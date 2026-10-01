@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Internship Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input[type="text"], input[type="email"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; width: 100%; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        .nav-link { display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Student Registration</h2>
+    <form method="POST">
+        <label>Full Name:</label>
+        <input type="text" name="name" placeholder="John Doe" required>
+        
+        <label>Email Address:</label>
+        <input type="email" name="email" placeholder="john@example.com" required>
+        
+        <label>Your Skills (comma separated):</label>
+        <input type="text" name="skills" placeholder="e.g. Python, Java, CSS" required>
+        
+        <button type="submit">Create Profile</button>
+    </form>
+    <a href="/" class="nav-link">Back to Home</a>
+</div>
+
+</body>
+</html>

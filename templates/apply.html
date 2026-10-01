@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply for Internship</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #28a745; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #218838; }
+        .back-link { display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #555; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Apply for Job</h2>
+    <form method="POST">
+        <label>Enter your registered Email:</label>
+        <input type="email" name="email" placeholder="e.g. john@example.com" required>
+        <button type="submit">Submit Application</button>
+    </form>
+    <a href="/jobs" class="back-link">Cancel and return to Jobs</a>
+</div>
+</body>
+</html>

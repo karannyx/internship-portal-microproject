@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post an Internship</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #ff9800; color: white; padding: 10px 15px; border: none; cursor: pointer; width: 100%; border-radius: 5px; }
+        button:hover { background: #e68a00; }
+        .nav-link { display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Employer: Post an Internship</h2>
+    <form method="POST">
+        <label>Job Title:</label>
+        <input type="text" name="title" placeholder="e.g. Frontend Developer" required>
+        
+        <label>Company Name:</label>
+        <input type="text" name="company" placeholder="e.g. TechCorp" required>
+        
+        <label>Required Skills (comma separated):</label>
+        <input type="text" name="required_skills" placeholder="e.g. HTML, CSS, JavaScript" required>
+        
+        <button type="submit">Post Internship</button>
+    </form>
+    <a href="/" class="nav-link">Back to Home</a>
+</div>
+
+</body>
+</html>
