@@ -1,22 +1,130 @@
-{% extends "base.html" %}
-{% block title %}Apply for Position | InternHub{% endblock %}
-{% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card card-custom p-4 p-md-5">
-                <h4 class="fw-bold mb-1 text-dark">Submit Application</h4>
-                <p class="text-muted small mb-4">Confirm your candidacy using your registered email</p>
-                <form method="POST">
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold small">Registered Student Email</label>
-                        <input type="email" class="form-control" name="email" placeholder="student@university.edu" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary-custom w-100 py-2">Submit Profile</button>
-                    <a href="/jobs" class="btn btn-link w-100 text-muted mt-2 text-decoration-none small">Cancel</a>
-                </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InternHub | Student Skill & Internship Portal{% endblock %}</title>
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --dark: #0f172a;
+            --gray-subtle: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.85rem 0;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            color: var(--primary) !important;
+            letter-spacing: -0.5px;
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s ease;
+        }
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 0.6rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary-custom:hover {
+            background: var(--primary-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .badge-skill {
+            background-color: var(--primary-soft);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            border: 1px solid rgba(79, 70, 229, 0.15);
+        }
+        footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-briefcase-fill fs-4"></i> InternHub
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0 gap-lg-2">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/"><i class="bi bi-cpu me-1"></i> Skill Matcher</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/jobs"><i class="bi bi-grid me-1"></i> Browse Jobs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/live_jobs">
+                        <span class="badge bg-danger rounded-pill me-1" style="font-size: 0.65rem;">LIVE</span> Online Openings
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex gap-2">
+                <a href="/register" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-person-plus"></i> Student Sign Up
+                </a>
+                <a href="/add_job" class="btn btn-primary-custom rounded-pill px-3">
+                    <i class="bi bi-plus-circle"></i> Post a Job
+                </a>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</nav>
+
+<main class="py-4">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0">Student Skill & Internship Portal &bull; Micro Project</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
