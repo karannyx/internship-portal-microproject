@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Matcher - Internship Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #28a745; color: white; padding: 10px 15px; border: none; cursor: pointer; width: 100%; border-radius: 5px; }
+        button:hover { background: #218838; }
+        .result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; color: #007bff; }
+        .nav-links { margin-top: 25px; text-align: center; }
+        .nav-links a { display: inline-block; margin: 0 10px; color: #007bff; text-decoration: none; font-weight: bold; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Test the Algorithm Engine</h2>
+    <form method="POST">
+        <label>Student Skills (comma separated):</label>
+        <input type="text" name="student_skills" placeholder="e.g. Python, C, HTML" required>
+        
+        <label>Internship Required Skills (comma separated):</label>
+        <input type="text" name="job_skills" placeholder="e.g. Python, SQL, C" required>
+        
+        <button type="submit">Calculate Match %</button>
+    </form>
+
+    {% if score is not none %}
+        <div class="result">
+            Match Score: {{ score }}%
+        </div>
+    {% endif %}
+    
+    <!-- Easy Navigation Links -->
+    <div class="nav-links">
+        <a href="/register">Create Student Profile</a>
+        <a href="/jobs">View Job Board & Apply</a>
+    </div>
+</div>
+
+</body>
+</html>

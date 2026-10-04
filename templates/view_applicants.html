@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants for {{ job_title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
+        .container { max-width: 800px; margin: auto; }
+        .student-card { background: white; padding: 15px; border-radius: 5px; margin-bottom: 10px; border-left: 5px solid #007bff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Applicants for: {{ job_title }}</h2>
+    <a href="/jobs" style="display:block; margin-bottom: 20px;">Back to Jobs</a>
+
+    {% if applicants %}
+        {% for student in applicants %}
+            <div class="student-card">
+                <h4>{{ student[0] }}</h4>
+                <p><strong>Email:</strong> {{ student[1] }}</p>
+                <p><strong>Skills:</strong> {{ student[2] }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No one has applied to this position yet.</p>
+    {% endif %}
+</div>
+</body>
+</html>

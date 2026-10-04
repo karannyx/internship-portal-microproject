@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Student Registration | InternHub{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card card-custom p-4 p-md-5">
+                <h4 class="fw-bold mb-1 text-dark">Create Candidate Profile</h4>
+                <p class="text-muted small mb-4">Register your skills to apply for open internships</p>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Full Name</label>
+                        <input type="text" class="form-control" name="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Email Address</label>
+                        <input type="email" class="form-control" name="email" placeholder="john@university.edu" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Skills (comma-separated)</label>
+                        <input type="text" class="form-control" name="skills" placeholder="Python, SQL, React, C" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
