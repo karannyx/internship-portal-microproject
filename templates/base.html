@@ -23,16 +23,17 @@
 
     <style>
         /* ====================================================
-           PREMIUM MODERN VIOLET / OBSIDIAN PALETTE
+           PREMIUM EMERALD & MINT (CAREER / GROWTH PALETTE)
            ==================================================== */
         :root {
-            --primary: #7c3aed;          /* Premium Electric Violet */
-            --primary-hover: #6d28d9;
-            --primary-subtle: #f5f3ff;
-            --accent-glow: rgba(124, 58, 237, 0.15);
+            --primary: #059669;          /* Deep Rich Emerald */
+            --primary-hover: #047857;
+            --primary-light: #10b981;    /* Vibrant Mint Green */
+            --primary-subtle: #ecfdf5;
+            --accent-glow: rgba(16, 185, 129, 0.2);
         }
 
-        /* LIGHT THEME (Crisp Minimalist Paper & Violet Accent) */
+        /* LIGHT THEME (Crisp Clean Slate & Emerald Accent) */
         [data-bs-theme="light"] {
             --body-bg: #f8fafc;
             --nav-bg: #ffffff;
@@ -42,23 +43,23 @@
             --text-body: #334155;
             --text-muted: #64748b;
             --card-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
-            --badge-bg: #f5f3ff;
-            --badge-text: #7c3aed;
+            --badge-bg: #ecfdf5;
+            --badge-text: #059669;
         }
 
-        /* DARK THEME (Deep Obsidian & Neon Violet) */
+        /* DARK THEME (Deep Charcoal Slate & Neon Mint Glow) */
         [data-bs-theme="dark"] {
-            --body-bg: #090812;          /* True Deep Obsidian */
-            --nav-bg: #0e0c1c;          /* Glass-like Dark Bar */
-            --card-bg: #141226;          /* Elevated Dark Purple Card */
-            --border-color: #262244;     /* Refined Violet-Tinted Border */
+            --body-bg: #09100e;          /* Rich Deep Charcoal with subtle emerald tone */
+            --nav-bg: #0d1714;          /* Sleek Dark Bar */
+            --card-bg: #111e1a;          /* Elevated Emerald Surface */
+            --border-color: #1a2f29;     /* Subtle Tinted Border */
             --text-heading: #f8fafc;     /* Clean Crisp White */
-            --text-body: #cbd5e1;        /* Soft High-Contrast Slate */
+            --text-body: #cbd5e1;        /* High-Contrast Soft Slate */
             --text-muted: #94a3b8;
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            --badge-bg: #201c3d;
-            --badge-text: #a78bfa;
-            --primary-subtle: #241e45;
+            --badge-bg: #14352b;
+            --badge-text: #34d399;        /* Vivid Mint Text */
+            --primary-subtle: #17382e;
         }
 
         body {
@@ -91,7 +92,7 @@
 
         .navbar-brand {
             font-weight: 800;
-            color: var(--primary) !important;
+            color: var(--primary-light) !important;
             letter-spacing: -0.5px;
             font-size: 1.25rem;
         }
@@ -104,7 +105,7 @@
         }
 
         .nav-link:hover {
-            color: var(--primary) !important;
+            color: var(--primary-light) !important;
         }
 
         /* Card System */
@@ -118,20 +119,20 @@
         }
 
         .card:hover, .card-custom:hover {
-            border-color: var(--primary) !important;
+            border-color: var(--primary-light) !important;
             transform: translateY(-2px);
         }
 
         /* Premium Buttons */
         .btn-primary-custom {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            background: linear-gradient(135deg, #10b981, #059669) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 600;
             border-radius: 9px;
             padding: 0.55rem 1.2rem;
             font-size: 0.9rem;
-            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
             transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
@@ -140,9 +141,9 @@
         }
 
         .btn-primary-custom:hover {
-            background: linear-gradient(135deg, #6d28d9, #5b21b6) !important;
+            background: linear-gradient(135deg, #059669, #047857) !important;
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.38);
         }
 
         .btn-outline-custom {
@@ -162,8 +163,8 @@
 
         .btn-outline-custom:hover {
             background-color: var(--primary-subtle);
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
+            border-color: var(--primary-light) !important;
+            color: var(--primary-light) !important;
         }
 
         /* Badges */
@@ -193,8 +194,8 @@
         }
 
         .theme-toggle-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
         }
 
         /* Form Controls */
@@ -206,7 +207,7 @@
         }
 
         .form-control:focus {
-            border-color: var(--primary) !important;
+            border-color: var(--primary-light) !important;
             box-shadow: 0 0 0 0.2rem var(--accent-glow) !important;
         }
 
@@ -253,7 +254,7 @@
 
                 {% if session.student_email %}
                     <a href="/dashboard" class="btn btn-outline-custom btn-sm rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-person-check-fill me-1" style="color: var(--primary);"></i> Dashboard
+                        <i class="bi bi-person-check-fill me-1" style="color: var(--primary-light);"></i> Dashboard
                     </a>
                     <a href="/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
                         Logout
