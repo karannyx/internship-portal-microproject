@@ -1,8 +1,11 @@
 import sqlite3
 import requests
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
+
+# User session maintain karne ke liye secret_key zaroori hai
+app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
 
 def get_db():
@@ -13,6 +16,7 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    # Students table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,6 +25,7 @@ def init_db():
             skills TEXT NOT NULL
         )
     ''')
+    # Internships table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,6 +34,7 @@ def init_db():
             required_skills TEXT NOT NULL
         )
     ''')
+    # Applications table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,26 +45,14 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Database initialize karein
 init_db()
 
-# Direct redirect to the Internships page
+# --- MAIN & NAVIGATION ROUTES ---
+
 @app.route('/')
 def home():
     return redirect(url_for('jobs'))
-
-# Optional testing route for the algorithm calculator
-@app.route('/matcher', methods=['GET', 'POST'])
-def matcher():
-    score = None
-    if request.method == 'POST':
-        student_skills = [s.strip().lower() for s in request.form.get('student_skills', '').split(',') if s.strip()]
-        job_skills = [s.strip().lower() for s in request.form.get('job_skills', '').split(',') if s.strip()]
-        if job_skills:
-            matches = set(student_skills).intersection(set(job_skills))
-            score = round((len(matches) / len(job_skills)) * 100, 2)
-        else:
-            score = 0
-    return render_template('index.html', score=score)
 
 @app.route('/jobs')
 def jobs():
@@ -79,26 +73,72 @@ def live_jobs():
             external_jobs = data.get('jobs', [])
     except Exception as e:
         print(f"Error fetching live jobs: {e}")
-
     return render_template('live_jobs.html', jobs=external_jobs)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/matcher', methods=['GET', 'POST'])
+def matcher():
+    score = None
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        skills = request.form.get('skills')
-        conn = get_db()
-        cursor = conn.cursor()
+        student_skills = [s.strip().lower() for s in request.form.get('student_skills', '').split(',') if s.strip()]
+        job_skills = [s.strip().lower() for s in request.form.get('job_skills', '').split(',') if s.strip()]
+        if job_skills:
+            matches = set(student_skills).intersection(set(job_skills))
+            score = round((len(matches) / len(job_skills)) * 100, 2)
+        else:
+            score = 0
+    return render_template('index.html', score=score)
+
+# --- AUTHENTICATION & FIREBASE SYNC ROUTES ---
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('jobs'))
+
+@app.route('/sync_firebase', methods=['POST'])
+def sync_firebase():
+    """Firebase client-side authentication ke baad student profile sync karta hai."""
+    data = request.get_json() or {}
+    email = data.get('email')
+    action = data.get('action')
+
+    if not email:
+        return jsonify({"status": "error", "message": "Email is required"}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if action == 'register':
+        name = data.get('name', 'Student')
+        skills = data.get('skills', '')
         try:
             cursor.execute('INSERT INTO students (name, email, skills) VALUES (?, ?, ?)', (name, email, skills))
             conn.commit()
         except sqlite3.IntegrityError:
-            pass
-        finally:
-            conn.close()
-        return redirect(url_for('jobs'))
-    return render_template('register.html')
+            # Agar email pehle se exist karta hai, toh update skills
+            cursor.execute('UPDATE students SET name = ?, skills = ? WHERE email = ?', (name, skills, email))
+            conn.commit()
+        session['student_name'] = name
+        session['student_email'] = email
+
+    elif action == 'login':
+        cursor.execute('SELECT name FROM students WHERE email = ?', (email,))
+        student = cursor.fetchone()
+        session['student_name'] = student['name'] if student else email.split('@')[0]
+        session['student_email'] = email
+
+    conn.close()
+    return jsonify({"status": "success"})
+
+# --- JOB POSTING & APPLICATION ROUTES ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
@@ -108,7 +148,8 @@ def add_job():
         required_skills = request.form.get('required_skills')
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', (title, company, required_skills))
+        cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
+                       (title, company, required_skills))
         conn.commit()
         conn.close()
         return redirect(url_for('jobs'))
@@ -135,7 +176,7 @@ def view_applicants(job_id):
     job_title = job['title'] if job else "Unknown Role"
 
     cursor.execute('''
-        SELECT students.name, students.email, students.skills
+        SELECT students.name, students.email, students.skills 
         FROM students
         JOIN applications ON students.email = applications.student_email
         WHERE applications.job_id = ?
