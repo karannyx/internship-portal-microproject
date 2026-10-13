@@ -23,46 +23,42 @@
 
     <style>
         /* ====================================================
-           MINIMALIST ZINC & MONOCHROME GREY PALETTE (VERCEL / GITHUB STYLE)
+           PREMIUM MODERN VIOLET / OBSIDIAN PALETTE
            ==================================================== */
         :root {
-            --brand-icon: #71717a;
+            --primary: #7c3aed;          /* Premium Electric Violet */
+            --primary-hover: #6d28d9;
+            --primary-subtle: #f5f3ff;
+            --accent-glow: rgba(124, 58, 237, 0.15);
         }
 
-        /* LIGHT THEME (Crisp Zinc White & Deep Charcoal) */
+        /* LIGHT THEME (Crisp Minimalist Paper & Violet Accent) */
         [data-bs-theme="light"] {
             --body-bg: #f8fafc;
             --nav-bg: #ffffff;
             --card-bg: #ffffff;
             --border-color: #e2e8f0;
-            --text-heading: #09090b;
+            --text-heading: #0f172a;
             --text-body: #334155;
             --text-muted: #64748b;
-            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-            --badge-bg: #f1f5f9;
-            --badge-text: #0f172a;
-            --btn-main-bg: #0f172a;       /* Deep Matte Black */
-            --btn-main-text: #ffffff;
-            --btn-main-hover: #1e293b;
-            --btn-subtle-hover: #f1f5f9;
+            --card-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+            --badge-bg: #f5f3ff;
+            --badge-text: #7c3aed;
         }
 
-        /* DARK THEME (Deep Onyx, Studio Charcoal & Silver White) */
+        /* DARK THEME (Deep Obsidian & Neon Violet) */
         [data-bs-theme="dark"] {
-            --body-bg: #09090b;           /* Pure Deep Onyx */
-            --nav-bg: #111113;           /* Sleek Matte Header */
-            --card-bg: #141416;           /* Subtle Elevated Charcoal */
-            --border-color: #26262a;      /* Clean Minimalist Zinc Border */
-            --text-heading: #fafafa;      /* Crisp Silver White */
-            --text-body: #d4d4d8;         /* Soft Balanced Silver Slate */
-            --text-muted: #a1a1aa;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
-            --badge-bg: #202024;
-            --badge-text: #e4e4e7;
-            --btn-main-bg: #fafafa;       /* High-contrast Crisp Silver/White */
-            --btn-main-text: #09090b;      /* Matte Black Text */
-            --btn-main-hover: #e4e4e7;
-            --btn-subtle-hover: #1f1f23;
+            --body-bg: #090812;          /* True Deep Obsidian */
+            --nav-bg: #0e0c1c;          /* Glass-like Dark Bar */
+            --card-bg: #141226;          /* Elevated Dark Purple Card */
+            --border-color: #262244;     /* Refined Violet-Tinted Border */
+            --text-heading: #f8fafc;     /* Clean Crisp White */
+            --text-body: #cbd5e1;        /* Soft High-Contrast Slate */
+            --text-muted: #94a3b8;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --badge-bg: #201c3d;
+            --badge-text: #a78bfa;
+            --primary-subtle: #241e45;
         }
 
         body {
@@ -72,30 +68,30 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         h1, h2, h3, h4, h5, h6 {
             color: var(--text-heading) !important;
             font-weight: 700;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.02em;
         }
 
         .text-muted {
             color: var(--text-muted) !important;
         }
 
-        /* Minimalist Navigation Bar */
+        /* Navigation Bar */
         .navbar-custom {
             background: var(--nav-bg) !important;
             border-bottom: 1px solid var(--border-color);
             padding: 0.85rem 0;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
         }
 
         .navbar-brand {
             font-weight: 800;
-            color: var(--text-heading) !important;
+            color: var(--primary) !important;
             letter-spacing: -0.5px;
             font-size: 1.25rem;
         }
@@ -108,10 +104,10 @@
         }
 
         .nav-link:hover {
-            color: var(--text-heading) !important;
+            color: var(--primary) !important;
         }
 
-        /* Cards */
+        /* Card System */
         .card, .card-custom {
             background-color: var(--card-bg) !important;
             border: 1px solid var(--border-color) !important;
@@ -122,20 +118,20 @@
         }
 
         .card:hover, .card-custom:hover {
-            border-color: #52525b !important;
+            border-color: var(--primary) !important;
             transform: translateY(-2px);
         }
 
-        /* High-Contrast Minimalist Buttons */
+        /* Premium Buttons */
         .btn-primary-custom {
-            background: var(--btn-main-bg) !important;
-            color: var(--btn-main-text) !important;
-            border: 1px solid var(--btn-main-bg) !important;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            color: #ffffff !important;
+            border: none !important;
             font-weight: 600;
             border-radius: 9px;
             padding: 0.55rem 1.2rem;
             font-size: 0.9rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
             transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
@@ -144,9 +140,9 @@
         }
 
         .btn-primary-custom:hover {
-            background: var(--btn-main-hover) !important;
-            border-color: var(--btn-main-hover) !important;
+            background: linear-gradient(135deg, #6d28d9, #5b21b6) !important;
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
         }
 
         .btn-outline-custom {
@@ -165,12 +161,12 @@
         }
 
         .btn-outline-custom:hover {
-            background-color: var(--btn-subtle-hover);
-            border-color: #52525b !important;
-            color: var(--text-heading) !important;
+            background-color: var(--primary-subtle);
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
         }
 
-        /* Minimalist Badges */
+        /* Badges */
         .badge-skill {
             background-color: var(--badge-bg) !important;
             color: var(--badge-text) !important;
@@ -197,8 +193,8 @@
         }
 
         .theme-toggle-btn:hover {
-            border-color: #71717a;
-            color: var(--text-heading);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         /* Form Controls */
@@ -210,8 +206,8 @@
         }
 
         .form-control:focus {
-            border-color: #71717a !important;
-            box-shadow: 0 0 0 0.2rem rgba(113, 113, 122, 0.2) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 0.2rem var(--accent-glow) !important;
         }
 
         footer {
@@ -229,7 +225,7 @@
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-            <i class="bi bi-briefcase-fill text-secondary"></i> Skill2Career
+            <i class="bi bi-briefcase-fill"></i> Skill2Career
         </a>
         <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <i class="bi bi-list fs-2 text-secondary"></i>
@@ -241,7 +237,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-2" href="/live_jobs">
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill me-1 border" style="font-size: 0.65rem;">LIVE</span> Online Openings
+                        <span class="badge bg-danger rounded-pill me-1" style="font-size: 0.65rem;">LIVE</span> Online Openings
                     </a>
                 </li>
                 <li class="nav-item">
@@ -257,7 +253,7 @@
 
                 {% if session.student_email %}
                     <a href="/dashboard" class="btn btn-outline-custom btn-sm rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-person-circle me-1"></i> Dashboard
+                        <i class="bi bi-person-check-fill me-1" style="color: var(--primary);"></i> Dashboard
                     </a>
                     <a href="/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
                         Logout
