@@ -2,135 +2,87 @@
 {% block title %}Available Internships | Skill2Career{% endblock %}
 
 {% block content %}
-<style>
-    /* Direct High-Contrast Typography Fixes */
-    .page-heading {
-        color: var(--text-heading, #0f172a) !important;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-    }
-    .page-subheading {
-        color: var(--text-muted, #64748b) !important;
-        font-size: 0.95rem;
-    }
-    .internship-card {
-        background-color: var(--card-bg, #ffffff) !important;
-        border: 1px solid var(--border-color, #e2e8f0) !important;
-        border-radius: 16px;
-        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .internship-card:hover {
-        transform: translateY(-3px);
-        border-color: #3b82f6 !important;
-        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.3) !important;
-    }
-    .job-title {
-        color: var(--text-heading, #0f172a) !important;
-        font-weight: 700;
-        font-size: 1.15rem;
-        margin-bottom: 2px;
-    }
-    .company-name {
-        color: var(--text-muted, #64748b) !important;
-        font-size: 0.88rem;
-        font-weight: 500;
-    }
-    .skills-label {
-        color: var(--text-muted, #64748b) !important;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    .skill-tag {
-        background-color: rgba(37, 99, 235, 0.1) !important;
-        color: #60a5fa !important;
-        border: 1px solid rgba(59, 130, 246, 0.25) !important;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.35rem 0.65rem;
-        border-radius: 6px;
-    }
-    [data-bs-theme="light"] .skill-tag {
-        background-color: #eff6ff !important;
-        color: #2563eb !important;
-        border-color: #bfdbfe !important;
-    }
-    .company-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #4f46e5, #3b82f6);
-        color: #ffffff;
-        font-weight: 800;
-        font-size: 1.25rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
-    }
-    .btn-apply {
-        background: #2563eb !important;
-        color: #ffffff !important;
-        font-weight: 600;
-        border-radius: 10px;
-        border: none;
-        padding: 0.65rem;
-        transition: background 0.2s ease;
-    }
-    .btn-apply:hover {
-        background: #1d4ed8 !important;
-    }
-    .btn-applicants {
-        border-radius: 10px;
-        border: 1px solid var(--border-color, #334155) !important;
-        color: var(--text-muted, #94a3b8) !important;
-        background: transparent;
-    }
-    .btn-applicants:hover {
-        color: #ffffff !important;
-        border-color: #3b82f6 !important;
-    }
-</style>
-
 <div class="container py-3">
-    <!-- Header Section -->
+    <!-- Header Section (Clean Student View - No Post Button) -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="page-heading mb-1">Available Internships</h2>
-            <p class="page-subheading mb-0">Discover opportunities and submit your profile</p>
+            <h2 class="fw-bold mb-1" style="color: var(--text-heading, #0f172a);">Available Internships</h2>
+            <p class="mb-0" style="color: var(--text-muted, #64748b);">Discover verified student roles tailored to your skill set</p>
         </div>
-        <a href="/add_job" class="btn btn-primary-custom rounded-pill px-4 shadow-sm">
-            <i class="bi bi-plus-lg me-1"></i> Post New Opening
-        </a>
+    </div>
+
+    <!-- Live Search & Skill Filter Bar -->
+    <div class="card p-3 mb-4 shadow-sm" style="border-radius: 14px;">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="jobSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by role, company, or required skill...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
+                    <span class="small fw-semibold text-muted me-1">Filter:</span>
+                    <button type="button" class="btn btn-sm btn-outline-custom filter-pill active" data-filter="all">All</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="python">Python</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="sql">SQL</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="html">HTML</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="react">React</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Job Cards Grid -->
-    <div class="row g-4">
+    <div class="row g-4" id="jobsGrid">
         {% if internships %}
             {% for job in internships %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card internship-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div class="col-md-6 col-lg-4 job-item-col" 
+                 data-title="{{ job.title|lower }}" 
+                 data-company="{{ job.company|lower }}" 
+                 data-skills="{{ job.required_skills|lower }}">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 16px;">
                     <div>
-                        <!-- Company Avatar & Title -->
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <div class="company-avatar">
-                                {{ job.company[0]|upper }}
-                            </div>
-                            <div>
-                                <h3 class="job-title">{{ job.title }}</h3>
-                                <div class="company-name">
-                                    <i class="bi bi-buildings me-1"></i> {{ job.company }}
+                        <!-- Company Header & Match Badge -->
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
+                                    {{ job.company[0]|upper }}
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a); font-size: 1.15rem;">{{ job.title }}</h4>
+                                    <div class="small" style="color: var(--text-muted, #64748b);">
+                                        <i class="bi bi-buildings me-1"></i> {{ job.company }}
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Match Score Pill -->
+                            {% if job.match_score is not none %}
+                                {% if job.match_score >= 70 %}
+                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle fw-semibold px-2 py-1" title="High Match">
+                                        <i class="bi bi-stars"></i> {{ job.match_score }}% Match
+                                    </span>
+                                {% elif job.match_score >= 40 %}
+                                    <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle fw-semibold px-2 py-1" title="Moderate Match">
+                                        {{ job.match_score }}% Match
+                                    </span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-secondary-subtle text-secondary border border-secondary-subtle fw-semibold px-2 py-1" title="Low Match">
+                                        {{ job.match_score }}% Match
+                                    </span>
+                                {% endif %}
+                            {% endif %}
                         </div>
 
-                        <!-- Required Skills -->
+                        <!-- Skills -->
                         <div class="mb-4">
-                            <div class="skills-label mb-2">Required Skills</div>
+                            <div class="small fw-semibold mb-2 text-uppercase" style="color: var(--text-muted, #64748b); letter-spacing: 0.05em; font-size: 0.72rem;">Required Skills</div>
                             <div class="d-flex flex-wrap gap-1">
                                 {% for skill in job.required_skills.split(',') %}
-                                    <span class="skill-tag">{{ skill.strip() }}</span>
+                                    <span class="badge badge-skill">{{ skill.strip() }}</span>
                                 {% endfor %}
                             </div>
                         </div>
@@ -138,10 +90,10 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 pt-2">
-                        <a href="/apply/{{ job.id }}" class="btn btn-apply flex-grow-1 text-center text-decoration-none">
+                        <a href="/apply/{{ job.id }}" class="btn btn-primary-custom flex-grow-1 text-center text-decoration-none">
                             Apply Now
                         </a>
-                        <a href="/view_applicants/{{ job.id }}" class="btn btn-applicants px-3" title="View Applicants">
+                        <a href="/view_applicants/{{ job.id }}" class="btn btn-outline-custom px-3" title="View Applicants">
                             <i class="bi bi-people-fill"></i>
                         </a>
                     </div>
@@ -151,13 +103,64 @@
         {% else %}
             <div class="col-12 text-center py-5">
                 <i class="bi bi-briefcase fs-1 text-muted mb-3 d-block"></i>
-                <h5 class="page-heading">No Openings Available Yet</h5>
-                <p class="page-subheading mb-4">Be the first to post an internship opportunity for students.</p>
-                <a href="/add_job" class="btn btn-primary-custom rounded-pill px-4">
-                    <i class="bi bi-plus-lg me-1"></i> Post An Opening
-                </a>
+                <h5 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Openings Available Yet</h5>
+                <p class="text-muted">Check back later for newly announced internship opportunities.</p>
             </div>
         {% endif %}
     </div>
+
+    <!-- Empty Filter Notice -->
+    <div id="noResultsNotice" class="text-center py-5 d-none">
+        <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
+        <h5 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Matching Internships Found</h5>
+        <p class="text-muted">Try clearing your search query or selecting a different skill filter.</p>
+    </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById('jobSearchInput');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const jobCards = document.querySelectorAll('.job-item-col');
+    const noResults = document.getElementById('noResultsNotice');
+
+    let activeSkill = 'all';
+
+    function filterJobs() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        jobCards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const company = card.getAttribute('data-company');
+            const skills = card.getAttribute('data-skills');
+
+            const matchesQuery = !query || title.includes(query) || company.includes(query) || skills.includes(query);
+            const matchesSkill = activeSkill === 'all' || skills.includes(activeSkill);
+
+            if (matchesQuery && matchesSkill) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0 && jobCards.length > 0) {
+            noResults.classList.remove('d-none');
+        } else {
+            noResults.classList.add('d-none');
+        }
+    }
+
+    searchInput.addEventListener('input', filterJobs);
+
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active', 'btn-primary-custom'));
+            pill.classList.add('active');
+            activeSkill = pill.getAttribute('data-filter');
+            filterJobs();
+        });
+    });
+</script>
 {% endblock %}

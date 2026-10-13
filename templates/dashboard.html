@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard | Skill2Career{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Top Greeting -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--text-heading, #0f172a);">Student Dashboard</h2>
+            <p class="mb-0 text-muted">Manage your profile skills and track submitted internship applications</p>
+        </div>
+        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Browse Openings
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile & Skill Editor Card -->
+        <div class="col-lg-4">
+            <div class="card p-4 h-100" style="border-radius: 16px;">
+                <div class="text-center mb-4">
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-size: 1.6rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
+                        {{ student.name[0]|upper }}
+                    </div>
+                    <h5 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a);">{{ student.name }}</h5>
+                    <p class="small text-muted mb-2">{{ student.email }}</p>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                        Verified Student
+                    </span>
+                </div>
+
+                <hr style="border-color: var(--border-color, #e2e8f0);">
+
+                <!-- Edit Skills Form -->
+                <form method="POST" action="/dashboard">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small" style="color: var(--text-heading, #0f172a);">
+                            My Technical Skills
+                        </label>
+                        <textarea name="skills" rows="3" class="form-control" placeholder="e.g. Python, SQL, React, HTML" required>{{ student.skills }}</textarea>
+                        <div class="form-text small">Updating your skills automatically re-calculates your match scores on all job cards.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100">
+                        <i class="bi bi-check-circle me-1"></i> Update Skills
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Submitted Applications Card -->
+        <div class="col-lg-8">
+            <div class="card p-4 h-100" style="border-radius: 16px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a);">
+                        Submitted Applications ({{ applied_jobs|length }})
+                    </h5>
+                    <span class="small text-muted">Application Status Tracker</span>
+                </div>
+
+                {% if applied_jobs %}
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr class="text-muted small text-uppercase">
+                                    <th>Role & Company</th>
+                                    <th>Required Tech</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in applied_jobs %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold" style="color: var(--text-heading, #0f172a);">{{ job.title }}</div>
+                                        <div class="small text-muted"><i class="bi bi-buildings me-1"></i>{{ job.company }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for sk in job.required_skills.split(',') %}
+                                                <span class="badge badge-skill" style="font-size: 0.7rem;">{{ sk.strip() }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold">
+                                            <i class="bi bi-check2-all me-1"></i> Under Review
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-send-slash fs-1 text-muted mb-2 d-block"></i>
+                        <h6 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Applications Submitted Yet</h6>
+                        <p class="text-muted small mb-3">Explore open listings and apply with your registered skills.</p>
+                        <a href="/jobs" class="btn btn-primary-custom btn-sm rounded-pill px-3">Browse Jobs</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

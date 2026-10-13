@@ -3,10 +3,11 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
-
-# User session maintain karne ke liye secret_key zaroori hai
 app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
+
+# Training & Placement Officer / Recruiter Passkey
+ADMIN_PASSKEY = "admin2026"
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
@@ -16,7 +17,6 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    # Students table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +25,6 @@ def init_db():
             skills TEXT NOT NULL
         )
     ''')
-    # Internships table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +33,6 @@ def init_db():
             required_skills TEXT NOT NULL
         )
     ''')
-    # Applications table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,10 +43,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Database initialize karein
 init_db()
 
-# --- MAIN & NAVIGATION ROUTES ---
+# --- NAVIGATION & JOB LISTING ---
 
 @app.route('/')
 def home():
@@ -59,7 +56,26 @@ def jobs():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('SELECT id, title, company, required_skills FROM internships ORDER BY id DESC')
-    internships = cursor.fetchall()
+    raw_internships = cursor.fetchall()
+
+    student_skills = []
+    if 'student_email' in session:
+        cursor.execute('SELECT skills FROM students WHERE email = ?', (session['student_email'],))
+        row = cursor.fetchone()
+        if row and row['skills']:
+            student_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
+
+    internships = []
+    for job in raw_internships:
+        job_dict = dict(job)
+        job_req = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
+        if student_skills and job_req:
+            matches = set(student_skills).intersection(set(job_req))
+            job_dict['match_score'] = round((len(matches) / len(job_req)) * 100)
+        else:
+            job_dict['match_score'] = None
+        internships.append(job_dict)
+
     conn.close()
     return render_template('jobs.html', internships=internships)
 
@@ -88,7 +104,37 @@ def matcher():
             score = 0
     return render_template('index.html', score=score)
 
-# --- AUTHENTICATION & FIREBASE SYNC ROUTES ---
+# --- STUDENT DASHBOARD ---
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        updated_skills = request.form.get('skills', '').strip()
+        cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (updated_skills, session['student_email']))
+        conn.commit()
+
+    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
+    student = cursor.fetchone()
+
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company, internships.required_skills
+        FROM internships
+        JOIN applications ON internships.id = applications.job_id
+        WHERE applications.student_email = ?
+        ORDER BY applications.id DESC
+    ''', (session['student_email'],))
+    applied_jobs = cursor.fetchall()
+    conn.close()
+
+    return render_template('dashboard.html', student=student, applied_jobs=applied_jobs)
+
+# --- AUTHENTICATION & FIREBASE SYNC ---
 
 @app.route('/login')
 def login():
@@ -105,7 +151,6 @@ def logout():
 
 @app.route('/sync_firebase', methods=['POST'])
 def sync_firebase():
-    """Firebase client-side authentication ke baad student profile sync karta hai."""
     data = request.get_json() or {}
     email = data.get('email')
     action = data.get('action')
@@ -123,7 +168,6 @@ def sync_firebase():
             cursor.execute('INSERT INTO students (name, email, skills) VALUES (?, ?, ?)', (name, email, skills))
             conn.commit()
         except sqlite3.IntegrityError:
-            # Agar email pehle se exist karta hai, toh update skills
             cursor.execute('UPDATE students SET name = ?, skills = ? WHERE email = ?', (name, skills, email))
             conn.commit()
         session['student_name'] = name
@@ -138,14 +182,21 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- JOB POSTING & APPLICATION ROUTES ---
+# --- RECRUITER / ADMIN PROTECTED OPENING CREATION ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
+    error = None
     if request.method == 'POST':
-        title = request.form.get('title')
-        company = request.form.get('company')
-        required_skills = request.form.get('required_skills')
+        pin = request.form.get('admin_pin', '').strip()
+        title = request.form.get('title', '').strip()
+        company = request.form.get('company', '').strip()
+        required_skills = request.form.get('required_skills', '').strip()
+
+        if pin != ADMIN_PASSKEY:
+            error = "Invalid Coordinator Passkey. Only authorized T&P officers can post listings."
+            return render_template('add_job.html', error=error)
+
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
@@ -153,7 +204,8 @@ def add_job():
         conn.commit()
         conn.close()
         return redirect(url_for('jobs'))
-    return render_template('add_job.html')
+
+    return render_template('add_job.html', error=error)
 
 @app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
 def apply(job_id):
@@ -164,7 +216,7 @@ def apply(job_id):
         cursor.execute('INSERT INTO applications (student_email, job_id) VALUES (?, ?)', (email, job_id))
         conn.commit()
         conn.close()
-        return redirect(url_for('jobs'))
+        return redirect(url_for('dashboard') if 'student_email' in session else url_for('jobs'))
     return render_template('apply.html', job_id=job_id)
 
 @app.route('/view_applicants/<int:job_id>')
