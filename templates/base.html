@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InternHub | Student Skill & Internship Portal{% endblock %}</title>
-    <!-- Google Fonts & Bootstrap Icons -->
+    <title>{% block title %}Skill2Career | Student Skill Portal{% endblock %}</title>
+    <!-- Google Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,7 +18,6 @@
             --primary-hover: #4338ca;
             --primary-soft: #eef2ff;
             --dark: #0f172a;
-            --gray-subtle: #f8fafc;
             --border-color: #e2e8f0;
         }
         body {
@@ -43,8 +42,7 @@
             background: #ffffff;
             border-radius: 16px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .btn-primary-custom {
             background: var(--primary);
@@ -53,21 +51,10 @@
             font-weight: 600;
             border-radius: 10px;
             padding: 0.6rem 1.25rem;
-            transition: all 0.2s ease;
         }
         .btn-primary-custom:hover {
             background: var(--primary-hover);
             color: white;
-            transform: translateY(-1px);
-        }
-        .badge-skill {
-            background-color: var(--primary-soft);
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.75rem;
-            padding: 0.35rem 0.65rem;
-            border-radius: 6px;
-            border: 1px solid rgba(79, 70, 229, 0.15);
         }
         footer {
             margin-top: auto;
@@ -92,7 +79,7 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0 gap-lg-2">
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="/"><i class="bi bi-cpu me-1"></i> Skill Matcher</a>
+                    <a class="nav-link fw-semibold" href="/matcher"><i class="bi bi-cpu me-1"></i> Skill Matcher</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link fw-semibold" href="/jobs"><i class="bi bi-grid me-1"></i> Browse Jobs</a>
@@ -103,11 +90,26 @@
                     </a>
                 </li>
             </ul>
-            <div class="d-flex gap-2">
-                <a href="/register" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-person-plus"></i> Student Sign Up
-                </a>
-                <a href="/add_job" class="btn btn-primary-custom rounded-pill px-3">
+
+            <!-- Dynamic Authentication Section -->
+            <div class="d-flex gap-2 align-items-center">
+                {% if session.student_email %}
+                    <span class="badge bg-light text-primary border px-3 py-2 fw-semibold fs-6">
+                        <i class="bi bi-person-circle me-1"></i> {{ session.student_name }}
+                    </span>
+                    <a href="/logout" class="btn btn-outline-danger rounded-pill px-3 fw-semibold">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="/login" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                        Login
+                    </a>
+                    <a href="/register" class="btn btn-primary-custom rounded-pill px-3">
+                        <i class="bi bi-person-plus"></i> Student Sign Up
+                    </a>
+                {% endif %}
+
+                <a href="/add_job" class="btn btn-dark rounded-pill px-3 d-none d-lg-block">
                     <i class="bi bi-plus-circle"></i> Post a Job
                 </a>
             </div>
