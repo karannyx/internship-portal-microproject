@@ -25,6 +25,7 @@
             --brand-icon: #71717a;
         }
 
+        /* LIGHT THEME */
         [data-bs-theme="light"] {
             --body-bg: #f8fafc;
             --nav-bg: #ffffff;
@@ -42,20 +43,23 @@
             --btn-subtle-hover: #f1f5f9;
         }
 
+        /* DARK THEME (Refined Muted Zinc - No Blinding White Glare) */
         [data-bs-theme="dark"] {
-            --body-bg: #09090b;
-            --nav-bg: #111113;
-            --card-bg: #141416;
-            --border-color: #26262a;
-            --text-heading: #fafafa;
-            --text-body: #d4d4d8;
+            --body-bg: #09090b;           /* Pure Deep Onyx */
+            --nav-bg: #111113;           /* Sleek Matte Header */
+            --card-bg: #141416;           /* Subtle Elevated Charcoal */
+            --border-color: #26262a;      /* Clean Minimalist Zinc Border */
+            --text-heading: #fafafa;      /* Crisp Silver White */
+            --text-body: #d4d4d8;         /* Soft Balanced Silver Slate */
             --text-muted: #a1a1aa;
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
             --badge-bg: #202024;
             --badge-text: #e4e4e7;
-            --btn-main-bg: #fafafa;
-            --btn-main-text: #09090b;
-            --btn-main-hover: #e4e4e7;
+            
+            /* Sleek Eye-Friendly Muted Action Button */
+            --btn-main-bg: #27272a;       /* Muted Charcoal Zinc */
+            --btn-main-text: #f4f4f5;      /* Crisp Light Silver */
+            --btn-main-hover: #3f3f46;     /* Lighter slate on hover */
             --btn-subtle-hover: #1f1f23;
         }
 
@@ -113,10 +117,11 @@
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
+        /* Muted Professional Action Buttons */
         .btn-primary-custom {
             background: var(--btn-main-bg) !important;
             color: var(--btn-main-text) !important;
-            border: 1px solid var(--btn-main-bg) !important;
+            border: 1px solid #3f3f46 !important;
             font-weight: 600;
             border-radius: 9px;
             padding: 0.55rem 1.2rem;
@@ -131,8 +136,13 @@
 
         .btn-primary-custom:hover {
             background: var(--btn-main-hover) !important;
-            border-color: var(--btn-main-hover) !important;
+            border-color: #52525b !important;
+            color: #ffffff !important;
             transform: translateY(-1px);
+        }
+
+        [data-bs-theme="light"] .btn-primary-custom {
+            border: 1px solid #0f172a !important;
         }
 
         .btn-outline-custom {
