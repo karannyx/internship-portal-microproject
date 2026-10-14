@@ -3,38 +3,60 @@
 
 {% block content %}
 <style>
-    /* Unique Hero & Card Enhancements */
+    /* Light Theme (Clean Crisp White & Soft Slate) */
     .hero-banner {
-        background: linear-gradient(135deg, rgba(38, 38, 42, 0.4), rgba(20, 20, 22, 0.4));
-        border: 1px solid var(--border-color);
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
         border-radius: 20px;
         padding: 2.25rem 2.5rem;
         position: relative;
         overflow: hidden;
         margin-bottom: 2rem;
+        box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
     }
-    .hero-banner::after {
-        content: '';
-        position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 200px;
-        height: 200px;
-        background: radial-gradient(circle, rgba(161, 161, 170, 0.15), transparent 70%);
-        pointer-events: none;
+    .hero-banner-title {
+        color: #09090b !important;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+    .hero-banner-subtitle {
+        color: #475569 !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+        max-width: 620px;
     }
     .stat-pill {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        padding: 0.4rem 0.85rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 0.45rem 0.9rem;
         border-radius: 30px;
         font-size: 0.85rem;
         font-weight: 600;
-        color: var(--text-heading);
+        color: #0f172a;
     }
+
+    /* Dark Theme Override */
+    [data-bs-theme="dark"] .hero-banner {
+        background: linear-gradient(135deg, #18181b 0%, #111113 100%) !important;
+        border: 1px solid #27272a !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    [data-bs-theme="dark"] .hero-banner-title {
+        color: #fafafa !important;
+    }
+    [data-bs-theme="dark"] .hero-banner-subtitle {
+        color: #a1a1aa !important;
+    }
+    [data-bs-theme="dark"] .stat-pill {
+        background: #1f1f23;
+        border-color: #2e2e34;
+        color: #f4f4f5;
+    }
+
+    /* Progress & Skills */
     .match-progress-container {
         height: 6px;
         background-color: var(--border-color);
@@ -77,13 +99,13 @@
         font-weight: 800;
         font-size: 1.25rem;
         color: var(--text-heading);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
 </style>
 
 <div class="container py-2">
-    <!-- Unique Hero Banner -->
-    <div class="hero-banner shadow-sm">
+    <!-- Clean Hero Banner -->
+    <div class="hero-banner">
         <div class="row align-items-center g-3">
             <div class="col-lg-8">
                 <div class="d-flex flex-wrap gap-2 mb-2">
@@ -97,20 +119,20 @@
                     {% endif %}
                 </div>
 
-                <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
+                <h1 class="display-6 hero-banner-title mb-2">
                     {% if session.student_name %}
                         Welcome back, {{ session.student_name }} 👋
                     {% else %}
-                        Turn Your Technical Skills Into High-Growth Careers
+                        Turn Technical Skills Into Internships
                     {% endif %}
                 </h1>
-                <p class="mb-3 text-muted" style="max-width: 600px; font-size: 0.95rem;">
+                <p class="mb-3 hero-banner-subtitle">
                     Discover curated student internships matched dynamically against your skill profile with real-time bridge-the-gap recommendations.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 pt-1">
                     <div class="stat-pill">
-                        <i class="bi bi-briefcase text-muted"></i>
+                        <i class="bi bi-briefcase text-secondary"></i>
                         <span>{{ total_jobs }} Active Openings</span>
                     </div>
                     {% if session.student_email and top_score > 0 %}
@@ -188,12 +210,12 @@
                             </span>
                         </div>
 
-                        <!-- Match Scoring Bar (Bridge The Gap) -->
+                        <!-- Match Scoring Bar -->
                         {% if job.match_score is not none %}
                             <div class="mb-3 p-2.5 rounded-3 border bg-body-tertiary" style="border-radius: 12px;">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="small fw-bold" style="color: var(--text-heading); font-size: 0.8rem;">
-                                        <i class="bi bi-cpu text-primary me-1"></i> Skill Compatibility
+                                        <i class="bi bi-cpu text-secondary me-1"></i> Skill Compatibility
                                     </span>
                                     <span class="fw-bold small" style="color: {% if job.match_score >= 70 %}#10b981{% elif job.match_score >= 40 %}#f59e0b{% else %}#71717a{% endif %};">
                                         {{ job.match_score }}% Match
@@ -205,7 +227,7 @@
                             </div>
                         {% endif %}
 
-                        <!-- Bridge The Gap: Matched vs Missing Skills -->
+                        <!-- Matched vs Missing Skills -->
                         <div class="mb-4">
                             {% if job.matched_skills %}
                                 <div class="small fw-semibold mb-1 text-muted" style="font-size: 0.72rem; letter-spacing: 0.04em;">MATCHED SKILLS</div>
