@@ -1,16 +1,15 @@
 import sqlite3
 import requests
 import time
+from collections import Counter
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
 app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
 
-# T&P Cell / Recruiter Passkey
 ADMIN_PASSKEY = "admin2026"
 
-# Auto-sync throttling (5 minute interval)
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300  
 
@@ -22,6 +21,7 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    
     # Students Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
@@ -31,6 +31,7 @@ def init_db():
             skills TEXT NOT NULL
         )
     ''')
+
     # Internships Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
@@ -40,15 +41,34 @@ def init_db():
             required_skills TEXT NOT NULL
         )
     ''')
-    # Applications Table
+
+    # Applications Table with Status column
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_email TEXT NOT NULL,
-            job_id INTEGER NOT NULL
+            job_id INTEGER NOT NULL,
+            status TEXT DEFAULT 'Under Review'
         )
     ''')
-    # Dynamic Student Resume Details Table
+
+    # Migration check: Ensure 'status' column exists if DB was already created
+    cursor.execute("PRAGMA table_info(applications)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'status' not in columns:
+        cursor.execute("ALTER TABLE applications ADD COLUMN status TEXT DEFAULT 'Under Review'")
+
+    # Saved / Bookmarked Jobs Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS saved_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_email TEXT NOT NULL,
+            job_id INTEGER NOT NULL,
+            UNIQUE(student_email, job_id)
+        )
+    ''')
+
+    # Student Resumes Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_resumes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +93,7 @@ def init_db():
         )
     ''')
 
-    # Seed core Indian Tech & Govt roles if empty
+    # Seed core Indian Govt & Tech roles if empty
     cursor.execute('SELECT COUNT(*) FROM internships')
     if cursor.fetchone()[0] == 0:
         openings = [
@@ -121,7 +141,7 @@ def sync_live_jobs_automatically():
             conn.commit()
             conn.close()
     except Exception as e:
-        print(f"Auto-sync background check note: {e}")
+        print(f"Auto-sync note: {e}")
 
 # --- MAIN & NAVIGATION ROUTES ---
 
@@ -139,17 +159,31 @@ def jobs():
     raw_internships = cursor.fetchall()
 
     student_skills = []
+    applied_job_ids = set()
+    saved_job_ids = set()
+
     if 'student_email' in session:
         cursor.execute('SELECT skills FROM students WHERE email = ?', (session['student_email'],))
         row = cursor.fetchone()
         if row and row['skills']:
             student_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
 
+        # Get jobs student already applied to
+        cursor.execute('SELECT job_id FROM applications WHERE student_email = ?', (session['student_email'],))
+        applied_job_ids = {r['job_id'] for r in cursor.fetchall()}
+
+        # Get saved jobs
+        cursor.execute('SELECT job_id FROM saved_jobs WHERE student_email = ?', (session['student_email'],))
+        saved_job_ids = {r['job_id'] for r in cursor.fetchall()}
+
     internships = []
     top_score = 0
     for job in raw_internships:
         job_dict = dict(job)
         job_req = [s.strip() for s in job['required_skills'].split(',') if s.strip()]
+
+        job_dict['is_applied'] = job['id'] in applied_job_ids
+        job_dict['is_saved'] = job['id'] in saved_job_ids
 
         if student_skills and job_req:
             matched_items = [orig for orig in job_req if orig.lower() in student_skills]
@@ -167,8 +201,15 @@ def jobs():
 
         internships.append(job_dict)
 
+    # Campus T&P Announcement Notices
+    announcements = [
+        "T&P Drive: TCS Digital applications closing this Friday at 5:00 PM.",
+        "Notice: India Post (CEPT) shortlisted candidates list updated for Technical Trainee roles.",
+        "Pro-Tip: Complete Harvard CS50 in the Courses section to boost your Software Trainee match score to 100%."
+    ]
+
     conn.close()
-    return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships))
+    return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships), announcements=announcements)
 
 @app.route('/live_jobs')
 def live_jobs():
@@ -248,7 +289,210 @@ def courses():
     ]
     return render_template('courses.html', courses=curated_courses)
 
-# --- DYNAMIC RESUME BUILDER & ATS VIEWER ---
+# --- 1-CLICK INSTANT APPLY & BOOKMARKS ---
+
+@app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
+def apply(job_id):
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    # Check if already applied
+    cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
+    if not cursor.fetchone():
+        cursor.execute('INSERT INTO applications (student_email, job_id, status) VALUES (?, ?, ?)', 
+                       (session['student_email'], job_id, 'Under Review'))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
+
+@app.route('/toggle_save/<int:job_id>', methods=['POST'])
+def toggle_save(job_id):
+    if 'student_email' not in session:
+        return jsonify({"status": "error", "message": "Sign in required"}), 401
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM saved_jobs WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute('DELETE FROM saved_jobs WHERE id = ?', (row['id'],))
+        is_saved = False
+    else:
+        cursor.execute('INSERT INTO saved_jobs (student_email, job_id) VALUES (?, ?)', (session['student_email'], job_id))
+        is_saved = True
+
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "is_saved": is_saved})
+
+# --- TECHNICAL INTERVIEW PREPARATION GUIDE ---
+
+@app.route('/interview_prep/<int:job_id>')
+def interview_prep(job_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, title, company, required_skills FROM internships WHERE id = ?', (job_id,))
+    job = cursor.fetchone()
+    conn.close()
+
+    if not job:
+        return redirect(url_for('jobs'))
+
+    req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
+
+    # Technical Q&A bank mapped by skill
+    interview_bank = {
+        'python': [
+            {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable (elements can be modified, appended, removed), while tuples are immutable once created. Tuples are faster and used for fixed data integrity."},
+            {"q": "How does memory management work in Python?", "a": "Python uses a private heap containing all objects and data structures. It relies on Reference Counting and a generational Garbage Collector to detect and destroy cyclic references."},
+            {"q": "Explain decorators and write a typical use case.", "a": "Decorators are functions that take another function as an argument and extend its behavior without modifying it directly (e.g. @app.route in Flask or authentication checks)."}
+        ],
+        'sql': [
+            {"q": "Explain the difference between WHERE and HAVING clauses.", "a": "WHERE filters rows before aggregation occurs. HAVING filters aggregated data after the GROUP BY clause has executed."},
+            {"q": "What are primary keys, foreign keys, and unique indexes?", "a": "A Primary Key uniquely identifies each record and cannot be NULL. A Foreign Key references a primary key in another table to enforce referential integrity."},
+            {"q": "What is database normalization (1NF, 2NF, 3NF)?", "a": "Normalization organizes database columns and tables to minimize redundancy and prevent dependency anomalies during insert, update, and delete actions."}
+        ],
+        'html': [
+            {"q": "What are Semantic HTML5 tags and why are they critical?", "a": "Tags like <header>, <nav>, <article>, <section>, and <footer> clearly describe their meaning to both browser and developer, improving accessibility (screen readers) and SEO rankings."},
+            {"q": "Explain the CSS Box Model.", "a": "The Box Model consists of four concentric layers: Content, Padding (inner spacing), Border, and Margin (outer spacing between elements)."}
+        ],
+        'react': [
+            {"q": "What is the Virtual DOM in React and how does reconciliation work?", "a": "Virtual DOM is a lightweight memory copy of the real DOM. When state changes, React compares Virtual DOM with the previous snapshot (diffing algorithm) and only updates changed nodes in the real DOM."},
+            {"q": "What is the purpose of useEffect dependency array?", "a": "It specifies when the effect should re-run. An empty array [] means it runs only once on mount; passing variables means it re-runs whenever those state values change."}
+        ],
+        'c': [
+            {"q": "What is a Pointer and how does dereferencing work in C?", "a": "A pointer is a variable that stores the memory address of another variable. The dereference operator (*) accesses the value stored at that address."},
+            {"q": "What is the difference between malloc() and calloc()?", "a": "malloc() allocates uninitialized memory containing garbage values; calloc() allocates memory and initializes all allocated bytes to zero."}
+        ]
+    }
+
+    curated_qa = []
+    for skill in req_skills:
+        for key in interview_bank:
+            if key in skill:
+                for item in interview_bank[key]:
+                    if item not in curated_qa:
+                        curated_qa.append({"skill": key.upper(), **item})
+
+    if not curated_qa:
+        curated_qa = [
+            {"skill": "CORE CS", "q": "Explain the Time and Space Complexity of QuickSort and MergeSort.", "a": "MergeSort is O(N log N) in all cases with O(N) auxiliary space. QuickSort average time is O(N log N) but worst case is O(N^2) if pivot selection is unoptimized."},
+            {"skill": "CORE CS", "q": "What are ACID properties in transactional systems?", "a": "Atomicity (all or nothing), Consistency (valid state transitions), Isolation (concurrent transactions don't interfere), and Durability (committed changes persist)."}
+        ]
+
+    return render_template('interview_prep.html', job=job, curated_qa=curated_qa)
+
+# --- INTERACTIVE ANALYTICS ROUTE ---
+
+@app.route('/analytics')
+def analytics():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. Skill Frequency Calculation across all internships
+    cursor.execute('SELECT required_skills FROM internships')
+    rows = cursor.fetchall()
+    all_skills = []
+    for row in rows:
+        for s in row['required_skills'].split(','):
+            cleaned = s.strip().title()
+            if cleaned:
+                all_skills.append(cleaned)
+    skill_counts = Counter(all_skills).most_common(6)
+    skill_labels = [sc[0] for sc in skill_counts]
+    skill_data = [sc[1] for sc in skill_counts]
+
+    # 2. Student Readiness calculation
+    student_readiness = 0
+    student_skills_count = 0
+    if 'student_email' in session:
+        cursor.execute('SELECT skills FROM students WHERE email = ?', (session['student_email'],))
+        row = cursor.fetchone()
+        if row and row['skills']:
+            st_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
+            student_skills_count = len(st_skills)
+            # Market alignment score
+            matches_in_market = sum(1 for s in st_skills if any(s in lbl.lower() for lbl in skill_labels))
+            student_readiness = min(100, int((matches_in_market / max(1, len(skill_labels))) * 100) + 20)
+
+    # 3. Application Distribution
+    cursor.execute('SELECT status, COUNT(*) as count FROM applications GROUP BY status')
+    status_rows = cursor.fetchall()
+    status_labels = [sr['status'] for sr in status_rows] if status_rows else ["Under Review"]
+    status_data = [sr['count'] for sr in status_rows] if status_rows else [1]
+
+    cursor.execute('SELECT COUNT(*) FROM internships')
+    total_openings = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM applications')
+    total_apps = cursor.fetchone()[0]
+    conn.close()
+
+    return render_template('analytics.html', 
+                           skill_labels=skill_labels, skill_data=skill_data,
+                           status_labels=status_labels, status_data=status_data,
+                           student_readiness=student_readiness,
+                           student_skills_count=student_skills_count,
+                           total_openings=total_openings, total_apps=total_apps)
+
+# --- RECRUITER STATUS UPDATE ---
+
+@app.route('/update_status/<int:app_id>', methods=['POST'])
+def update_status(app_id):
+    new_status = request.form.get('status', 'Under Review')
+    job_id = request.form.get('job_id')
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('view_applicants', job_id=job_id))
+
+# --- STUDENT DASHBOARD (With Saved Jobs & Status) ---
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        updated_skills = request.form.get('skills', '').strip()
+        cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (updated_skills, session['student_email']))
+        conn.commit()
+
+    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
+    student = cursor.fetchone()
+
+    # Applied Jobs with Status
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status
+        FROM internships
+        JOIN applications ON internships.id = applications.job_id
+        WHERE applications.student_email = ?
+        ORDER BY applications.id DESC
+    ''', (session['student_email'],))
+    applied_jobs = cursor.fetchall()
+
+    # Saved Bookmarked Jobs
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company, internships.required_skills
+        FROM internships
+        JOIN saved_jobs ON internships.id = saved_jobs.job_id
+        WHERE saved_jobs.student_email = ?
+        ORDER BY saved_jobs.id DESC
+    ''', (session['student_email'],))
+    saved_jobs = cursor.fetchall()
+
+    conn.close()
+    return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
+
+# --- RESUME BUILDER & VIEWER ---
 
 @app.route('/build_resume', methods=['GET', 'POST'])
 def build_resume():
@@ -278,11 +522,9 @@ def build_resume():
         certifications = request.form.get('certifications', '').strip()
         summary = request.form.get('summary', '').strip()
 
-        # Update core skills in students profile
         if skills:
             cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (skills, session['student_email']))
 
-        # Check if resume row already exists
         cursor.execute('SELECT id FROM student_resumes WHERE student_email = ?', (session['student_email'],))
         row = cursor.fetchone()
 
@@ -317,7 +559,6 @@ def build_resume():
         conn.close()
         return redirect(url_for('resume'))
 
-    # Load existing student and resume data to prefill form
     cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
@@ -341,12 +582,10 @@ def resume():
     resume_data = cursor.fetchone()
     conn.close()
 
-    # Agar student ne abhi tak details nahi bhari hain, toh builder form par bhejein
     if not resume_data:
         return redirect(url_for('build_resume'))
 
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()] if student and student['skills'] else []
-
     return render_template('resume.html', student=student, resume=resume_data, skills_list=skills_list)
 
 @app.route('/matcher', methods=['GET', 'POST'])
@@ -361,36 +600,6 @@ def matcher():
         else:
             score = 0
     return render_template('index.html', score=score)
-
-# --- STUDENT DASHBOARD ---
-
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
-    if 'student_email' not in session:
-        return redirect(url_for('login'))
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    if request.method == 'POST':
-        updated_skills = request.form.get('skills', '').strip()
-        cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (updated_skills, session['student_email']))
-        conn.commit()
-
-    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
-    student = cursor.fetchone()
-
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills
-        FROM internships
-        JOIN applications ON internships.id = applications.job_id
-        WHERE applications.student_email = ?
-        ORDER BY applications.id DESC
-    ''', (session['student_email'],))
-    applied_jobs = cursor.fetchall()
-    conn.close()
-
-    return render_template('dashboard.html', student=student, applied_jobs=applied_jobs)
 
 # --- AUTHENTICATION & FIREBASE SYNC ---
 
@@ -440,7 +649,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- RECRUITER / ADMIN ROUTES ---
+# --- RECRUITER / ADMIN PROTECTED OPENING CREATION ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
@@ -465,18 +674,6 @@ def add_job():
 
     return render_template('add_job.html', error=error)
 
-@app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
-def apply(job_id):
-    if request.method == 'POST':
-        email = request.form.get('email')
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO applications (student_email, job_id) VALUES (?, ?)', (email, job_id))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('dashboard') if 'student_email' in session else url_for('jobs'))
-    return render_template('apply.html', job_id=job_id)
-
 @app.route('/view_applicants/<int:job_id>')
 def view_applicants(job_id):
     conn = get_db()
@@ -486,14 +683,15 @@ def view_applicants(job_id):
     job_title = job['title'] if job else "Unknown Role"
 
     cursor.execute('''
-        SELECT students.name, students.email, students.skills 
+        SELECT applications.id as app_id, students.name, students.email, students.skills, applications.status
         FROM students
         JOIN applications ON students.email = applications.student_email
         WHERE applications.job_id = ?
+        ORDER BY applications.id DESC
     ''', (job_id,))
     applicants = cursor.fetchall()
     conn.close()
-    return render_template('view_applicants.html', applicants=applicants, job_title=job_title)
+    return render_template('view_applicants.html', applicants=applicants, job_title=job_title, job_id=job_id)
 
 if __name__ == '__main__':
     app.run(debug=True)

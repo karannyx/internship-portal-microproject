@@ -3,7 +3,17 @@
 
 {% block content %}
 <style>
-    /* Light Theme (Clean Crisp White & Soft Slate) */
+    .announcement-ticker {
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.88rem;
+    }
     .hero-banner {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -38,7 +48,6 @@
         color: #0f172a;
     }
 
-    /* Dark Theme Hero Banner */
     [data-bs-theme="dark"] .hero-banner {
         background: linear-gradient(135deg, #18122c 0%, #110e20 100%) !important;
         border: 1px solid #2b234d !important;
@@ -56,7 +65,6 @@
         color: #f4f4f5;
     }
 
-    /* Compatibility Card Container */
     .compat-box {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
@@ -68,7 +76,6 @@
         border: 1px solid #2f2554 !important;
     }
 
-    /* Progress Bar */
     .match-progress-container {
         height: 6px;
         background-color: rgba(148, 163, 184, 0.2);
@@ -82,7 +89,6 @@
         transition: width 0.6s ease;
     }
 
-    /* Skills Badges */
     .skill-badge-matched {
         background-color: rgba(16, 185, 129, 0.12) !important;
         color: #10b981 !important;
@@ -115,9 +121,38 @@
         color: var(--text-heading);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
+    .bookmark-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .bookmark-btn:hover {
+        transform: scale(1.15);
+    }
+    .bookmark-btn.active {
+        color: #f59e0b;
+    }
 </style>
 
 <div class="container py-2">
+    <!-- Campus T&P Notice Board Ticker -->
+    <div class="announcement-ticker">
+        <span class="badge bg-danger rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.68rem;">
+            <i class="bi bi-bell-fill me-1"></i> T&P Bulletin
+        </span>
+        <div class="text-truncate flex-grow-1" style="color: var(--text-heading);">
+            {{ announcements[0] }} &bull; {{ announcements[1] }}
+        </div>
+        <a href="/analytics" class="small fw-semibold text-decoration-none text-primary d-none d-md-inline">
+            View Analytics &rarr;
+        </a>
+    </div>
+
     <!-- Hero Banner -->
     <div class="hero-banner">
         <div class="row align-items-center g-3">
@@ -206,7 +241,7 @@
                  data-skills="{{ job.required_skills|lower }}">
                 <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
                     <div>
-                        <!-- Header & Meta -->
+                        <!-- Header & Bookmark Button -->
                         <div class="d-flex align-items-start justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="company-avatar-box">
@@ -219,20 +254,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="badge border bg-body-tertiary text-secondary px-2 py-1 rounded-pill" style="font-size: 0.7rem;">
-                                Internship
-                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="bookmark-btn {% if job.is_saved %}active{% endif %}" onclick="toggleSaveJob({{ job.id }}, this)" title="Bookmark Role">
+                                    <i class="bi {% if job.is_saved %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Match Scoring Bar with High-Contrast Distinct Badges -->
+                        <!-- Match Scoring Bar with Distinct Lavender Badge -->
                         {% if job.match_score is not none %}
                             <div class="mb-3 compat-box">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="small fw-bold" style="color: var(--text-heading); font-size: 0.82rem;">
                                         <i class="bi bi-cpu text-primary me-1"></i> Skill Compatibility
                                     </span>
-                                    
-                                    <!-- High-Contrast Distinct Badge (Never Submerged) -->
                                     <span class="badge rounded-pill fw-bold px-2.5 py-1" style="font-size: 0.78rem;
                                         {% if job.match_score >= 70 %}
                                             background-color: rgba(16, 185, 129, 0.16) !important; color: #34d399 !important; border: 1px solid rgba(52, 211, 153, 0.4) !important;
@@ -250,8 +285,8 @@
                             </div>
                         {% endif %}
 
-                        <!-- Bridge The Gap: Matched vs Missing Skills -->
-                        <div class="mb-4">
+                        <!-- Matched vs Missing Skills -->
+                        <div class="mb-3">
                             {% if job.matched_skills %}
                                 <div class="small fw-semibold mb-1 text-muted" style="font-size: 0.72rem; letter-spacing: 0.04em;">MATCHED SKILLS</div>
                                 <div class="d-flex flex-wrap gap-1 mb-2">
@@ -270,14 +305,28 @@
                                 </div>
                             {% endif %}
                         </div>
+
+                        <!-- Technical Interview Prep Link -->
+                        <div class="mb-3">
+                            <a href="/interview_prep/{{ job.id }}" class="small text-decoration-none fw-semibold text-primary d-inline-flex align-items-center">
+                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Technical Interview Prep Guide &rarr;
+                            </a>
+                        </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2 pt-2">
-                        <a href="/apply/{{ job.id }}" class="btn btn-primary-custom flex-grow-1 text-center text-decoration-none">
-                            Apply Now
-                        </a>
-                        <a href="/view_applicants/{{ job.id }}" class="btn btn-outline-custom px-3" title="View Applicants">
+                    <!-- 1-Click Action Buttons -->
+                    <div class="d-flex gap-2 pt-2 border-top" style="border-color: var(--border-color) !important;">
+                        {% if job.is_applied %}
+                            <button class="btn btn-outline-success flex-grow-1 disabled" style="border-radius: 10px;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Applied
+                            </button>
+                        {% else %}
+                            <a href="/apply/{{ job.id }}" class="btn btn-primary-custom flex-grow-1 text-center">
+                                <i class="bi bi-send-fill me-1"></i> 1-Click Apply
+                            </a>
+                        {% endif %}
+
+                        <a href="/view_applicants/{{ job.id }}" class="btn btn-outline-custom px-3" title="View Applicants (T&P)">
                             <i class="bi bi-people-fill"></i>
                         </a>
                     </div>
@@ -293,7 +342,6 @@
         {% endif %}
     </div>
 
-    <!-- Empty Search Notice -->
     <div id="noResultsNotice" class="text-center py-5 d-none">
         <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
         <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Internships Found</h5>
@@ -302,6 +350,7 @@
 </div>
 
 <script>
+    // Search & Filter
     const searchInput = document.getElementById('jobSearchInput');
     const filterPills = document.querySelectorAll('.filter-pill');
     const jobCards = document.querySelectorAll('.job-item-col');
@@ -340,4 +389,35 @@
 
     filterPills.forEach(pill => {
         pill.addEventListener('click', () => {
-            filterPills.forEach(p => p.classList.remove('active',
+            filterPills.forEach(p => p.classList.remove('active', 'btn-primary-custom'));
+            pill.classList.add('active');
+            activeSkill = pill.getAttribute('data-filter');
+            filterJobs();
+        });
+    });
+
+    // Bookmark Save Toggle
+    function toggleSaveJob(jobId, btn) {
+        fetch(`/toggle_save/${jobId}`, { method: 'POST' })
+            .then(res => {
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.status === 'success') {
+                    if (data.is_saved) {
+                        btn.classList.add('active');
+                        btn.innerHTML = '<i class="bi bi-bookmark-fill"></i>';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.innerHTML = '<i class="bi bi-bookmark"></i>';
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+    }
+</script>
+{% endblock %}

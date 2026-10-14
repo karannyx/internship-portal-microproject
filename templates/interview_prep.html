@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Technical Interview Prep | {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 920px;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2.5 py-1 small fw-bold">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> High-Yield Technical Q&A
+                </span>
+                <span class="badge border px-2.5 py-1 rounded-pill small" style="background: var(--badge-bg); color: var(--badge-text);">
+                    {{ job.company }}
+                </span>
+            </div>
+            <h2 class="fw-bold mb-1" style="color: var(--text-heading);">Interview Preparation: {{ job.title }}</h2>
+            <p class="text-muted mb-0">Frequently asked technical interview questions and model answers tailored to: <strong>{{ job.required_skills }}</strong></p>
+        </div>
+        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Jobs
+        </a>
+    </div>
+
+    <!-- Questions Accordion -->
+    <div class="card p-4" style="border-radius: 18px;">
+        <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+            <i class="bi bi-patch-question-fill text-primary me-2"></i> Technical Screening Questions
+        </h5>
+
+        <div class="accordion accordion-flush" id="prepAccordion">
+            {% for item in curated_qa %}
+            <div class="accordion-item bg-transparent mb-3 border rounded-3 p-2" style="border-color: var(--border-color) !important;">
+                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                    <button class="accordion-button collapsed bg-transparent shadow-none fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" style="color: var(--text-heading); font-size: 0.95rem;">
+                        <span class="badge border me-2" style="background: var(--badge-bg); color: var(--badge-text);">{{ item.skill }}</span>
+                        {{ item.q }}
+                    </button>
+                </h2>
+                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#prepAccordion">
+                    <div class="accordion-body text-muted pt-2" style="font-size: 0.92rem; line-height: 1.6;">
+                        <strong style="color: var(--text-heading); display: block; margin-bottom: 0.35rem;">Model Answer:</strong>
+                        {{ item.a }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="p-3 border rounded-3 mt-3 bg-body-tertiary text-center">
+            <h6 class="fw-bold mb-1" style="color: var(--text-heading);">Want deeper hands-on preparation?</h6>
+            <p class="small text-muted mb-2">Check out free certifications and video courses in our learning catalog.</p>
+            <a href="/courses" class="btn btn-sm btn-primary-custom rounded-pill px-4">
+                Explore Free Courses <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

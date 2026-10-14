@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Campus Placement & Skill Analytics | Skill2Career{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-bold">
+                    <i class="bi bi-bar-chart-fill me-1"></i> Live Portal Insights
+                </span>
+            </div>
+            <h2 class="fw-bold mb-0" style="color: var(--text-heading);">Placement & Skill Analytics</h2>
+            <p class="text-muted mb-0">Real-time data telemetry tracking top employer tech stacks and candidate readiness</p>
+        </div>
+        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
+            <i class="bi bi-briefcase me-1"></i> Browse Openings
+        </a>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-radius: 16px;">
+                <div class="small text-muted fw-semibold mb-1">TOTAL OPENINGS</div>
+                <h3 class="fw-bold mb-0" style="color: var(--text-heading);">{{ total_openings }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-radius: 16px;">
+                <div class="small text-muted fw-semibold mb-1">APPLICATIONS FILED</div>
+                <h3 class="fw-bold mb-0" style="color: var(--text-heading);">{{ total_apps }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-radius: 16px;">
+                <div class="small text-muted fw-semibold mb-1">MY VERIFIED SKILLS</div>
+                <h3 class="fw-bold mb-0" style="color: var(--text-heading);">{{ student_skills_count }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-radius: 16px;">
+                <div class="small text-muted fw-semibold mb-1">MARKET READINESS</div>
+                <h3 class="fw-bold mb-0 text-success">{{ student_readiness }}%</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Charts -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card p-4 h-100" style="border-radius: 18px;">
+                <h5 class="fw-bold mb-1" style="color: var(--text-heading);">Most In-Demand Campus Skills</h5>
+                <p class="small text-muted mb-4">Frequency of technical tags requested across active internships</p>
+                <div>
+                    <canvas id="skillsChart" height="230"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-4 h-100" style="border-radius: 18px;">
+                <h5 class="fw-bold mb-1" style="color: var(--text-heading);">Application Funnel</h5>
+                <p class="small text-muted mb-4">Breakdown of submitted candidate applications by hiring stage</p>
+                <div>
+                    <canvas id="statusChart" height="230"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDark ? '#d6cee8' : '#473d61';
+    const gridColor = isDark ? '#2b234d' : '#ebe7f5';
+
+    // Skill Bar Chart
+    const ctxSkills = document.getElementById('skillsChart').getContext('2d');
+    new Chart(ctxSkills, {
+        type: 'bar',
+        data: {
+            labels: {{ skill_labels|tojson }},
+            datasets: [{
+                label: 'Number of Openings',
+                data: {{ skill_data|tojson }},
+                backgroundColor: 'rgba(124, 58, 237, 0.7)',
+                borderColor: '#7c3aed',
+                borderWidth: 1.5,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: textColor }, grid: { display: false } },
+                y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } }
+            }
+        }
+    });
+
+    // Application Status Doughnut Chart
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: {{ status_labels|tojson }},
+            datasets: [{
+                data: {{ status_data|tojson }},
+                backgroundColor: ['#f59e0b', '#10b981', '#7c3aed', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: textColor } }
+            }
+        }
+    });
+</script>
+{% endblock %}

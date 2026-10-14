@@ -3,58 +3,69 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Top Greeting -->
+    <!-- Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--text-heading, #0f172a);">Student Dashboard</h2>
-            <p class="mb-0 text-muted">Manage your profile skills and track submitted internship applications</p>
+            <h2 class="fw-bold mb-1" style="color: var(--text-heading);">Student Dashboard</h2>
+            <p class="mb-0 text-muted">Manage profile skills, track recruiter status, and view saved opportunities</p>
         </div>
-        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
-            <i class="bi bi-arrow-left me-1"></i> Browse Openings
-        </a>
+        <div class="d-flex gap-2">
+            <a href="/resume" class="btn btn-outline-custom rounded-pill px-3">
+                <i class="bi bi-file-earmark-person me-1"></i> View Resume
+            </a>
+            <a href="/jobs" class="btn btn-primary-custom rounded-pill px-3">
+                <i class="bi bi-briefcase me-1"></i> Browse Jobs
+            </a>
+        </div>
     </div>
 
     <div class="row g-4">
-        <!-- Profile & Skill Editor Card -->
+        <!-- Profile & Skill Editor -->
         <div class="col-lg-4">
-            <div class="card p-4 h-100" style="border-radius: 16px;">
+            <div class="card p-4 h-100" style="border-radius: 18px;">
                 <div class="text-center mb-4">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-size: 1.6rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
+                    <div style="width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; font-size: 1.8rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
                         {{ student.name[0]|upper }}
                     </div>
-                    <h5 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a);">{{ student.name }}</h5>
+                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">{{ student.name }}</h5>
                     <p class="small text-muted mb-2">{{ student.email }}</p>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
-                        Verified Student
+                    <span class="badge border px-3 py-1 rounded-pill" style="background: var(--badge-bg); color: var(--badge-text);">
+                        <i class="bi bi-patch-check-fill me-1"></i> Verified Student
                     </span>
                 </div>
 
-                <hr style="border-color: var(--border-color, #e2e8f0);">
+                <hr style="border-color: var(--border-color);">
 
-                <!-- Edit Skills Form -->
                 <form method="POST" action="/dashboard">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small" style="color: var(--text-heading, #0f172a);">
-                            My Technical Skills
+                        <label class="form-label fw-semibold small" style="color: var(--text-heading);">
+                            My Core Skills (comma-separated)
                         </label>
-                        <textarea name="skills" rows="3" class="form-control" placeholder="e.g. Python, SQL, React, HTML" required>{{ student.skills }}</textarea>
-                        <div class="form-text small">Updating your skills automatically re-calculates your match scores on all job cards.</div>
+                        <textarea name="skills" rows="3" class="form-control" placeholder="e.g. Python, SQL, C, HTML" required>{{ student.skills }}</textarea>
+                        <div class="form-text small">Updating skills instantly recalculates all your job match percentages.</div>
                     </div>
                     <button type="submit" class="btn btn-primary-custom w-100">
-                        <i class="bi bi-check-circle me-1"></i> Update Skills
+                        <i class="bi bi-arrow-clockwise me-1"></i> Update Skills
                     </button>
                 </form>
+
+                <div class="mt-4 pt-3 border-top text-center" style="border-color: var(--border-color) !important;">
+                    <a href="/build_resume" class="btn btn-outline-custom w-100 btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Full Resume Data
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Submitted Applications Card -->
+        <!-- Applications & Saved Jobs -->
         <div class="col-lg-8">
-            <div class="card p-4 h-100" style="border-radius: 16px;">
+            <!-- Applied Jobs Table -->
+            <div class="card p-4 mb-4" style="border-radius: 18px;">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a);">
-                        Submitted Applications ({{ applied_jobs|length }})
+                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">
+                        My Applications ({{ applied_jobs|length }})
                     </h5>
-                    <span class="small text-muted">Application Status Tracker</span>
+                    <span class="small text-muted">Live Status Tracking</span>
                 </div>
 
                 {% if applied_jobs %}
@@ -63,15 +74,16 @@
                             <thead>
                                 <tr class="text-muted small text-uppercase">
                                     <th>Role & Company</th>
-                                    <th>Required Tech</th>
-                                    <th>Status</th>
+                                    <th>Tech Stack</th>
+                                    <th>Application Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for job in applied_jobs %}
                                 <tr>
                                     <td>
-                                        <div class="fw-bold" style="color: var(--text-heading, #0f172a);">{{ job.title }}</div>
+                                        <div class="fw-bold" style="color: var(--text-heading);">{{ job.title }}</div>
                                         <div class="small text-muted"><i class="bi bi-buildings me-1"></i>{{ job.company }}</div>
                                     </td>
                                     <td>
@@ -82,9 +94,28 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold">
-                                            <i class="bi bi-check2-all me-1"></i> Under Review
-                                        </span>
+                                        {% if job.status == 'Shortlisted' %}
+                                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold">
+                                                <i class="bi bi-star-fill me-1"></i> Shortlisted
+                                            </span>
+                                        {% elif job.status == 'Interview Scheduled' %}
+                                            <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-bold">
+                                                <i class="bi bi-calendar-event-fill me-1"></i> Interview Call
+                                            </span>
+                                        {% elif job.status == 'Rejected' %}
+                                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 fw-semibold">
+                                                <i class="bi bi-x-circle me-1"></i> Archival
+                                            </span>
+                                        {% else %}
+                                            <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1 fw-semibold">
+                                                <i class="bi bi-hourglass-split me-1"></i> Under Review
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="/interview_prep/{{ job.id }}" class="btn btn-sm btn-outline-custom" title="Interview Q&A">
+                                            <i class="bi bi-lightning-charge"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -92,12 +123,42 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-send-slash fs-1 text-muted mb-2 d-block"></i>
-                        <h6 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Applications Submitted Yet</h6>
-                        <p class="text-muted small mb-3">Explore open listings and apply with your registered skills.</p>
-                        <a href="/jobs" class="btn btn-primary-custom btn-sm rounded-pill px-3">Browse Jobs</a>
+                    <div class="text-center py-4">
+                        <i class="bi bi-send-slash fs-2 text-muted mb-2 d-block"></i>
+                        <h6 class="fw-bold" style="color: var(--text-heading);">No Applications Yet</h6>
+                        <p class="text-muted small mb-2">Explore active campus drives and apply with 1-click.</p>
                     </div>
+                {% endif %}
+            </div>
+
+            <!-- Saved Bookmarked Jobs Card -->
+            <div class="card p-4" style="border-radius: 18px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">
+                        <i class="bi bi-bookmark-fill text-warning me-2"></i> Saved Opportunities ({{ saved_jobs|length }})
+                    </h5>
+                    <span class="small text-muted">Bookmarked Roles</span>
+                </div>
+
+                {% if saved_jobs %}
+                    <div class="row g-3">
+                        {% for job in saved_jobs %}
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-body-tertiary d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold mb-0" style="color: var(--text-heading);">{{ job.title }}</div>
+                                    <div class="small text-muted mb-1">{{ job.company }}</div>
+                                    <div class="small text-muted">{{ job.required_skills }}</div>
+                                </div>
+                                <a href="/apply/{{ job.id }}" class="btn btn-sm btn-primary-custom">
+                                    Apply
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No bookmarked jobs. Click the bookmark icon on any job card to save it here.</p>
                 {% endif %}
             </div>
         </div>

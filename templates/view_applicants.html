@@ -1,30 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Applicants for {{ job_title }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
-        .container { max-width: 800px; margin: auto; }
-        .student-card { background: white; padding: 15px; border-radius: 5px; margin-bottom: 10px; border-left: 5px solid #007bff; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h2>Applicants for: {{ job_title }}</h2>
-    <a href="/jobs" style="display:block; margin-bottom: 20px;">Back to Jobs</a>
+{% extends "base.html" %}
+{% block title %}Applicants for {{ job_title }} | Skill2Career{% endblock %}
 
-    {% if applicants %}
-        {% for student in applicants %}
-            <div class="student-card">
-                <h4>{{ student[0] }}</h4>
-                <p><strong>Email:</strong> {{ student[1] }}</p>
-                <p><strong>Skills:</strong> {{ student[2] }}</p>
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--badge-bg); color: var(--badge-text);">
+                T&P Placement Dashboard
+            </span>
+            <h2 class="fw-bold mb-1" style="color: var(--text-heading);">Applicants for: {{ job_title }}</h2>
+            <p class="text-muted mb-0">Review candidate qualifications and update their hiring stages</p>
+        </div>
+        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Jobs
+        </a>
+    </div>
+
+    <div class="card p-4 shadow-sm" style="border-radius: 18px;">
+        {% if applicants %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr class="text-muted small text-uppercase">
+                            <th>Candidate Name</th>
+                            <th>Email Address</th>
+                            <th>Verified Skills</th>
+                            <th>Current Status</th>
+                            <th>Update Hiring Stage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applicants %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold" style="color: var(--text-heading);">{{ app.name }}</div>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ app.email }}" class="text-decoration-none small text-muted">
+                                    <i class="bi bi-envelope me-1"></i>{{ app.email }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for sk in app.skills.split(',') %}
+                                        <span class="badge badge-skill" style="font-size: 0.72rem;">{{ sk.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill fw-bold px-2.5 py-1
+                                    {% if app.status == 'Shortlisted' %}bg-success-subtle text-success border border-success-subtle
+                                    {% elif app.status == 'Interview Scheduled' %}bg-primary-subtle text-primary border border-primary-subtle
+                                    {% elif app.status == 'Rejected' %}bg-danger-subtle text-danger border border-danger-subtle
+                                    {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                    {{ app.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Recruiter Status Update Dropdown Form -->
+                                <form method="POST" action="/update_status/{{ app.app_id }}" class="d-flex gap-2">
+                                    <input type="hidden" name="job_id" value="{{ job_id }}">
+                                    <select name="status" class="form-select form-select-sm" style="width: auto;">
+                                        <option value="Under Review" {% if app.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                        <option value="Shortlisted" {% if app.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                        <option value="Interview Scheduled" {% if app.status == 'Interview Scheduled' %}selected{% endif %}>Interview Call</option>
+                                        <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary-custom">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No one has applied to this position yet.</p>
-    {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-people fs-1 text-muted mb-2 d-block"></i>
+                <h5 class="fw-bold" style="color: var(--text-heading);">No Candidate Applications Yet</h5>
+                <p class="text-muted small">Applications submitted by students will appear in this review portal.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
-</body>
-</html>
+{% endblock %}
