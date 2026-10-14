@@ -1,5 +1,6 @@
 import sqlite3
 import requests
+import time
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
@@ -8,6 +9,10 @@ DB_NAME = 'database.db'
 
 # T&P Cell / Recruiter Passkey
 ADMIN_PASSKEY = "admin2026"
+
+# Auto-sync throttling (Har 5 minute mein background check)
+LAST_SYNC_TIME = 0
+SYNC_INTERVAL = 300  
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
@@ -41,21 +46,14 @@ def init_db():
         )
     ''')
 
-    # Seed Database with Real Indian Openings & India Post Tech Roles
+    # Seed core Indian Govt & Tech roles if empty
     cursor.execute('SELECT COUNT(*) FROM internships')
-    count = cursor.fetchone()[0]
-    if count <= 1:
-        # Clear single placeholder job if exists to ensure clean list
-        cursor.execute('DELETE FROM internships')
+    if cursor.fetchone()[0] == 0:
         openings = [
-            ("Web Developer Intern", "Google India", "Python, SQL, HTML"),
             ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML"),
-            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C"),
-            ("Frontend Development Trainee", "Zomato India", "HTML, React, JavaScript"),
-            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL"),
-            ("Backend Systems Apprentice", "Flipkart", "Python, SQL, React"),
             ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C"),
-            ("Cloud & DevOps Apprentice", "Wipro Technologies", "Linux, Python, SQL")
+            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C"),
+            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL")
         ]
         cursor.executemany('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', openings)
 
@@ -63,6 +61,47 @@ def init_db():
     conn.close()
 
 init_db()
+
+# --- AUTOMATIC ONLINE JOB SYNC ENGINE ---
+
+def sync_live_jobs_automatically():
+    """Online publish hone wali nayi tech openings ko automatic portal mein laata hai."""
+    global LAST_SYNC_TIME
+    current_time = time.time()
+    
+    # Agar pichle 5 minute mein sync ho chuka hai, toh dobara API call na karein (Speed badhane ke liye)
+    if current_time - LAST_SYNC_TIME < SYNC_INTERVAL:
+        return
+
+    LAST_SYNC_TIME = current_time
+    try:
+        # Real-time free tech openings feed
+        response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=10', timeout=3.5)
+        if response.status_code == 200:
+            data = response.json()
+            jobs = data.get('jobs', [])
+            conn = get_db()
+            cursor = conn.cursor()
+
+            for job in jobs:
+                title = job.get('title', '').strip()
+                company = job.get('company_name', '').strip()
+                tags = job.get('tags', [])
+                
+                # Format required skills
+                skills = ", ".join(tags[:4]) if tags else "Python, HTML, SQL"
+
+                if title and company:
+                    # Check karein agar yeh job pehle se database mein toh nahi hai
+                    cursor.execute('SELECT id FROM internships WHERE title = ? AND company = ?', (title, company))
+                    if not cursor.fetchone():
+                        cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
+                                       (title, company, skills))
+
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        print(f"Auto-sync background check note: {e}")
 
 # --- MAIN & NAVIGATION ROUTES ---
 
@@ -72,6 +111,10 @@ def home():
 
 @app.route('/jobs')
 def jobs():
+    # 1. Nayi online publish hui jobs ko auto-fetch aur insert karein
+    sync_live_jobs_automatically()
+
+    # 2. Database se latest saari openings nikaalein
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('SELECT id, title, company, required_skills FROM internships ORDER BY id DESC')
@@ -212,7 +255,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- PROTECTED RECRUITER / ADMIN ROUTES ---
+# --- PROTECTED ADMIN JOB POSTING & APPLICATIONS ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
