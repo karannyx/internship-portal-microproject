@@ -21,46 +21,53 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        /* ====================================================
+           PREMIUM ELECTRIC PURPLE & MIDNIGHT VIOLET PALETTE
+           ==================================================== */
         :root {
-            --brand-icon: #71717a;
+            --primary: #7c3aed;           /* Electric Violet */
+            --primary-hover: #6d28d9;
+            --primary-subtle: #f5f3ff;
+            --accent-glow: rgba(124, 58, 237, 0.25);
         }
 
-        /* LIGHT THEME */
+        /* LIGHT THEME (Soft Lavender Mist & Deep Royal Purple) */
         [data-bs-theme="light"] {
-            --body-bg: #f8fafc;
+            --body-bg: #f9f8fe;           /* Soft clean lavender-tinted background */
             --nav-bg: #ffffff;
             --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --text-heading: #09090b;
-            --text-body: #334155;
-            --text-muted: #64748b;
-            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-            --badge-bg: #f1f5f9;
-            --badge-text: #0f172a;
-            --btn-main-bg: #0f172a;
+            --border-color: #ebe7f5;
+            --text-heading: #1e1338;      /* Deep Royal Violet */
+            --text-body: #473d61;
+            --text-muted: #7d7297;
+            --card-shadow: 0 4px 12px -2px rgba(124, 58, 237, 0.05);
+            --badge-bg: #f3effe;
+            --badge-text: #7c3aed;
+            --btn-main-bg: #7c3aed;
             --btn-main-text: #ffffff;
-            --btn-main-hover: #1e293b;
-            --btn-subtle-hover: #f1f5f9;
+            --btn-main-hover: #6d28d9;
+            --btn-subtle-hover: #f3effe;
         }
 
-        /* DARK THEME (Refined Muted Zinc - No Blinding White Glare) */
+        /* DARK THEME (Deep Midnight Obsidian & Electric Violet) */
         [data-bs-theme="dark"] {
-            --body-bg: #09090b;           /* Pure Deep Onyx */
-            --nav-bg: #111113;           /* Sleek Matte Header */
-            --card-bg: #141416;           /* Subtle Elevated Charcoal */
-            --border-color: #26262a;      /* Clean Minimalist Zinc Border */
-            --text-heading: #fafafa;      /* Crisp Silver White */
-            --text-body: #d4d4d8;         /* Soft Balanced Silver Slate */
-            --text-muted: #a1a1aa;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
-            --badge-bg: #202024;
-            --badge-text: #e4e4e7;
+            --body-bg: #0b0914;           /* True Deep Midnight Violet (Not pitch black) */
+            --nav-bg: #110e20;           /* Elevated Dark Header */
+            --card-bg: #16122a;           /* Rich Obsidian Surface */
+            --border-color: #2b234d;      /* Subtle Purple Tinted Border */
+            --text-heading: #faf5ff;      /* Crisp Lavender-White */
+            --text-body: #d6cee8;         /* Soft readable violet-slate */
+            --text-muted: #9c91b8;
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+            --badge-bg: #261e46;
+            --badge-text: #c4b5fd;        /* Soft Glowing Lavender */
             
-            /* Sleek Eye-Friendly Muted Action Button */
-            --btn-main-bg: #27272a;       /* Muted Charcoal Zinc */
-            --btn-main-text: #f4f4f5;      /* Crisp Light Silver */
-            --btn-main-hover: #3f3f46;     /* Lighter slate on hover */
-            --btn-subtle-hover: #1f1f23;
+            /* Eye-friendly Electric Purple Button (Replaces the blinding white) */
+            --btn-main-bg: #7c3aed;
+            --btn-main-text: #ffffff;
+            --btn-main-hover: #6d28d9;
+            --btn-subtle-hover: #231b3e;
+            --primary-subtle: #261e46;
         }
 
         body {
@@ -70,7 +77,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -83,16 +90,17 @@
             color: var(--text-muted) !important;
         }
 
+        /* Navigation Bar */
         .navbar-custom {
             background: var(--nav-bg) !important;
             border-bottom: 1px solid var(--border-color);
             padding: 0.85rem 0;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
         }
 
         .navbar-brand {
             font-weight: 800;
-            color: var(--text-heading) !important;
+            color: var(--primary) !important;
             letter-spacing: -0.5px;
             font-size: 1.25rem;
         }
@@ -105,28 +113,34 @@
         }
 
         .nav-link:hover {
-            color: var(--text-heading) !important;
+            color: var(--primary) !important;
         }
 
+        /* Cards */
         .card, .card-custom {
             background-color: var(--card-bg) !important;
             border: 1px solid var(--border-color) !important;
-            border-radius: 14px;
+            border-radius: 16px;
             box-shadow: var(--card-shadow);
             color: var(--text-body) !important;
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        /* Muted Professional Action Buttons */
+        .card:hover, .card-custom:hover {
+            border-color: var(--primary) !important;
+            transform: translateY(-2px);
+        }
+
+        /* High-Class Modern Purple Action Buttons */
         .btn-primary-custom {
-            background: var(--btn-main-bg) !important;
-            color: var(--btn-main-text) !important;
-            border: 1px solid #3f3f46 !important;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+            color: #ffffff !important;
+            border: none !important;
             font-weight: 600;
-            border-radius: 9px;
-            padding: 0.55rem 1.2rem;
+            border-radius: 10px;
+            padding: 0.6rem 1.25rem;
             font-size: 0.9rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
             transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
@@ -135,14 +149,10 @@
         }
 
         .btn-primary-custom:hover {
-            background: var(--btn-main-hover) !important;
-            border-color: #52525b !important;
-            color: #ffffff !important;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
             transform: translateY(-1px);
-        }
-
-        [data-bs-theme="light"] .btn-primary-custom {
-            border: 1px solid #0f172a !important;
+            color: #ffffff !important;
         }
 
         .btn-outline-custom {
@@ -150,8 +160,8 @@
             color: var(--text-heading) !important;
             background: transparent;
             font-weight: 600;
-            border-radius: 9px;
-            padding: 0.55rem 1.1rem;
+            border-radius: 10px;
+            padding: 0.55rem 1.15rem;
             font-size: 0.9rem;
             transition: all 0.2s ease;
             text-decoration: none;
@@ -162,8 +172,8 @@
 
         .btn-outline-custom:hover {
             background-color: var(--btn-subtle-hover);
-            border-color: #52525b !important;
-            color: var(--text-heading) !important;
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
         }
 
         .badge-skill {
@@ -179,7 +189,7 @@
         .theme-toggle-btn {
             width: 38px;
             height: 38px;
-            border-radius: 9px;
+            border-radius: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -191,8 +201,20 @@
         }
 
         .theme-toggle-btn:hover {
-            border-color: #71717a;
-            color: var(--text-heading);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .form-control {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-heading) !important;
+            border-radius: 10px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 0.2rem var(--accent-glow) !important;
         }
 
         footer {
@@ -210,7 +232,7 @@
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-            <i class="bi bi-briefcase-fill text-secondary"></i> Skill2Career
+            <i class="bi bi-briefcase-fill"></i> Skill2Career
         </a>
         <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <i class="bi bi-list fs-2 text-secondary"></i>
@@ -225,7 +247,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-2" href="/live_jobs">
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill me-1 border" style="font-size: 0.65rem;">LIVE</span> Online Openings
+                        <span class="badge rounded-pill me-1 border" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.65rem;">LIVE</span> Online Openings
                     </a>
                 </li>
                 <li class="nav-item">
@@ -244,7 +266,7 @@
                         <i class="bi bi-file-earmark-person me-1"></i> ATS Resume
                     </a>
                     <a href="/dashboard" class="btn btn-outline-custom btn-sm rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-person-circle me-1"></i> Dashboard
+                        <i class="bi bi-person-circle me-1" style="color: var(--primary);"></i> Dashboard
                     </a>
                     <a href="/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
                         Logout
