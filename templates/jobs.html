@@ -1,20 +1,145 @@
 {% extends "base.html" %}
-{% block title %}Available Internships | Skill2Career{% endblock %}
+{% block title %}Explore Internships | Skill2Career{% endblock %}
 
 {% block content %}
-<div class="container py-3">
-    <!-- Header Section (Clean Student View - No Post Button) -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold mb-1" style="color: var(--text-heading, #0f172a);">Available Internships</h2>
-            <p class="mb-0" style="color: var(--text-muted, #64748b);">Discover verified student roles tailored to your skill set</p>
+<style>
+    /* Unique Hero & Card Enhancements */
+    .hero-banner {
+        background: linear-gradient(135deg, rgba(38, 38, 42, 0.4), rgba(20, 20, 22, 0.4));
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.25rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(161, 161, 170, 0.15), transparent 70%);
+        pointer-events: none;
+    }
+    .stat-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem 0.85rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-heading);
+    }
+    .match-progress-container {
+        height: 6px;
+        background-color: var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 0.6rem 0;
+    }
+    .match-progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+    .skill-badge-matched {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        color: #10b981 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        font-size: 0.73rem;
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+    }
+    .skill-badge-missing {
+        background-color: rgba(245, 158, 11, 0.1) !important;
+        color: #f59e0b !important;
+        border: 1px dashed rgba(245, 158, 11, 0.4) !important;
+        font-size: 0.73rem;
+        font-weight: 500;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+    }
+    .company-avatar-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--text-heading);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+</style>
+
+<div class="container py-2">
+    <!-- Unique Hero Banner -->
+    <div class="hero-banner shadow-sm">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <span class="badge border bg-body-tertiary text-secondary px-2.5 py-1 rounded-pill small">
+                        <i class="bi bi-shield-check me-1"></i> T&P Verified Drives
+                    </span>
+                    {% if session.student_email %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill small">
+                            <i class="bi bi-cpu me-1"></i> Auto-Matching Active
+                        </span>
+                    {% endif %}
+                </div>
+
+                <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
+                    {% if session.student_name %}
+                        Welcome back, {{ session.student_name }} 👋
+                    {% else %}
+                        Turn Your Technical Skills Into High-Growth Careers
+                    {% endif %}
+                </h1>
+                <p class="mb-3 text-muted" style="max-width: 600px; font-size: 0.95rem;">
+                    Discover curated student internships matched dynamically against your skill profile with real-time bridge-the-gap recommendations.
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 pt-1">
+                    <div class="stat-pill">
+                        <i class="bi bi-briefcase text-muted"></i>
+                        <span>{{ total_jobs }} Active Openings</span>
+                    </div>
+                    {% if session.student_email and top_score > 0 %}
+                    <div class="stat-pill">
+                        <i class="bi bi-stars text-warning"></i>
+                        <span>Top Match: {{ top_score }}%</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-4 text-lg-end d-none d-lg-block">
+                {% if session.student_email %}
+                    <a href="/dashboard" class="btn btn-outline-custom rounded-pill px-4 py-2">
+                        <i class="bi bi-sliders me-1"></i> Update Skills
+                    </a>
+                {% else %}
+                    <a href="/register" class="btn btn-primary-custom rounded-pill px-4 py-2">
+                        Get Started <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Live Search & Skill Filter Bar -->
     <div class="card p-3 mb-4 shadow-sm" style="border-radius: 14px;">
         <div class="row g-2 align-items-center">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0">
                         <i class="bi bi-search text-muted"></i>
@@ -22,9 +147,9 @@
                     <input type="text" id="jobSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by role, company, or required skill...">
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <div class="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
-                    <span class="small fw-semibold text-muted me-1">Filter:</span>
+                    <span class="small fw-semibold text-muted me-1">Quick Filter:</span>
                     <button type="button" class="btn btn-sm btn-outline-custom filter-pill active" data-filter="all">All</button>
                     <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="python">Python</button>
                     <button type="button" class="btn btn-sm btn-outline-custom filter-pill" data-filter="sql">SQL</button>
@@ -43,48 +168,62 @@
                  data-title="{{ job.title|lower }}" 
                  data-company="{{ job.company|lower }}" 
                  data-skills="{{ job.required_skills|lower }}">
-                <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 16px;">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
                     <div>
-                        <!-- Company Header & Match Badge -->
+                        <!-- Header & Meta -->
                         <div class="d-flex align-items-start justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div style="width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
+                                <div class="company-avatar-box">
                                     {{ job.company[0]|upper }}
                                 </div>
                                 <div>
-                                    <h4 class="fw-bold mb-0" style="color: var(--text-heading, #0f172a); font-size: 1.15rem;">{{ job.title }}</h4>
-                                    <div class="small" style="color: var(--text-muted, #64748b);">
+                                    <h4 class="fw-bold mb-0" style="color: var(--text-heading); font-size: 1.15rem;">{{ job.title }}</h4>
+                                    <div class="small text-muted">
                                         <i class="bi bi-buildings me-1"></i> {{ job.company }}
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Match Score Pill -->
-                            {% if job.match_score is not none %}
-                                {% if job.match_score >= 70 %}
-                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle fw-semibold px-2 py-1" title="High Match">
-                                        <i class="bi bi-stars"></i> {{ job.match_score }}% Match
-                                    </span>
-                                {% elif job.match_score >= 40 %}
-                                    <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle fw-semibold px-2 py-1" title="Moderate Match">
-                                        {{ job.match_score }}% Match
-                                    </span>
-                                {% else %}
-                                    <span class="badge rounded-pill bg-secondary-subtle text-secondary border border-secondary-subtle fw-semibold px-2 py-1" title="Low Match">
-                                        {{ job.match_score }}% Match
-                                    </span>
-                                {% endif %}
-                            {% endif %}
+                            <span class="badge border bg-body-tertiary text-secondary px-2 py-1 rounded-pill" style="font-size: 0.7rem;">
+                                Internship
+                            </span>
                         </div>
 
-                        <!-- Skills -->
-                        <div class="mb-4">
-                            <div class="small fw-semibold mb-2 text-uppercase" style="color: var(--text-muted, #64748b); letter-spacing: 0.05em; font-size: 0.72rem;">Required Skills</div>
-                            <div class="d-flex flex-wrap gap-1">
-                                {% for skill in job.required_skills.split(',') %}
-                                    <span class="badge badge-skill">{{ skill.strip() }}</span>
-                                {% endfor %}
+                        <!-- Match Scoring Bar (Bridge The Gap) -->
+                        {% if job.match_score is not none %}
+                            <div class="mb-3 p-2.5 rounded-3 border bg-body-tertiary" style="border-radius: 12px;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold" style="color: var(--text-heading); font-size: 0.8rem;">
+                                        <i class="bi bi-cpu text-primary me-1"></i> Skill Compatibility
+                                    </span>
+                                    <span class="fw-bold small" style="color: {% if job.match_score >= 70 %}#10b981{% elif job.match_score >= 40 %}#f59e0b{% else %}#71717a{% endif %};">
+                                        {{ job.match_score }}% Match
+                                    </span>
+                                </div>
+                                <div class="match-progress-container">
+                                    <div class="match-progress-bar" style="width: {{ job.match_score }}%; background-color: {% if job.match_score >= 70 %}#10b981{% elif job.match_score >= 40 %}#f59e0b{% else %}#71717a{% endif %};"></div>
+                                </div>
                             </div>
+                        {% endif %}
+
+                        <!-- Bridge The Gap: Matched vs Missing Skills -->
+                        <div class="mb-4">
+                            {% if job.matched_skills %}
+                                <div class="small fw-semibold mb-1 text-muted" style="font-size: 0.72rem; letter-spacing: 0.04em;">MATCHED SKILLS</div>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    {% for sk in job.matched_skills %}
+                                        <span class="skill-badge-matched"><i class="bi bi-check2"></i> {{ sk }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if job.missing_skills %}
+                                <div class="small fw-semibold mb-1 text-muted" style="font-size: 0.72rem; letter-spacing: 0.04em;">SKILLS TO ACQUIRE</div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for sk in job.missing_skills %}
+                                        <span class="skill-badge-missing">+ {{ sk }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -103,16 +242,16 @@
         {% else %}
             <div class="col-12 text-center py-5">
                 <i class="bi bi-briefcase fs-1 text-muted mb-3 d-block"></i>
-                <h5 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Openings Available Yet</h5>
+                <h5 class="fw-bold" style="color: var(--text-heading);">No Openings Available Yet</h5>
                 <p class="text-muted">Check back later for newly announced internship opportunities.</p>
             </div>
         {% endif %}
     </div>
 
-    <!-- Empty Filter Notice -->
+    <!-- Empty Search Notice -->
     <div id="noResultsNotice" class="text-center py-5 d-none">
         <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
-        <h5 class="fw-bold" style="color: var(--text-heading, #0f172a);">No Matching Internships Found</h5>
+        <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Internships Found</h5>
         <p class="text-muted">Try clearing your search query or selecting a different skill filter.</p>
     </div>
 </div>

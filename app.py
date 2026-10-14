@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
 
-# Training & Placement Officer / Recruiter Passkey
+# T&P Cell / Recruiter Passkey
 ADMIN_PASSKEY = "admin2026"
 
 def get_db():
@@ -45,7 +45,7 @@ def init_db():
 
 init_db()
 
-# --- NAVIGATION & JOB LISTING ---
+# --- MAIN & NAVIGATION ROUTES ---
 
 @app.route('/')
 def home():
@@ -66,18 +66,30 @@ def jobs():
             student_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
 
     internships = []
+    top_score = 0
     for job in raw_internships:
         job_dict = dict(job)
-        job_req = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
+        job_req = [s.strip() for s in job['required_skills'].split(',') if s.strip()]
+        job_req_lower = [s.lower() for s in job_req]
+
         if student_skills and job_req:
-            matches = set(student_skills).intersection(set(job_req))
-            job_dict['match_score'] = round((len(matches) / len(job_req)) * 100)
+            matched_items = [orig for orig in job_req if orig.lower() in student_skills]
+            missing_items = [orig for orig in job_req if orig.lower() not in student_skills]
+            score = round((len(matched_items) / len(job_req)) * 100)
+            if score > top_score:
+                top_score = score
+            job_dict['match_score'] = score
+            job_dict['matched_skills'] = matched_items
+            job_dict['missing_skills'] = missing_items
         else:
             job_dict['match_score'] = None
+            job_dict['matched_skills'] = []
+            job_dict['missing_skills'] = job_req
+
         internships.append(job_dict)
 
     conn.close()
-    return render_template('jobs.html', internships=internships)
+    return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships))
 
 @app.route('/live_jobs')
 def live_jobs():
@@ -182,7 +194,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- RECRUITER / ADMIN PROTECTED OPENING CREATION ---
+# --- PROTECTED JOB POSTING & APPLICATIONS ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
