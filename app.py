@@ -10,7 +10,7 @@ DB_NAME = 'database.db'
 # T&P Cell / Recruiter Passkey
 ADMIN_PASSKEY = "admin2026"
 
-# Auto-sync throttling (Har 5 minute mein background check)
+# Auto-sync throttling (Har 5 minute mein check)
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300  
 
@@ -65,17 +65,13 @@ init_db()
 # --- AUTOMATIC ONLINE JOB SYNC ENGINE ---
 
 def sync_live_jobs_automatically():
-    """Online publish hone wali nayi tech openings ko automatic portal mein laata hai."""
     global LAST_SYNC_TIME
     current_time = time.time()
-    
-    # Agar pichle 5 minute mein sync ho chuka hai, toh dobara API call na karein (Speed badhane ke liye)
     if current_time - LAST_SYNC_TIME < SYNC_INTERVAL:
         return
 
     LAST_SYNC_TIME = current_time
     try:
-        # Real-time free tech openings feed
         response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=10', timeout=3.5)
         if response.status_code == 200:
             data = response.json()
@@ -87,12 +83,9 @@ def sync_live_jobs_automatically():
                 title = job.get('title', '').strip()
                 company = job.get('company_name', '').strip()
                 tags = job.get('tags', [])
-                
-                # Format required skills
                 skills = ", ".join(tags[:4]) if tags else "Python, HTML, SQL"
 
                 if title and company:
-                    # Check karein agar yeh job pehle se database mein toh nahi hai
                     cursor.execute('SELECT id FROM internships WHERE title = ? AND company = ?', (title, company))
                     if not cursor.fetchone():
                         cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
@@ -111,10 +104,8 @@ def home():
 
 @app.route('/jobs')
 def jobs():
-    # 1. Nayi online publish hui jobs ko auto-fetch aur insert karein
     sync_live_jobs_automatically()
 
-    # 2. Database se latest saari openings nikaalein
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('SELECT id, title, company, required_skills FROM internships ORDER BY id DESC')
@@ -163,6 +154,97 @@ def live_jobs():
     except Exception as e:
         print(f"Error fetching live jobs: {e}")
     return render_template('live_jobs.html', jobs=external_jobs)
+
+@app.route('/courses')
+def courses():
+    # Curated free certifications matching student skills & industry demand
+    curated_courses = [
+        {
+            "title": "CS50's Introduction to Computer Science",
+            "provider": "Harvard University / edX",
+            "tag": "C",
+            "level": "Beginner to Intermediate",
+            "duration": "10 Weeks",
+            "type": "Free / Self-Paced",
+            "url": "https://cs50.harvard.edu/x/",
+            "desc": "Foundational programming course covering C, memory, data structures, algorithms, and web basics."
+        },
+        {
+            "title": "Scientific Computing with Python",
+            "provider": "freeCodeCamp",
+            "tag": "Python",
+            "level": "Beginner",
+            "duration": "300 Hours",
+            "type": "Free Certificate",
+            "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/",
+            "desc": "Hands-on projects covering Python data structures, algorithms, OOP, and budget tracking."
+        },
+        {
+            "title": "Responsive Web Design Certification",
+            "provider": "freeCodeCamp",
+            "tag": "HTML",
+            "level": "Beginner",
+            "duration": "300 Hours",
+            "type": "Free Certificate",
+            "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design/",
+            "desc": "Learn modern HTML5 semantic markup, CSS3 Flexbox, Grid, and build real responsive projects."
+        },
+        {
+            "title": "Intro to SQL & Relational Databases",
+            "provider": "Kaggle Learn",
+            "tag": "SQL",
+            "level": "Beginner",
+            "duration": "4 Hours",
+            "type": "Free Certificate",
+            "url": "https://www.kaggle.com/learn/intro-to-sql",
+            "desc": "Master SQL queries, JOINs, GROUP BY, BigQuery integration, and data querying best practices."
+        },
+        {
+            "title": "Full Stack Open: Deep Dive Into Modern Web",
+            "provider": "University of Helsinki",
+            "tag": "React",
+            "level": "Intermediate",
+            "duration": "Self-Paced",
+            "type": "Free Course",
+            "url": "https://fullstackopen.com/en/",
+            "desc": "Industry-grade introduction to React, Redux, Node.js, REST APIs, GraphQL, and TypeScript."
+        },
+        {
+            "title": "Learn Git Branching & Version Control",
+            "provider": "Open Source Community",
+            "tag": "Git",
+            "level": "Beginner",
+            "duration": "2 Hours",
+            "type": "Interactive Guide",
+            "url": "https://learngitbranching.js.org/",
+            "desc": "Visual interactive tutorial for mastering Git commands, branches, rebasing, and collaboration."
+        }
+    ]
+    return render_template('courses.html', courses=curated_courses)
+
+@app.route('/resume')
+def resume():
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
+    student = cursor.fetchone()
+
+    cursor.execute('''
+        SELECT internships.title, internships.company, internships.required_skills
+        FROM internships
+        JOIN applications ON internships.id = applications.job_id
+        WHERE applications.student_email = ?
+        ORDER BY applications.id DESC
+    ''', (session['student_email'],))
+    applied_jobs = cursor.fetchall()
+    conn.close()
+
+    skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()] if student and student['skills'] else []
+
+    return render_template('resume.html', student=student, applied_jobs=applied_jobs, skills_list=skills_list)
 
 @app.route('/matcher', methods=['GET', 'POST'])
 def matcher():
