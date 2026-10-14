@@ -10,7 +10,7 @@ DB_NAME = 'database.db'
 # T&P Cell / Recruiter Passkey
 ADMIN_PASSKEY = "admin2026"
 
-# Auto-sync throttling (Har 5 minute mein check)
+# Auto-sync throttling (5 minute interval)
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300  
 
@@ -22,6 +22,7 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    # Students Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,6 +31,7 @@ def init_db():
             skills TEXT NOT NULL
         )
     ''')
+    # Internships Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +40,7 @@ def init_db():
             required_skills TEXT NOT NULL
         )
     ''')
+    # Applications Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,8 +48,32 @@ def init_db():
             job_id INTEGER NOT NULL
         )
     ''')
+    # Dynamic Student Resume Details Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS student_resumes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_email TEXT UNIQUE NOT NULL,
+            phone TEXT,
+            location TEXT,
+            linkedin TEXT,
+            github TEXT,
+            college TEXT,
+            degree TEXT,
+            branch TEXT,
+            cgpa TEXT,
+            grad_year TEXT,
+            project1_title TEXT,
+            project1_tech TEXT,
+            project1_desc TEXT,
+            project2_title TEXT,
+            project2_tech TEXT,
+            project2_desc TEXT,
+            certifications TEXT,
+            summary TEXT
+        )
+    ''')
 
-    # Seed core Indian Govt & Tech roles if empty
+    # Seed core Indian Tech & Govt roles if empty
     cursor.execute('SELECT COUNT(*) FROM internships')
     if cursor.fetchone()[0] == 0:
         openings = [
@@ -62,7 +89,7 @@ def init_db():
 
 init_db()
 
-# --- AUTOMATIC ONLINE JOB SYNC ENGINE ---
+# --- AUTOMATIC JOB SYNC ENGINE ---
 
 def sync_live_jobs_automatically():
     global LAST_SYNC_TIME
@@ -157,7 +184,6 @@ def live_jobs():
 
 @app.route('/courses')
 def courses():
-    # Curated free certifications matching student skills & industry demand
     curated_courses = [
         {
             "title": "CS50's Introduction to Computer Science",
@@ -200,7 +226,7 @@ def courses():
             "desc": "Master SQL queries, JOINs, GROUP BY, BigQuery integration, and data querying best practices."
         },
         {
-            "title": "Full Stack Open: Deep Dive Into Modern Web",
+            "title": "Full Stack Open: Modern Web Development",
             "provider": "University of Helsinki",
             "tag": "React",
             "level": "Intermediate",
@@ -222,6 +248,85 @@ def courses():
     ]
     return render_template('courses.html', courses=curated_courses)
 
+# --- DYNAMIC RESUME BUILDER & ATS VIEWER ---
+
+@app.route('/build_resume', methods=['GET', 'POST'])
+def build_resume():
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        phone = request.form.get('phone', '').strip()
+        location = request.form.get('location', '').strip()
+        linkedin = request.form.get('linkedin', '').strip()
+        github = request.form.get('github', '').strip()
+        college = request.form.get('college', '').strip()
+        degree = request.form.get('degree', '').strip()
+        branch = request.form.get('branch', '').strip()
+        cgpa = request.form.get('cgpa', '').strip()
+        grad_year = request.form.get('grad_year', '').strip()
+        skills = request.form.get('skills', '').strip()
+        project1_title = request.form.get('project1_title', '').strip()
+        project1_tech = request.form.get('project1_tech', '').strip()
+        project1_desc = request.form.get('project1_desc', '').strip()
+        project2_title = request.form.get('project2_title', '').strip()
+        project2_tech = request.form.get('project2_tech', '').strip()
+        project2_desc = request.form.get('project2_desc', '').strip()
+        certifications = request.form.get('certifications', '').strip()
+        summary = request.form.get('summary', '').strip()
+
+        # Update core skills in students profile
+        if skills:
+            cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (skills, session['student_email']))
+
+        # Check if resume row already exists
+        cursor.execute('SELECT id FROM student_resumes WHERE student_email = ?', (session['student_email'],))
+        row = cursor.fetchone()
+
+        if row:
+            cursor.execute('''
+                UPDATE student_resumes SET
+                    phone=?, location=?, linkedin=?, github=?,
+                    college=?, degree=?, branch=?, cgpa=?, grad_year=?,
+                    project1_title=?, project1_tech=?, project1_desc=?,
+                    project2_title=?, project2_tech=?, project2_desc=?,
+                    certifications=?, summary=?
+                WHERE student_email=?
+            ''', (phone, location, linkedin, github, college, degree, branch, cgpa, grad_year,
+                  project1_title, project1_tech, project1_desc, project2_title, project2_tech, project2_desc,
+                  certifications, summary, session['student_email']))
+        else:
+            cursor.execute('''
+                INSERT INTO student_resumes (
+                    student_email, phone, location, linkedin, github,
+                    college, degree, branch, cgpa, grad_year,
+                    project1_title, project1_tech, project1_desc,
+                    project2_title, project2_tech, project2_desc,
+                    certifications, summary
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (session['student_email'], phone, location, linkedin, github,
+                  college, degree, branch, cgpa, grad_year,
+                  project1_title, project1_tech, project1_desc,
+                  project2_title, project2_tech, project2_desc,
+                  certifications, summary))
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for('resume'))
+
+    # Load existing student and resume data to prefill form
+    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
+    student = cursor.fetchone()
+
+    cursor.execute('SELECT * FROM student_resumes WHERE student_email = ?', (session['student_email'],))
+    resume_data = cursor.fetchone()
+    conn.close()
+
+    return render_template('resume_builder.html', student=student, resume=resume_data)
+
 @app.route('/resume')
 def resume():
     if 'student_email' not in session:
@@ -232,19 +337,17 @@ def resume():
     cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
-    cursor.execute('''
-        SELECT internships.title, internships.company, internships.required_skills
-        FROM internships
-        JOIN applications ON internships.id = applications.job_id
-        WHERE applications.student_email = ?
-        ORDER BY applications.id DESC
-    ''', (session['student_email'],))
-    applied_jobs = cursor.fetchall()
+    cursor.execute('SELECT * FROM student_resumes WHERE student_email = ?', (session['student_email'],))
+    resume_data = cursor.fetchone()
     conn.close()
+
+    # Agar student ne abhi tak details nahi bhari hain, toh builder form par bhejein
+    if not resume_data:
+        return redirect(url_for('build_resume'))
 
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()] if student and student['skills'] else []
 
-    return render_template('resume.html', student=student, applied_jobs=applied_jobs, skills_list=skills_list)
+    return render_template('resume.html', student=student, resume=resume_data, skills_list=skills_list)
 
 @app.route('/matcher', methods=['GET', 'POST'])
 def matcher():
@@ -337,7 +440,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- PROTECTED ADMIN JOB POSTING & APPLICATIONS ---
+# --- RECRUITER / ADMIN ROUTES ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():

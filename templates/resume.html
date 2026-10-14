@@ -1,66 +1,77 @@
 {% extends "base.html" %}
-{% block title %}ATS Resume Preview | Skill2Career{% endblock %}
+{% block title %}{{ student.name }} | ATS Resume Preview{% endblock %}
 
 {% block content %}
 <style>
-    /* Clean ATS Minimalist Resume Styling */
-    .resume-paper {
+    /* Standard ATS Single-Page Resume Sheet */
+    .resume-sheet {
         background: #ffffff !important;
         color: #111827 !important;
-        max-width: 800px;
+        max-width: 820px;
         margin: 0 auto;
-        padding: 3rem 3.5rem;
+        padding: 3.25rem 3.5rem;
         border-radius: 12px;
         border: 1px solid #e5e7eb;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .resume-header-name {
-        font-size: 2rem;
+    .r-name {
+        font-size: 2.2rem;
         font-weight: 800;
         letter-spacing: -0.03em;
         color: #0f172a !important;
         margin-bottom: 0.25rem;
+        text-transform: uppercase;
     }
-    .resume-section-title {
+    .r-contact-bar {
+        font-size: 0.88rem;
+        color: #475569 !important;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    .r-section-heading {
         font-size: 0.95rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: #0f172a !important;
         border-bottom: 2px solid #0f172a;
-        padding-bottom: 0.35rem;
-        margin-top: 1.75rem;
+        padding-bottom: 0.25rem;
+        margin-top: 1.5rem;
         margin-bottom: 0.75rem;
     }
-    .resume-text {
-        color: #374151 !important;
+    .r-text {
         font-size: 0.9rem;
-        line-height: 1.6;
+        line-height: 1.55;
+        color: #334155 !important;
     }
-    .resume-badge {
+    .r-skill-tag {
         display: inline-block;
-        background: #f3f4f6;
-        color: #111827;
+        background: #f1f5f9;
+        color: #0f172a !important;
         font-size: 0.8rem;
         font-weight: 600;
         padding: 0.25rem 0.6rem;
         border-radius: 4px;
-        margin-right: 0.35rem;
-        margin-bottom: 0.35rem;
-        border: 1px solid #e5e7eb;
+        margin-right: 0.3rem;
+        margin-bottom: 0.4rem;
+        border: 1px solid #e2e8f0;
     }
 
-    /* Print Media CSS - Only Prints the Resume Sheet */
+    /* Print Optimization - Pure Print Sheet */
     @media print {
         body {
             background: #ffffff !important;
             padding: 0 !important;
+            margin: 0 !important;
         }
         nav, footer, .no-print {
             display: none !important;
         }
-        .resume-paper {
+        .resume-sheet {
             border: none !important;
             box-shadow: none !important;
             max-width: 100% !important;
@@ -71,99 +82,108 @@
 </style>
 
 <div class="container py-3">
-    <!-- Action Bar -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 no-print" style="max-width: 800px; margin: 0 auto;">
+    <!-- Top Action Bar (Screen Only) -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 no-print" style="max-width: 820px; margin: 0 auto;">
         <div>
-            <h4 class="fw-bold mb-0" style="color: var(--text-heading);">ATS Single-Page Resume</h4>
-            <p class="small text-muted mb-0">Standardized layout optimized for recruitment software & campus placement drives</p>
+            <h4 class="fw-bold mb-0" style="color: var(--text-heading);">Live ATS Resume</h4>
+            <p class="small text-muted mb-0">Generated dynamically from your student profile details</p>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="window.print()" class="btn btn-primary-custom">
-                <i class="bi bi-printer me-1"></i> Print / Download PDF
-            </button>
-            <a href="/dashboard" class="btn btn-outline-custom">
-                <i class="bi bi-arrow-left me-1"></i> Back
+            <a href="/build_resume" class="btn btn-outline-custom">
+                <i class="bi bi-pencil-square me-1"></i> Edit Details
             </a>
+            <button onclick="window.print()" class="btn btn-primary-custom">
+                <i class="bi bi-printer-fill me-1"></i> Print / Download PDF
+            </button>
         </div>
     </div>
 
-    <!-- Resume Document Sheet -->
-    <div class="resume-paper">
+    <!-- The Resume Sheet -->
+    <div class="resume-sheet">
         <!-- Header -->
-        <div class="text-center pb-3 border-bottom" style="border-color: #e5e7eb !important;">
-            <h1 class="resume-header-name">{{ student.name }}</h1>
-            <div class="resume-text">
-                <span><i class="bi bi-envelope"></i> {{ student.email }}</span>
-                <span class="mx-2">&bull;</span>
-                <span><i class="bi bi-geo-alt"></i> India</span>
-                <span class="mx-2">&bull;</span>
-                <span><i class="bi bi-shield-check text-success"></i> Skill2Career Verified Student</span>
+        <div class="text-center pb-3 border-bottom" style="border-color: #cbd5e1 !important;">
+            <h1 class="r-name">{{ student.name }}</h1>
+            <div class="r-contact-bar">
+                {% if resume.phone %}<span><i class="bi bi-telephone me-1"></i>{{ resume.phone }}</span> &bull;{% endif %}
+                <span><i class="bi bi-envelope me-1"></i>{{ student.email }}</span>
+                {% if resume.location %} &bull; <span><i class="bi bi-geo-alt me-1"></i>{{ resume.location }}</span>{% endif %}
+            </div>
+            {% if resume.linkedin or resume.github %}
+            <div class="r-contact-bar mt-1">
+                {% if resume.linkedin %}<span><i class="bi bi-linkedin me-1"></i>{{ resume.linkedin }}</span>{% endif %}
+                {% if resume.linkedin and resume.github %} &bull; {% endif %}
+                {% if resume.github %}<span><i class="bi bi-github me-1"></i>{{ resume.github }}</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Summary -->
+        {% if resume.summary %}
+        <div>
+            <div class="r-section-heading">Professional Objective</div>
+            <p class="r-text mb-0">{{ resume.summary }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Education -->
+        <div>
+            <div class="r-section-heading">Education</div>
+            <div class="d-flex justify-content-between align-items-baseline">
+                <div>
+                    <strong style="color: #0f172a; font-size: 0.95rem;">{{ resume.degree }} - {{ resume.branch }}</strong>
+                    <div class="r-text">{{ resume.college }}</div>
+                </div>
+                <div class="text-end">
+                    <div class="r-text fw-bold">{{ resume.grad_year }}</div>
+                    {% if resume.cgpa %}<div class="r-text small text-muted">CGPA / Score: {{ resume.cgpa }}</div>{% endif %}
+                </div>
             </div>
         </div>
 
         <!-- Technical Skills -->
         <div>
-            <div class="resume-section-title">Technical Competencies</div>
+            <div class="r-section-heading">Technical Skills</div>
             <div class="pt-1">
-                {% if skills_list %}
-                    {% for sk in skills_list %}
-                        <span class="resume-badge">{{ sk }}</span>
-                    {% endfor %}
-                {% else %}
-                    <span class="resume-text text-muted">No skills listed yet. Update on dashboard.</span>
-                {% endif %}
+                {% for sk in skills_list %}
+                    <span class="r-skill-tag">{{ sk }}</span>
+                {% endfor %}
             </div>
         </div>
 
-        <!-- Education -->
+        <!-- Key Projects -->
         <div>
-            <div class="resume-section-title">Education</div>
-            <div class="d-flex justify-content-between align-items-start pt-1">
-                <div>
-                    <strong style="color: #0f172a;">Bachelor of Technology (B.Tech) - Computer Science</strong>
-                    <div class="resume-text">Madhav Institute of Technology & Science (MITS), Gwalior</div>
-                </div>
-                <div class="resume-text fw-semibold text-end">2026 - Present</div>
-            </div>
-        </div>
+            <div class="r-section-heading">Projects & Software Implementations</div>
 
-        <!-- Practical Projects / Experience -->
-        <div>
-            <div class="resume-section-title">Technical Projects & Implementations</div>
-            
-            <div class="mb-3 pt-1">
+            <!-- Project 1 -->
+            {% if resume.project1_title %}
+            <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-baseline">
-                    <strong style="color: #0f172a;">Skill2Career &bull; Student Skill & Internship Portal</strong>
-                    <span class="resume-text small fw-semibold">Live Web App</span>
+                    <strong style="color: #0f172a; font-size: 0.95rem;">{{ resume.project1_title }}</strong>
+                    <span class="r-text small fw-semibold" style="color: #2563eb;">{{ resume.project1_tech }}</span>
                 </div>
-                <p class="resume-text mb-1">
-                    Architected and deployed a production-ready student portal connecting students with technical internships based on dynamic skill-matching algorithms.
-                </p>
-                <ul class="resume-text ps-3 mb-0">
-                    <li>Engineered automated percentage match scoring based on required tech tags (Python, SQLite).</li>
-                    <li>Integrated client-side instant search, category filtration, and responsive dark/light mode toggling.</li>
-                    <li>Synchronized Firebase Authentication with Flask sessions for persistent student profiles.</li>
-                </ul>
+                <p class="r-text mb-0 mt-1" style="white-space: pre-line;">{{ resume.project1_desc }}</p>
             </div>
-        </div>
+            {% endif %}
 
-        <!-- Submitted Applications / Drive Activity -->
-        <div>
-            <div class="resume-section-title">Campus Drive Applications & Active Roles</div>
-            {% if applied_jobs %}
-                <ul class="resume-text ps-3 mb-0">
-                    {% for job in applied_jobs %}
-                        <li>
-                            <strong>{{ job.title }}</strong> at <em>{{ job.company }}</em> &mdash; Applied with technical stack: {{ job.required_skills }}.
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="resume-text text-muted mb-0">
-                    Active applicant in campus recruitment drives and online tech openings.
-                </p>
+            <!-- Project 2 -->
+            {% if resume.project2_title %}
+            <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <strong style="color: #0f172a; font-size: 0.95rem;">{{ resume.project2_title }}</strong>
+                    <span class="r-text small fw-semibold" style="color: #2563eb;">{{ resume.project2_tech }}</span>
+                </div>
+                <p class="r-text mb-0 mt-1" style="white-space: pre-line;">{{ resume.project2_desc }}</p>
+            </div>
             {% endif %}
         </div>
+
+        <!-- Certifications & Achievements -->
+        {% if resume.certifications %}
+        <div>
+            <div class="r-section-heading">Certifications & Accreditations</div>
+            <p class="r-text mb-0">{{ resume.certifications }}</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Resume Builder Form | Skill2Career{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    <!-- Title Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill small">
+                    <i class="bi bi-magic me-1"></i> ATS Resume Generator
+                </span>
+                <h2 class="fw-bold mb-0" style="color: var(--text-heading);">Build Your Professional Resume</h2>
+            </div>
+            <p class="mb-0 text-muted">Fill in your academic and project details. We will format it into an ATS-compliant, single-page resume.</p>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-custom rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card p-4 p-md-5" style="border-radius: 18px;">
+        <form method="POST" action="/build_resume">
+
+            <!-- Section 1: Contact Information -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-person-lines-fill text-primary me-2"></i> 1. Contact & Social Profiles
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Phone Number</label>
+                        <input type="text" name="phone" class="form-control" placeholder="+91 98765 43210" value="{{ resume.phone if resume else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">City, State</label>
+                        <input type="text" name="location" class="form-control" placeholder="Gwalior, Madhya Pradesh" value="{{ resume.location if resume else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">LinkedIn Profile URL</label>
+                        <input type="text" name="linkedin" class="form-control" placeholder="linkedin.com/in/username" value="{{ resume.linkedin if resume else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">GitHub / Portfolio URL</label>
+                        <input type="text" name="github" class="form-control" placeholder="github.com/username" value="{{ resume.github if resume else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border-color);">
+
+            <!-- Section 2: Education -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-mortarboard-fill text-primary me-2"></i> 2. Academic Background
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label small fw-semibold">College / University Name</label>
+                        <input type="text" name="college" class="form-control" placeholder="Madhav Institute of Technology & Science (MITS), Gwalior" value="{{ resume.college if resume else 'Madhav Institute of Technology & Science, Gwalior' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Degree</label>
+                        <input type="text" name="degree" class="form-control" placeholder="B.Tech" value="{{ resume.degree if resume else 'B.Tech' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Branch / Department</label>
+                        <input type="text" name="branch" class="form-control" placeholder="Computer Science and Engineering" value="{{ resume.branch if resume else 'Computer Science and Engineering' }}" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">CGPA / %</label>
+                        <input type="text" name="cgpa" class="form-control" placeholder="8.5 CGPA" value="{{ resume.cgpa if resume else '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">Grad Year</label>
+                        <input type="text" name="grad_year" class="form-control" placeholder="2026 - Present" value="{{ resume.grad_year if resume else '2026 - Present' }}">
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border-color);">
+
+            <!-- Section 3: Technical Skills -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-cpu-fill text-primary me-2"></i> 3. Technical Skills
+                </h5>
+                <div>
+                    <label class="form-label small fw-semibold">Programming Languages & Tools (comma-separated)</label>
+                    <input type="text" name="skills" class="form-control" placeholder="Python, C, HTML5, CSS3, Flask, SQLite, Git, VS Code" value="{{ student.skills if student else '' }}" required>
+                    <div class="form-text small">These skills also power your live internship match score!</div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border-color);">
+
+            <!-- Section 4: Practical Projects -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-code-square text-primary me-2"></i> 4. Key Projects
+                </h5>
+
+                <!-- Project 1 -->
+                <div class="p-3 border rounded-3 mb-3 bg-body-tertiary">
+                    <h6 class="fw-bold mb-2">Project #1 (Primary)</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-7">
+                            <input type="text" name="project1_title" class="form-control" placeholder="Project Name (e.g. Skill2Career - Student Internship Portal)" value="{{ resume.project1_title if resume else 'Skill2Career - Student Skill & Internship Portal' }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="project1_tech" class="form-control" placeholder="Tech Stack (e.g. Python, Flask, SQLite, Bootstrap)" value="{{ resume.project1_tech if resume else 'Python, Flask, SQLite, Bootstrap 5, Firebase' }}" required>
+                        </div>
+                    </div>
+                    <textarea name="project1_desc" rows="3" class="form-control" placeholder="Bullet points describing what you built and key features..." required>{{ resume.project1_desc if resume else 'Developed a web portal enabling students to match technical skills dynamically with campus and online internships. Implemented Firebase authentication session tracking and real-time job filtering.' }}</textarea>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="p-3 border rounded-3 bg-body-tertiary">
+                    <h6 class="fw-bold mb-2">Project #2 (Secondary / Upcoming)</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-7">
+                            <input type="text" name="project2_title" class="form-control" placeholder="Project Name (e.g. Smart Attendance Analyzer)" value="{{ resume.project2_title if resume else '' }}">
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="project2_tech" class="form-control" placeholder="Tech Stack (e.g. Python, Flask, HTML)" value="{{ resume.project2_tech if resume else '' }}">
+                        </div>
+                    </div>
+                    <textarea name="project2_desc" rows="2" class="form-control" placeholder="Brief summary of functionality...">{{ resume.project2_desc if resume else '' }}</textarea>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border-color);">
+
+            <!-- Section 5: Certifications & Objective -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-award-fill text-primary me-2"></i> 5. Certifications & Summary
+                </h5>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Certifications & Achievements (one per line or comma-separated)</label>
+                    <input type="text" name="certifications" class="form-control" placeholder="e.g. DECODE Case Study Competition, CS50 Introduction to Computer Science" value="{{ resume.certifications if resume else 'DECODE Case Competition Participant, FreeCodeCamp Responsive Web Design' }}">
+                </div>
+                <div>
+                    <label class="form-label small fw-semibold">Career Objective / Professional Summary</label>
+                    <textarea name="summary" rows="2" class="form-control" placeholder="e.g. Computer Science student passionate about web application engineering and building reliable software systems.">{{ resume.summary if resume else 'Enthusiastic Computer Science undergraduate with hands-on experience in full-stack web development and backend programming. Seeking technical internship opportunities to contribute and learn in production environments.' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-end pt-2">
+                <button type="submit" class="btn btn-primary-custom px-4 py-2 fw-semibold">
+                    <i class="bi bi-file-earmark-check me-1"></i> Save & Generate ATS Resume
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
