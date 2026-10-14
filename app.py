@@ -40,6 +40,25 @@ def init_db():
             job_id INTEGER NOT NULL
         )
     ''')
+
+    # Seed Database with Real Indian Openings & India Post Tech Roles
+    cursor.execute('SELECT COUNT(*) FROM internships')
+    count = cursor.fetchone()[0]
+    if count <= 1:
+        # Clear single placeholder job if exists to ensure clean list
+        cursor.execute('DELETE FROM internships')
+        openings = [
+            ("Web Developer Intern", "Google India", "Python, SQL, HTML"),
+            ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML"),
+            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C"),
+            ("Frontend Development Trainee", "Zomato India", "HTML, React, JavaScript"),
+            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL"),
+            ("Backend Systems Apprentice", "Flipkart", "Python, SQL, React"),
+            ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C"),
+            ("Cloud & DevOps Apprentice", "Wipro Technologies", "Linux, Python, SQL")
+        ]
+        cursor.executemany('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', openings)
+
     conn.commit()
     conn.close()
 
@@ -70,7 +89,6 @@ def jobs():
     for job in raw_internships:
         job_dict = dict(job)
         job_req = [s.strip() for s in job['required_skills'].split(',') if s.strip()]
-        job_req_lower = [s.lower() for s in job_req]
 
         if student_skills and job_req:
             matched_items = [orig for orig in job_req if orig.lower() in student_skills]
@@ -194,7 +212,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
-# --- PROTECTED JOB POSTING & APPLICATIONS ---
+# --- PROTECTED RECRUITER / ADMIN ROUTES ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
@@ -206,7 +224,7 @@ def add_job():
         required_skills = request.form.get('required_skills', '').strip()
 
         if pin != ADMIN_PASSKEY:
-            error = "Invalid Coordinator Passkey. Only authorized T&P officers can post listings."
+            error = "Invalid Coordinator Passkey. Only authorized officers can post listings."
             return render_template('add_job.html', error=error)
 
         conn = get_db()
