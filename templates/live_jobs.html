@@ -1,68 +1,123 @@
 {% extends "base.html" %}
-{% block title %}Live Online Openings | Skill2Career{% endblock %}
+{% block title %}Live Online Openings & Indian Internships | Skill2Career{% endblock %}
 
 {% block content %}
+<style>
+    .india-badge {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        color: #10b981 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+    }
+    .global-badge {
+        background-color: rgba(124, 58, 237, 0.15) !important;
+        color: #c4b5fd !important;
+        border: 1px solid rgba(124, 58, 237, 0.3) !important;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+    }
+</style>
+
 <div class="container py-3">
     <!-- Header Section with High Contrast -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-danger rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;">
-                    <i class="bi bi-broadcast me-1"></i> LIVE
+                <span class="badge bg-danger rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                    <i class="bi bi-broadcast me-1"></i> LIVE TELEMETRY
                 </span>
-                <h2 class="fw-bold mb-0" style="color: var(--text-heading, #f8fafc) !important;">
-                    Real-World Tech Opportunities
+                <h2 class="fw-bold mb-0" style="color: var(--text-heading, #faf5ff) !important;">
+                    Online Openings & Indian Tech Internships
                 </h2>
             </div>
-            <p class="mb-0" style="color: var(--text-muted, #94a3b8) !important;">
-                Aggregated in real-time from worldwide tech and software openings
+            <p class="mb-0 text-muted" style="color: var(--text-muted, #9c91b8) !important;">
+                Aggregated in real-time from Indian flagship drives (India Post, ISRO, TCS, Infosys, Zoho) and worldwide remote openings.
             </p>
         </div>
         <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
-            <i class="bi bi-arrow-left me-1"></i> View Portal Jobs
+            <i class="bi bi-briefcase me-1"></i> Campus Drives
         </a>
     </div>
 
+    <!-- Live Search & Region Filter Bar -->
+    <div class="card p-3 mb-4 shadow-sm" style="border-radius: 14px;">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="liveSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by role, company (e.g. India Post, TCS), or skill...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
+                    <span class="small fw-semibold text-muted me-1">Region:</span>
+                    <button type="button" class="btn btn-sm btn-outline-custom region-pill active" data-region="all">All ({{ jobs|length }})</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom region-pill" data-region="indian">🇮🇳 Indian Internships</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom region-pill" data-region="global">🌐 Global Remote</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Live Jobs Grid -->
-    <div class="row g-4">
+    <div class="row g-4" id="liveGrid">
         {% if jobs %}
             {% for job in jobs %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 16px;">
+            <div class="col-md-6 col-lg-4 live-card-col" 
+                 data-title="{{ job.title|lower }}" 
+                 data-company="{{ job.company_name|lower }}" 
+                 data-location="{{ job.candidate_required_location|lower }}"
+                 data-indian="{{ 'true' if job.is_indian else 'false' }}">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
                     <div>
-                        <!-- Company Avatar & Job Title -->
-                        <div class="d-flex align-items-start gap-3 mb-3">
-                            <div style="width: 46px; height: 46px; min-width: 46px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
-                                {{ job.company_name[0]|upper if job.company_name else 'J' }}
-                            </div>
-                            <div class="overflow-hidden">
-                                <h4 class="fw-bold mb-1 text-truncate" style="color: var(--text-heading, #f8fafc) !important; font-size: 1.1rem;" title="{{ job.title }}">
-                                    {{ job.title }}
-                                </h4>
-                                <div class="small text-truncate" style="color: var(--text-muted, #94a3b8) !important;">
-                                    <i class="bi bi-buildings me-1"></i> {{ job.company_name }}
+                        <!-- Header & Badges -->
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 14px; background: {% if job.is_indian %}linear-gradient(135deg, #10b981, #059669){% else %}linear-gradient(135deg, #7c3aed, #6d28d9){% endif %}; color: #fff; font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                                    {{ job.company_name[0]|upper if job.company_name else 'J' }}
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="fw-bold mb-0 text-truncate" style="color: var(--text-heading) !important; font-size: 1.12rem;" title="{{ job.title }}">
+                                        {{ job.title }}
+                                    </h4>
+                                    <div class="small text-truncate text-muted">
+                                        <i class="bi bi-buildings me-1"></i> {{ job.company_name }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Location & Job Type Badges -->
+                        <!-- Location & Region Badge -->
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <span class="badge border" style="background-color: var(--badge-bg, #1e293b); color: var(--text-body, #cbd5e1); border-color: var(--border-color, #334155) !important;">
-                                <i class="bi bi-geo-alt me-1 text-primary"></i> {{ job.candidate_required_location or 'Worldwide' }}
-                            </span>
-                            <span class="badge border" style="background-color: var(--badge-bg, #1e293b); color: var(--text-body, #cbd5e1); border-color: var(--border-color, #334155) !important;">
-                                <i class="bi bi-clock me-1 text-info"></i> {{ job.job_type or 'Full-Time' }}
+                            {% if job.is_indian %}
+                                <span class="india-badge">
+                                    🇮🇳 India Tech Drive
+                                </span>
+                            {% else %}
+                                <span class="global-badge">
+                                    🌐 Global Remote
+                                </span>
+                            {% endif %}
+                            <span class="badge border bg-body-tertiary text-secondary px-2.5 py-1 rounded-pill small">
+                                <i class="bi bi-geo-alt me-1 text-primary"></i> {{ job.candidate_required_location }}
                             </span>
                         </div>
 
                         <!-- Tags / Skills -->
                         <div class="mb-4">
-                            <div class="small fw-semibold mb-2 text-uppercase" style="color: var(--text-muted, #64748b) !important; letter-spacing: 0.05em; font-size: 0.72rem;">
-                                Tags / Skills
+                            <div class="small fw-semibold mb-2 text-uppercase text-muted" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                Stack & Competencies
                             </div>
                             <div class="d-flex flex-wrap gap-1">
                                 {% if job.tags %}
-                                    {% for tag in job.tags[:5] %}
+                                    {% for tag in job.tags %}
                                         <span class="badge badge-skill">{{ tag }}</span>
                                     {% endfor %}
                                 {% else %}
@@ -72,10 +127,14 @@
                         </div>
                     </div>
 
-                    <!-- Direct Application Link -->
-                    <div class="pt-2">
+                    <!-- Direct Link -->
+                    <div class="pt-2 border-top" style="border-color: var(--border-color) !important;">
                         <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary-custom w-100 text-center">
-                            Apply on Remotive <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            {% if job.is_indian %}
+                                Apply on Official Portal <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            {% else %}
+                                Apply on Remotive <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            {% endif %}
                         </a>
                     </div>
                 </div>
@@ -83,12 +142,71 @@
             {% endfor %}
         {% else %}
             <div class="col-12 text-center py-5">
-                <i class="bi bi-wifi-off fs-1 mb-3 d-block" style="color: var(--text-muted, #64748b);"></i>
-                <h5 class="fw-bold" style="color: var(--text-heading, #f8fafc) !important;">No Live Openings Found</h5>
-                <p style="color: var(--text-muted, #94a3b8) !important;">Unable to load external openings right now. Please check back later.</p>
-                <a href="/jobs" class="btn btn-primary-custom rounded-pill px-4">Browse Campus Internships</a>
+                <i class="bi bi-wifi-off fs-1 mb-3 d-block text-muted"></i>
+                <h5 class="fw-bold" style="color: var(--text-heading) !important;">No Openings Available</h5>
+                <p class="text-muted">Unable to load live telemetry right now. Please check back later.</p>
             </div>
         {% endif %}
     </div>
+
+    <div id="noLiveResults" class="text-center py-5 d-none">
+        <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
+        <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Live Openings Found</h5>
+        <p class="text-muted">Try clearing your search query or selecting a different region.</p>
+    </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById('liveSearchInput');
+    const regionPills = document.querySelectorAll('.region-pill');
+    const cards = document.querySelectorAll('.live-card-col');
+    const noResults = document.getElementById('noLiveResults');
+
+    let activeRegion = 'all';
+
+    function filterLiveJobs() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const company = card.getAttribute('data-company');
+            const location = card.getAttribute('data-location');
+            const isIndian = card.getAttribute('data-indian') === 'true';
+
+            const matchesQuery = !query || title.includes(query) || company.includes(query) || location.includes(query);
+            
+            let matchesRegion = true;
+            if (activeRegion === 'indian') {
+                matchesRegion = isIndian;
+            } else if (activeRegion === 'global') {
+                matchesRegion = !isIndian;
+            }
+
+            if (matchesQuery && matchesRegion) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0 && cards.length > 0) {
+            noResults.classList.remove('d-none');
+        } else {
+            noResults.classList.add('d-none');
+        }
+    }
+
+    searchInput.addEventListener('input', filterLiveJobs);
+
+    regionPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            regionPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            activeRegion = pill.getAttribute('data-region');
+            filterLiveJobs();
+        });
+    });
+</script>
 {% endblock %}

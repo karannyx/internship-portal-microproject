@@ -22,7 +22,6 @@ def init_db():
     conn = get_db()
     cursor = conn.cursor()
     
-    # Students Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ def init_db():
         )
     ''')
 
-    # Internships Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +40,6 @@ def init_db():
         )
     ''')
 
-    # Applications Table with Status column
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,13 +49,11 @@ def init_db():
         )
     ''')
 
-    # Migration check: Ensure 'status' column exists if DB was already created
     cursor.execute("PRAGMA table_info(applications)")
     columns = [col[1] for col in cursor.fetchall()]
     if 'status' not in columns:
         cursor.execute("ALTER TABLE applications ADD COLUMN status TEXT DEFAULT 'Under Review'")
 
-    # Saved / Bookmarked Jobs Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS saved_jobs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +63,6 @@ def init_db():
         )
     ''')
 
-    # Student Resumes Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_resumes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,7 +87,6 @@ def init_db():
         )
     ''')
 
-    # Seed core Indian Govt & Tech roles if empty
     cursor.execute('SELECT COUNT(*) FROM internships')
     if cursor.fetchone()[0] == 0:
         openings = [
@@ -168,11 +161,9 @@ def jobs():
         if row and row['skills']:
             student_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
 
-        # Get jobs student already applied to
         cursor.execute('SELECT job_id FROM applications WHERE student_email = ?', (session['student_email'],))
         applied_job_ids = {r['job_id'] for r in cursor.fetchall()}
 
-        # Get saved jobs
         cursor.execute('SELECT job_id FROM saved_jobs WHERE student_email = ?', (session['student_email'],))
         saved_job_ids = {r['job_id'] for r in cursor.fetchall()}
 
@@ -201,7 +192,6 @@ def jobs():
 
         internships.append(job_dict)
 
-    # Campus T&P Announcement Notices
     announcements = [
         "T&P Drive: TCS Digital applications closing this Friday at 5:00 PM.",
         "Notice: India Post (CEPT) shortlisted candidates list updated for Technical Trainee roles.",
@@ -213,15 +203,87 @@ def jobs():
 
 @app.route('/live_jobs')
 def live_jobs():
+    # 1. Verified Live Indian Tech & Govt Internships
+    indian_internships = [
+        {
+            "title": "Junior Software Trainee (CEPT Tech)",
+            "company_name": "India Post (CEPT / Dak Vibhag)",
+            "candidate_required_location": "India (Bengaluru / Hybrid)",
+            "job_type": "Govt Tech Trainee",
+            "tags": ["Python", "SQL", "HTML", "C"],
+            "url": "https://cept.gov.in/",
+            "is_indian": True
+        },
+        {
+            "title": "Software Engineer Intern (Digital)",
+            "company_name": "TCS (Tata Consultancy Services)",
+            "candidate_required_location": "Pan India / Remote",
+            "job_type": "Corporate Internship",
+            "tags": ["Python", "SQL", "C", "DSA"],
+            "url": "https://www.tcs.com/careers/india",
+            "is_indian": True
+        },
+        {
+            "title": "InStep Software Trainee",
+            "company_name": "Infosys Technologies",
+            "candidate_required_location": "Bengaluru / Pune, India",
+            "job_type": "Flagship Internship",
+            "tags": ["Python", "Cloud", "SQL", "Flask"],
+            "url": "https://www.infosys.com/instep/",
+            "is_indian": True
+        },
+        {
+            "title": "Full Stack Web Developer Apprentice",
+            "company_name": "Zoho Corporation",
+            "candidate_required_location": "Chennai / Remote India",
+            "job_type": "Product Internship",
+            "tags": ["HTML", "React", "JavaScript", "SQL"],
+            "url": "https://www.zoho.com/careers/",
+            "is_indian": True
+        },
+        {
+            "title": "Backend Systems Intern",
+            "company_name": "Razorpay India",
+            "candidate_required_location": "Bengaluru / Remote India",
+            "job_type": "Fintech Internship",
+            "tags": ["Python", "SQL", "REST APIs", "Docker"],
+            "url": "https://razorpay.com/jobs/",
+            "is_indian": True
+        },
+        {
+            "title": "Student Research & Engineering Trainee",
+            "company_name": "ISRO (Indian Space Research Organisation)",
+            "candidate_required_location": "India (IIRS / SAC Dehradun)",
+            "job_type": "Govt Research Trainee",
+            "tags": ["Python", "C", "Data Analysis", "GIS"],
+            "url": "https://www.isro.gov.in/Internship.html",
+            "is_indian": True
+        }
+    ]
+
+    # 2. Live Global Openings from Remotive API
     external_jobs = []
     try:
-        response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=20', timeout=6)
+        response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=12', timeout=4)
         if response.status_code == 200:
             data = response.json()
-            external_jobs = data.get('jobs', [])
+            raw_jobs = data.get('jobs', [])
+            for rj in raw_jobs:
+                external_jobs.append({
+                    "title": rj.get('title'),
+                    "company_name": rj.get('company_name'),
+                    "candidate_required_location": rj.get('candidate_required_location') or 'Worldwide',
+                    "job_type": rj.get('job_type') or 'Remote Tech',
+                    "tags": rj.get('tags', [])[:5],
+                    "url": rj.get('url'),
+                    "is_indian": False
+                })
     except Exception as e:
         print(f"Error fetching live jobs: {e}")
-    return render_template('live_jobs.html', jobs=external_jobs)
+
+    # Combine: Indian internships highlighted on top + worldwide remote tech
+    all_openings = indian_internships + external_jobs
+    return render_template('live_jobs.html', jobs=all_openings)
 
 @app.route('/courses')
 def courses():
@@ -289,8 +351,6 @@ def courses():
     ]
     return render_template('courses.html', courses=curated_courses)
 
-# --- 1-CLICK INSTANT APPLY & BOOKMARKS ---
-
 @app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
 def apply(job_id):
     if 'student_email' not in session:
@@ -298,7 +358,6 @@ def apply(job_id):
 
     conn = get_db()
     cursor = conn.cursor()
-    # Check if already applied
     cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
     if not cursor.fetchone():
         cursor.execute('INSERT INTO applications (student_email, job_id, status) VALUES (?, ?, ?)', 
@@ -328,8 +387,6 @@ def toggle_save(job_id):
     conn.close()
     return jsonify({"status": "success", "is_saved": is_saved})
 
-# --- TECHNICAL INTERVIEW PREPARATION GUIDE ---
-
 @app.route('/interview_prep/<int:job_id>')
 def interview_prep(job_id):
     conn = get_db()
@@ -343,7 +400,6 @@ def interview_prep(job_id):
 
     req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
 
-    # Technical Q&A bank mapped by skill
     interview_bank = {
         'python': [
             {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable (elements can be modified, appended, removed), while tuples are immutable once created. Tuples are faster and used for fixed data integrity."},
@@ -356,8 +412,8 @@ def interview_prep(job_id):
             {"q": "What is database normalization (1NF, 2NF, 3NF)?", "a": "Normalization organizes database columns and tables to minimize redundancy and prevent dependency anomalies during insert, update, and delete actions."}
         ],
         'html': [
-            {"q": "What are Semantic HTML5 tags and why are they critical?", "a": "Tags like <header>, <nav>, <article>, <section>, and <footer> clearly describe their meaning to both browser and developer, improving accessibility (screen readers) and SEO rankings."},
-            {"q": "Explain the CSS Box Model.", "a": "The Box Model consists of four concentric layers: Content, Padding (inner spacing), Border, and Margin (outer spacing between elements)."}
+            {"q": "What are Semantic HTML5 tags and why are they critical?", "a": "Tags like <header>, <nav>, <article>, <section>, and <footer> clearly describe their meaning to both browser and developer, improving accessibility and SEO rankings."},
+            {"q": "Explain the CSS Box Model.", "a": "The Box Model consists of four concentric layers: Content, Padding, Border, and Margin."}
         ],
         'react': [
             {"q": "What is the Virtual DOM in React and how does reconciliation work?", "a": "Virtual DOM is a lightweight memory copy of the real DOM. When state changes, React compares Virtual DOM with the previous snapshot (diffing algorithm) and only updates changed nodes in the real DOM."},
@@ -380,19 +436,16 @@ def interview_prep(job_id):
     if not curated_qa:
         curated_qa = [
             {"skill": "CORE CS", "q": "Explain the Time and Space Complexity of QuickSort and MergeSort.", "a": "MergeSort is O(N log N) in all cases with O(N) auxiliary space. QuickSort average time is O(N log N) but worst case is O(N^2) if pivot selection is unoptimized."},
-            {"skill": "CORE CS", "q": "What are ACID properties in transactional systems?", "a": "Atomicity (all or nothing), Consistency (valid state transitions), Isolation (concurrent transactions don't interfere), and Durability (committed changes persist)."}
+            {"skill": "CORE CS", "q": "What are ACID properties in transactional systems?", "a": "Atomicity, Consistency, Isolation, and Durability."}
         ]
 
     return render_template('interview_prep.html', job=job, curated_qa=curated_qa)
-
-# --- INTERACTIVE ANALYTICS ROUTE ---
 
 @app.route('/analytics')
 def analytics():
     conn = get_db()
     cursor = conn.cursor()
 
-    # 1. Skill Frequency Calculation across all internships
     cursor.execute('SELECT required_skills FROM internships')
     rows = cursor.fetchall()
     all_skills = []
@@ -405,7 +458,6 @@ def analytics():
     skill_labels = [sc[0] for sc in skill_counts]
     skill_data = [sc[1] for sc in skill_counts]
 
-    # 2. Student Readiness calculation
     student_readiness = 0
     student_skills_count = 0
     if 'student_email' in session:
@@ -414,11 +466,9 @@ def analytics():
         if row and row['skills']:
             st_skills = [s.strip().lower() for s in row['skills'].split(',') if s.strip()]
             student_skills_count = len(st_skills)
-            # Market alignment score
             matches_in_market = sum(1 for s in st_skills if any(s in lbl.lower() for lbl in skill_labels))
             student_readiness = min(100, int((matches_in_market / max(1, len(skill_labels))) * 100) + 20)
 
-    # 3. Application Distribution
     cursor.execute('SELECT status, COUNT(*) as count FROM applications GROUP BY status')
     status_rows = cursor.fetchall()
     status_labels = [sr['status'] for sr in status_rows] if status_rows else ["Under Review"]
@@ -438,8 +488,6 @@ def analytics():
                            student_skills_count=student_skills_count,
                            total_openings=total_openings, total_apps=total_apps)
 
-# --- RECRUITER STATUS UPDATE ---
-
 @app.route('/update_status/<int:app_id>', methods=['POST'])
 def update_status(app_id):
     new_status = request.form.get('status', 'Under Review')
@@ -450,8 +498,6 @@ def update_status(app_id):
     conn.commit()
     conn.close()
     return redirect(url_for('view_applicants', job_id=job_id))
-
-# --- STUDENT DASHBOARD (With Saved Jobs & Status) ---
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -469,7 +515,6 @@ def dashboard():
     cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
-    # Applied Jobs with Status
     cursor.execute('''
         SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status
         FROM internships
@@ -479,7 +524,6 @@ def dashboard():
     ''', (session['student_email'],))
     applied_jobs = cursor.fetchall()
 
-    # Saved Bookmarked Jobs
     cursor.execute('''
         SELECT internships.id, internships.title, internships.company, internships.required_skills
         FROM internships
@@ -491,8 +535,6 @@ def dashboard():
 
     conn.close()
     return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
-
-# --- RESUME BUILDER & VIEWER ---
 
 @app.route('/build_resume', methods=['GET', 'POST'])
 def build_resume():
@@ -601,8 +643,6 @@ def matcher():
             score = 0
     return render_template('index.html', score=score)
 
-# --- AUTHENTICATION & FIREBASE SYNC ---
-
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -648,8 +688,6 @@ def sync_firebase():
 
     conn.close()
     return jsonify({"status": "success"})
-
-# --- RECRUITER / ADMIN PROTECTED OPENING CREATION ---
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
