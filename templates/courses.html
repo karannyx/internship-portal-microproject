@@ -1,19 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Free Verified Courses | Skill2Career{% endblock %}
+{% block title %}Curated YouTube Lectures & Certifications | Skill2Career{% endblock %}
 
 {% block content %}
+<style>
+    .yt-badge {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #ef4444 !important;
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .cert-badge {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        color: #10b981 !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .lang-pill {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-heading);
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.55rem;
+        border-radius: 20px;
+    }
+    .btn-youtube-watch {
+        background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-youtube-watch:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+        color: #ffffff !important;
+    }
+</style>
+
 <div class="container py-3">
     <!-- Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold small">
-                    <i class="bi bi-patch-check-fill me-1"></i> 100% Free Resources
+                <span class="badge bg-danger rounded-pill px-2.5 py-1 fw-bold small">
+                    <i class="bi bi-youtube me-1"></i> YouTube Lectures & Certifications
                 </span>
-                <h2 class="fw-bold mb-0" style="color: var(--text-heading);">Upskill & Bridge The Gap</h2>
+                <h2 class="fw-bold mb-0" style="color: var(--text-heading);">Skill Learning Hub</h2>
             </div>
             <p class="mb-0 text-muted">
-                Curated foundational and advanced technical certifications to increase your match percentage
+                Free high-yield YouTube masterclasses, playlists, and accredited certifications to bridge your required internship skills.
             </p>
         </div>
         <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
@@ -21,46 +78,157 @@
         </a>
     </div>
 
+    <!-- Filter Bar -->
+    <div class="card p-3 mb-4 shadow-sm" style="border-radius: 14px;">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="courseSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by topic (Python, C, SQL), creator, or channel...">
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
+                    <span class="small fw-semibold text-muted me-1">Type:</span>
+                    <button type="button" class="btn btn-sm btn-outline-custom course-filter active" data-type="all">All ({{ courses|length }})</button>
+                    <button type="button" class="btn btn-sm btn-outline-custom course-filter" data-type="youtube">
+                        <i class="bi bi-youtube text-danger me-1"></i> YouTube Lectures
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-custom course-filter" data-type="cert">
+                        <i class="bi bi-award text-success me-1"></i> Certifications
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Courses Grid -->
-    <div class="row g-4">
+    <div class="row g-4" id="coursesGrid">
         {% for course in courses %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 16px;">
+        <div class="col-md-6 col-lg-4 course-card-col" 
+             data-title="{{ course.title|lower }}" 
+             data-provider="{{ course.provider|lower }}" 
+             data-tag="{{ course.tag|lower }}"
+             data-platform="{{ 'youtube' if 'YouTube' in course.type else 'cert' }}">
+            <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
                 <div>
-                    <!-- Provider & Tag -->
+                    <!-- Badge and Language -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge border" style="background: var(--badge-bg); color: var(--badge-text);">
-                            {{ course.tag }}
-                        </span>
-                        <span class="badge bg-body-tertiary text-secondary border px-2 py-1 rounded-pill small">
-                            {{ course.type }}
-                        </span>
+                        {% if 'YouTube' in course.type %}
+                            <span class="yt-badge">
+                                <i class="bi bi-youtube"></i> {{ course.type }}
+                            </span>
+                        {% else %}
+                            <span class="cert-badge">
+                                <i class="bi bi-patch-check-fill"></i> {{ course.type }}
+                            </span>
+                        {% endif %}
+
+                        <div class="d-flex gap-1 align-items-center">
+                            <span class="lang-pill">{{ course.language }}</span>
+                            <span class="badge border" style="background: var(--badge-bg); color: var(--badge-text);">
+                                {{ course.tag }}
+                            </span>
+                        </div>
                     </div>
 
-                    <h4 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.15rem;">
+                    <!-- Title & Creator -->
+                    <h4 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.15rem; line-height: 1.35;">
                         {{ course.title }}
                     </h4>
                     <div class="small text-muted mb-3">
-                        <i class="bi bi-award me-1"></i> {{ course.provider }}
+                        <i class="bi bi-person-video3 me-1"></i> {{ course.provider }}
                     </div>
 
-                    <p class="small text-muted mb-3" style="line-height: 1.5;">
+                    <p class="small text-muted mb-3" style="line-height: 1.55;">
                         {{ course.desc }}
                     </p>
 
-                    <!-- Specs -->
-                    <div class="d-flex gap-3 small text-muted mb-4 pt-2 border-top" style="border-color: var(--border-color) !important;">
+                    <!-- Duration & Level Specs -->
+                    <div class="d-flex justify-content-between small text-muted mb-4 pt-2 border-top" style="border-color: var(--border-color) !important;">
                         <div><i class="bi bi-speedometer2 me-1"></i> {{ course.level }}</div>
-                        <div><i class="bi bi-clock me-1"></i> {{ course.duration }}</div>
+                        <div><i class="bi bi-clock-history me-1"></i> {{ course.duration }}</div>
                     </div>
                 </div>
 
-                <a href="{{ course.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary-custom w-100 text-center">
-                    Start Learning <i class="bi bi-box-arrow-up-right ms-1"></i>
-                </a>
+                <!-- Action Button -->
+                <div>
+                    {% if 'YouTube' in course.type %}
+                        <a href="{{ course.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-youtube-watch w-100">
+                            <i class="bi bi-play-circle-fill me-1.5"></i> Watch on YouTube <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ course.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary-custom w-100">
+                            Start Certification <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
+
+    <!-- Empty Search Notice -->
+    <div id="noCourseResults" class="text-center py-5 d-none">
+        <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
+        <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Courses Found</h5>
+        <p class="text-muted">Try clearing your search query or selecting a different filter.</p>
+    </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById('courseSearchInput');
+    const filterButtons = document.querySelectorAll('.course-filter');
+    const cards = document.querySelectorAll('.course-card-col');
+    const noResults = document.getElementById('noCourseResults');
+
+    let activeFilter = 'all';
+
+    function filterCourses() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const provider = card.getAttribute('data-provider');
+            const tag = card.getAttribute('data-tag');
+            const platform = card.getAttribute('data-platform');
+
+            const matchesQuery = !query || title.includes(query) || provider.includes(query) || tag.includes(query);
+            
+            let matchesFilter = true;
+            if (activeFilter === 'youtube') {
+                matchesFilter = (platform === 'youtube');
+            } else if (activeFilter === 'cert') {
+                matchesFilter = (platform === 'cert');
+            }
+
+            if (matchesQuery && matchesFilter) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0 && cards.length > 0) {
+            noResults.classList.remove('d-none');
+        } else {
+            noResults.classList.add('d-none');
+        }
+    }
+
+    searchInput.addEventListener('input', filterCourses);
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.getAttribute('data-type');
+            filterCourses();
+        });
+    });
+</script>
 {% endblock %}

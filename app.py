@@ -287,66 +287,118 @@ def live_jobs():
 
 @app.route('/courses')
 def courses():
+    # Curated Top-Tier YouTube Playlists & Industry Certifications
     curated_courses = [
+        # --- YOUTUBE LECTURES & PLAYLISTS ---
+        {
+            "title": "Complete C Language & Data Structures in One Shot",
+            "provider": "CodeWithHarry",
+            "platform": "YouTube",
+            "tag": "C",
+            "language": "Hindi",
+            "level": "Beginner to Advanced",
+            "duration": "15 Hours Full Video",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=ZSPZob_1TOk",
+            "desc": "Complete masterclass covering C fundamentals, pointers, memory allocation, arrays, strings, and structures with practice problems."
+        },
+        {
+            "title": "Python for Beginners (Full Course)",
+            "provider": "Programming with Mosh / FreeCodeCamp",
+            "platform": "YouTube",
+            "tag": "Python",
+            "language": "English",
+            "level": "Beginner",
+            "duration": "6 Hours Masterclass",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=_uQrJ0TkZlc",
+            "desc": "Hands-on project-based Python introduction covering variables, loops, lists, dictionaries, functions, and building a mini automation script."
+        },
+        {
+            "title": "Chai aur Python (Complete Backend & Core)",
+            "provider": "Chai aur Code (Hitesh Choudhary)",
+            "platform": "YouTube",
+            "tag": "Python",
+            "language": "Hindi",
+            "level": "Beginner to Intermediate",
+            "duration": "Complete Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoBsMugTFALhdOoZ5OqCGt7j",
+            "desc": "Deep dive into Python internals, virtual environments, decorators, generators, SQLite integration, and backend development."
+        },
+        {
+            "title": "Striver's A2Z DSA Complete Course",
+            "provider": "take U forward (Striver)",
+            "platform": "YouTube",
+            "tag": "DSA",
+            "language": "Hinglish",
+            "level": "Placement Ready",
+            "duration": "450+ Problems Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz",
+            "desc": "The gold-standard placement prep playlist for TCS, Google, and Infosys. Covers Arrays, Linked Lists, Trees, Graphs, and Dynamic Programming."
+        },
+        {
+            "title": "Complete Web Development Bootcamp (HTML, CSS, JS)",
+            "provider": "Chai aur Code",
+            "platform": "YouTube",
+            "tag": "HTML",
+            "language": "Hindi",
+            "level": "Beginner",
+            "duration": "Full Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDBNF5s-WH6QBD3Ia43RR28",
+            "desc": "Master semantic HTML5, modern CSS3 Flexbox & Grid, DOM manipulation, responsive layouts, and modern JavaScript from scratch."
+        },
+        {
+            "title": "SQL Tutorial - Full Database Course for Beginners",
+            "provider": "freeCodeCamp.org",
+            "platform": "YouTube",
+            "tag": "SQL",
+            "language": "English",
+            "level": "Beginner",
+            "duration": "4.5 Hours",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+            "desc": "Step-by-step introduction to relational database schemas, CRUD operations, foreign keys, table joins, and SQL query optimization."
+        },
+        {
+            "title": "React JS Complete Course with Projects",
+            "provider": "Dave Gray / FreeCodeCamp",
+            "platform": "YouTube",
+            "tag": "React",
+            "language": "English",
+            "level": "Intermediate",
+            "duration": "9 Hours Full Course",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=RVFAyFWO4go",
+            "desc": "Build production React single-page apps with React Hooks, useState, useEffect, context API, Axios data fetching, and routing."
+        },
+
+        # --- UNIVERSITY & VERIFIED CERTIFICATIONS ---
         {
             "title": "CS50's Introduction to Computer Science",
             "provider": "Harvard University / edX",
+            "platform": "Harvard / edX",
             "tag": "C",
+            "language": "English",
             "level": "Beginner to Intermediate",
             "duration": "10 Weeks",
-            "type": "Free / Self-Paced",
+            "type": "Free Certificate",
             "url": "https://cs50.harvard.edu/x/",
-            "desc": "Foundational programming course covering C, memory, data structures, algorithms, and web basics."
-        },
-        {
-            "title": "Scientific Computing with Python",
-            "provider": "freeCodeCamp",
-            "tag": "Python",
-            "level": "Beginner",
-            "duration": "300 Hours",
-            "type": "Free Certificate",
-            "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/",
-            "desc": "Hands-on projects covering Python data structures, algorithms, OOP, and budget tracking."
-        },
-        {
-            "title": "Responsive Web Design Certification",
-            "provider": "freeCodeCamp",
-            "tag": "HTML",
-            "level": "Beginner",
-            "duration": "300 Hours",
-            "type": "Free Certificate",
-            "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design/",
-            "desc": "Learn modern HTML5 semantic markup, CSS3 Flexbox, Grid, and build real responsive projects."
+            "desc": "Foundational programming course covering C, memory management, algorithms, data structures, and web development fundamentals."
         },
         {
             "title": "Intro to SQL & Relational Databases",
             "provider": "Kaggle Learn",
+            "platform": "Kaggle",
             "tag": "SQL",
+            "language": "English",
             "level": "Beginner",
             "duration": "4 Hours",
             "type": "Free Certificate",
             "url": "https://www.kaggle.com/learn/intro-to-sql",
-            "desc": "Master SQL queries, JOINs, GROUP BY, BigQuery integration, and data querying best practices."
-        },
-        {
-            "title": "Full Stack Open: Modern Web Development",
-            "provider": "University of Helsinki",
-            "tag": "React",
-            "level": "Intermediate",
-            "duration": "Self-Paced",
-            "type": "Free Course",
-            "url": "https://fullstackopen.com/en/",
-            "desc": "Industry-grade introduction to React, Redux, Node.js, REST APIs, GraphQL, and TypeScript."
-        },
-        {
-            "title": "Learn Git Branching & Version Control",
-            "provider": "Open Source Community",
-            "tag": "Git",
-            "level": "Beginner",
-            "duration": "2 Hours",
-            "type": "Interactive Guide",
-            "url": "https://learngitbranching.js.org/",
-            "desc": "Visual interactive tutorial for mastering Git commands, branches, rebasing, and collaboration."
+            "desc": "Interactive in-browser BigQuery SQL exercises with instant badge certification upon problem completion."
         }
     ]
     return render_template('courses.html', courses=curated_courses)
