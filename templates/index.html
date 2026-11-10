@@ -1,47 +1,213 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skill Matcher - Internship Portal</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 50px; }
-        .container { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { background: #28a745; color: white; padding: 10px 15px; border: none; cursor: pointer; width: 100%; border-radius: 5px; }
-        button:hover { background: #218838; }
-        .result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; color: #007bff; }
-        .nav-links { margin-top: 25px; text-align: center; }
-        .nav-links a { display: inline-block; margin: 0 10px; color: #007bff; text-decoration: none; font-weight: bold; }
-        .nav-links a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Skill Compatibility Matcher | Skill2Career{% endblock %}
 
-<div class="container">
-    <h2>Test the Algorithm Engine</h2>
-    <form method="POST">
-        <label>Student Skills (comma separated):</label>
-        <input type="text" name="student_skills" placeholder="e.g. Python, C, HTML" required>
-        
-        <label>Internship Required Skills (comma separated):</label>
-        <input type="text" name="job_skills" placeholder="e.g. Python, SQL, C" required>
-        
-        <button type="submit">Calculate Match %</button>
-    </form>
+{% block content %}
+<style>
+    .matcher-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        box-shadow: var(--card-shadow);
+        padding: 2.25rem;
+    }
+    .skill-input-tag {
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+    }
+    .skill-input-tag:hover {
+        transform: translateY(-2px);
+    }
+    .result-score-box {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+    }
+    .match-glow-pill {
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 30px;
+    }
+</style>
 
-    {% if score is not none %}
-        <div class="result">
-            Match Score: {{ score }}%
-        </div>
-    {% endif %}
-    
-    <!-- Easy Navigation Links -->
-    <div class="nav-links">
-        <a href="/register">Create Student Profile</a>
-        <a href="/jobs">View Job Board & Apply</a>
+<div class="container py-3" style="max-width: 950px;">
+    <!-- Title Header -->
+    <div class="text-center mb-4">
+        <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--badge-bg); color: var(--badge-text);">
+            <i class="bi bi-cpu me-1"></i> Mathematical Compatibility Engine
+        </span>
+        <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
+            Interactive Skill Matcher
+        </h1>
+        <p class="text-muted mx-auto" style="max-width: 620px;">
+            Input your technical proficiencies alongside internship prerequisites to calculate set-intersection compatibility and identify competency deficits in real-time.
+        </p>
     </div>
+
+    <!-- Match Form -->
+    <div class="matcher-card mb-4">
+        <form method="POST" action="/matcher">
+            <div class="row g-4">
+                <!-- Left: Student Skills -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0" style="color: var(--text-heading);">
+                            <i class="bi bi-person-badge-fill text-primary me-1"></i> My Technical Stack
+                        </label>
+                        <span class="small text-muted">Comma-separated</span>
+                    </div>
+                    <textarea name="student_skills" id="studentSkillsInput" rows="4" class="form-control" placeholder="e.g. Python, SQL, C, HTML5, Flask" required>{{ student_skills_raw }}</textarea>
+                    
+                    <!-- Quick Add Helper Chips -->
+                    <div class="mt-2 pt-1">
+                        <span class="small text-muted me-1">Quick Add:</span>
+                        <div class="d-inline-flex flex-wrap gap-1">
+                            <span class="badge badge-skill skill-input-tag" onclick="appendSkill('studentSkillsInput', 'Python')">+ Python</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="appendSkill('studentSkillsInput', 'SQL')">+ SQL</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="appendSkill('studentSkillsInput', 'C')">+ C</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="appendSkill('studentSkillsInput', 'HTML')">+ HTML</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="appendSkill('studentSkillsInput', 'React')">+ React</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Job Skills -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0" style="color: var(--text-heading);">
+                            <i class="bi bi-briefcase-fill text-primary me-1"></i> Required Job Skills
+                        </label>
+                        <span class="small text-muted">Comma-separated</span>
+                    </div>
+                    <textarea name="job_skills" id="jobSkillsInput" rows="4" class="form-control" placeholder="e.g. Python, SQL, C, Docker" required>{{ job_skills_raw }}</textarea>
+                    
+                    <!-- Quick Preset Helper Chips -->
+                    <div class="mt-2 pt-1">
+                        <span class="small text-muted me-1">Sample Roles:</span>
+                        <div class="d-inline-flex flex-wrap gap-1">
+                            <span class="badge badge-skill skill-input-tag" onclick="setPreset('Python, SQL, HTML', 'India Post Tech')">India Post</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="setPreset('Python, SQL, C, DSA', 'TCS Digital')">TCS Digital</span>
+                            <span class="badge badge-skill skill-input-tag" onclick="setPreset('HTML, React, JavaScript', 'Zoho Frontend')">Zoho Frontend</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 pt-2">
+                <button type="submit" class="btn btn-primary-custom px-5 py-2.5 fs-6 shadow">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> Calculate Skill Compatibility
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Match Results Section -->
+    {% if score is not none %}
+    <div class="matcher-card text-center mb-4 border-primary">
+        <h4 class="fw-bold mb-3" style="color: var(--text-heading);">Compatibility Analysis Verdict</h4>
+
+        <!-- Circular Score Meter -->
+        <div class="result-score-box" style="background: 
+            {% if score >= 70 %}linear-gradient(135deg, #10b981, #059669)
+            {% elif score >= 40 %}linear-gradient(135deg, #f59e0b, #d97706)
+            {% else %}linear-gradient(135deg, #8b5cf6, #7c3aed){% endif %};">
+            <span class="display-5 fw-extrabold text-white mb-0">{{ score }}%</span>
+            <span class="small text-white-50 text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.05em;">Compatibility</span>
+        </div>
+
+        <div class="mb-4">
+            {% if score >= 70 %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle match-glow-pill">
+                    <i class="bi bi-patch-check-fill me-1"></i> Exceptional Match &bull; High Candidate Competitiveness
+                </span>
+            {% elif score >= 40 %}
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle match-glow-pill">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Moderate Alignment &bull; Upskilling Recommended
+                </span>
+            {% else %}
+                <span class="badge rounded-pill match-glow-pill" style="background: rgba(167, 139, 250, 0.18); color: #c4b5fd; border: 1px solid rgba(196, 181, 253, 0.4);">
+                    <i class="bi bi-info-circle-fill me-1"></i> Substantial Skill Gap &bull; Complete Recommended Courses
+                </span>
+            {% endif %}
+        </div>
+
+        <!-- Matched vs Skills to Acquire Breakdown -->
+        <div class="row g-3 text-start mb-4">
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 border bg-body-tertiary h-100">
+                    <div class="small fw-bold text-success mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        <i class="bi bi-check2-circle me-1"></i> Verified Matched Skills ({{ matched_skills|length }})
+                    </div>
+                    {% if matched_skills %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for sk in matched_skills %}
+                                <span class="badge" style="background-color: rgba(16, 185, 129, 0.16); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4); font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+                                    <i class="bi bi-check2"></i> {{ sk }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="text-muted small">No overlapping skills found in the profile.</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-3 rounded-3 border bg-body-tertiary h-100">
+                    <div class="small fw-bold text-warning mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        <i class="bi bi-arrow-up-right-circle me-1"></i> Competencies to Acquire ({{ missing_skills|length }})
+                    </div>
+                    {% if missing_skills %}
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for sk in missing_skills %}
+                                <span class="badge" style="background-color: rgba(245, 158, 11, 0.16); color: #fbbf24; border: 1px dashed rgba(251, 191, 36, 0.4); font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+                                    + {{ sk }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="text-success small fw-semibold"><i class="bi bi-stars"></i> 100% prerequisite fulfillment! Zero skill deficit.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Direct Pathways -->
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a href="/courses" class="btn btn-outline-custom">
+                <i class="bi bi-mortarboard me-1"></i> Explore Recommended Courses
+            </a>
+            <a href="/jobs" class="btn btn-primary-custom">
+                <i class="bi bi-briefcase me-1"></i> Browse Verified Drives
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-</body>
-</html>
+<script>
+    function appendSkill(targetId, skill) {
+        const input = document.getElementById(targetId);
+        let current = input.value.trim();
+        if (!current) {
+            input.value = skill;
+        } else {
+            let tokens = current.split(',').map(s => s.trim().toLowerCase());
+            if (!tokens.includes(skill.toLowerCase())) {
+                input.value = current + ", " + skill;
+            }
+        }
+    }
+
+    function setPreset(skills, roleName) {
+        document.getElementById('jobSkillsInput').value = skills;
+    }
+</script>
+{% endblock %}

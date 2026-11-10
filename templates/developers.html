@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Engineering Team & Developers | Skill2Career{% endblock %}
+
+{% block content %}
+<style>
+    .dev-profile-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.25s ease, border-color 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .dev-profile-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary) !important;
+    }
+    .dev-banner {
+        height: 8px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+    .dev-avatar-circle {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.4);
+    }
+    .dev-badge-role {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-radius: 20px;
+        padding: 0.35rem 0.8rem;
+    }
+    .social-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+        color: var(--text-heading);
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .social-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: scale(1.08);
+    }
+</style>
+
+<div class="container py-3">
+    <!-- Header Title -->
+    <div class="text-center mb-5">
+        <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--badge-bg); color: var(--badge-text);">
+            <i class="bi bi-people-fill me-1"></i> Core Engineering Team
+        </span>
+        <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
+            Meet the Developers Behind Skill2Career
+        </h1>
+        <p class="text-muted mx-auto" style="max-width: 650px;">
+            Engineered as a high-performance student career enablement platform for Department of Computer Science & Engineering, Madhav Institute of Technology & Science (MITS), Gwalior.
+        </p>
+    </div>
+
+    <!-- Developer Profile Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Lead Developer 1: Karan Sahu -->
+        <div class="col-lg-6">
+            <div class="dev-profile-card h-100 d-flex flex-column justify-content-between">
+                <div class="dev-banner"></div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="dev-avatar-circle" style="background: linear-gradient(135deg, #7c3aed, #4c1d95);">
+                            K
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle dev-badge-role">
+                            Full-Stack Architect
+                        </span>
+                    </div>
+
+                    <h3 class="fw-bold mb-1" style="color: var(--text-heading);">Karan Sahu</h3>
+                    <div class="small text-muted mb-3">
+                        <i class="bi bi-mortarboard me-1"></i> B.Tech CSE &bull; Roll: <strong>BTCS26O1062</strong>
+                    </div>
+
+                    <p class="small text-muted mb-4" style="line-height: 1.6;">
+                        Architected the core application engine, SQLite database schema normalization, algorithmic skill compatibility scoring, ATS single-page resume generator, and real-time live telemetry ingestion.
+                    </p>
+
+                    <div class="mb-4">
+                        <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            Core Engineering Stack
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge badge-skill">Python 3</span>
+                            <span class="badge badge-skill">Flask WSGI</span>
+                            <span class="badge badge-skill">SQLite3 3NF</span>
+                            <span class="badge badge-skill">REST APIs</span>
+                            <span class="badge badge-skill">Firebase Auth</span>
+                            <span class="badge badge-skill">ReportLab PDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+                    <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i> MITS Gwalior</span>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com/karannyx" target="_blank" class="social-btn" title="GitHub Profile">
+                            <i class="bi bi-github"></i>
+                        </a>
+                        <a href="mailto:karansahu1594@gmail.com" class="social-btn" title="Send Email">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Developer 2: Yuvraj Yadav -->
+        <div class="col-lg-6">
+            <div class="dev-profile-card h-100 d-flex flex-column justify-content-between">
+                <div class="dev-banner" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="dev-avatar-circle" style="background: linear-gradient(135deg, #10b981, #047857);">
+                            Y
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle dev-badge-role">
+                            UI/UX & Frontend Lead
+                        </span>
+                    </div>
+
+                    <h3 class="fw-bold mb-1" style="color: var(--text-heading);">Yuvraj Yadav</h3>
+                    <div class="small text-muted mb-3">
+                        <i class="bi bi-mortarboard me-1"></i> B.Tech CSE &bull; Roll: <strong>BTCS26O1156</strong>
+                    </div>
+
+                    <p class="small text-muted mb-4" style="line-height: 1.6;">
+                        Spearheaded the developer-centric Obsidian Violet user interface, responsive Bootstrap styling, dark/light theme switching mechanisms, client-side live filtering, and interactive Chart.js analytics visualizations.
+                    </p>
+
+                    <div class="mb-4">
+                        <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            Design & UI Systems
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge badge-skill">HTML5 Semantic</span>
+                            <span class="badge badge-skill">CSS3 Custom Properties</span>
+                            <span class="badge badge-skill">Bootstrap 5.3</span>
+                            <span class="badge badge-skill">Chart.js</span>
+                            <span class="badge badge-skill">JavaScript (ES6+)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+                    <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i> MITS Gwalior</span>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com" target="_blank" class="social-btn" title="GitHub Profile">
+                            <i class="bi bi-github"></i>
+                        </a>
+                        <a href="mailto:yuvrajyadav@example.com" class="social-btn" title="Send Email">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Supervision & Institution Banner -->
+    <div class="card p-4 text-center" style="border-radius: 18px;">
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-4">
+            <div>
+                <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1 rounded-pill small mb-1">
+                    PROJECT SUPERVISION
+                </span>
+                <h5 class="fw-bold mb-0" style="color: var(--text-heading);">Dr. Ranjeet Kumar Singh</h5>
+                <p class="small text-muted mb-0">Department of Computer Science & Engineering &bull; M.I.T.S. Gwalior</p>
+            </div>
+            <div class="border-start ps-4 d-none d-md-block" style="border-color: var(--border-color) !important;">
+                <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1 rounded-pill small mb-1">
+                    ACCREDITATION
+                </span>
+                <h6 class="fw-bold mb-0" style="color: var(--text-heading);">NAAC A++ Accredited University</h6>
+                <p class="small text-muted mb-0">Established 1957 &bull; Deemed to be University</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

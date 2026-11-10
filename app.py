@@ -27,9 +27,16 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
-            skills TEXT NOT NULL
+            skills TEXT NOT NULL,
+            avatar_url TEXT DEFAULT ''
         )
     ''')
+
+    # Migration check: Ensure avatar_url column exists in students table
+    cursor.execute("PRAGMA table_info(students)")
+    s_cols = [col[1] for col in cursor.fetchall()]
+    if 'avatar_url' not in s_cols:
+        cursor.execute("ALTER TABLE students ADD COLUMN avatar_url TEXT DEFAULT ''")
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
@@ -203,7 +210,6 @@ def jobs():
 
 @app.route('/live_jobs')
 def live_jobs():
-    # 1. Verified Live Indian Tech & Govt Internships
     indian_internships = [
         {
             "title": "Junior Software Trainee (CEPT Tech)",
@@ -261,7 +267,6 @@ def live_jobs():
         }
     ]
 
-    # 2. Live Global Openings from Remotive API
     external_jobs = []
     try:
         response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=12', timeout=4)
@@ -281,15 +286,12 @@ def live_jobs():
     except Exception as e:
         print(f"Error fetching live jobs: {e}")
 
-    # Combine: Indian internships highlighted on top + worldwide remote tech
     all_openings = indian_internships + external_jobs
     return render_template('live_jobs.html', jobs=all_openings)
 
 @app.route('/courses')
 def courses():
-    # Curated Top-Tier YouTube Playlists & Industry Certifications
     curated_courses = [
-        # --- YOUTUBE LECTURES & PLAYLISTS ---
         {
             "title": "Complete C Language & Data Structures in One Shot",
             "provider": "CodeWithHarry",
@@ -363,20 +365,6 @@ def courses():
             "desc": "Step-by-step introduction to relational database schemas, CRUD operations, foreign keys, table joins, and SQL query optimization."
         },
         {
-            "title": "React JS Complete Course with Projects",
-            "provider": "Dave Gray / FreeCodeCamp",
-            "platform": "YouTube",
-            "tag": "React",
-            "language": "English",
-            "level": "Intermediate",
-            "duration": "9 Hours Full Course",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=RVFAyFWO4go",
-            "desc": "Build production React single-page apps with React Hooks, useState, useEffect, context API, Axios data fetching, and routing."
-        },
-
-        # --- UNIVERSITY & VERIFIED CERTIFICATIONS ---
-        {
             "title": "CS50's Introduction to Computer Science",
             "provider": "Harvard University / edX",
             "platform": "Harvard / edX",
@@ -387,21 +375,105 @@ def courses():
             "type": "Free Certificate",
             "url": "https://cs50.harvard.edu/x/",
             "desc": "Foundational programming course covering C, memory management, algorithms, data structures, and web development fundamentals."
-        },
-        {
-            "title": "Intro to SQL & Relational Databases",
-            "provider": "Kaggle Learn",
-            "platform": "Kaggle",
-            "tag": "SQL",
-            "language": "English",
-            "level": "Beginner",
-            "duration": "4 Hours",
-            "type": "Free Certificate",
-            "url": "https://www.kaggle.com/learn/intro-to-sql",
-            "desc": "Interactive in-browser BigQuery SQL exercises with instant badge certification upon problem completion."
         }
     ]
     return render_template('courses.html', courses=curated_courses)
+
+# --- DEVELOPERS / TEAM SHOWCASE ROUTE ---
+
+@app.route('/developers')
+def developers():
+    return render_template('developers.html')
+
+# --- SKILL MATCHER (DARK MODE & INTERACTIVE) ---
+
+@app.route('/matcher', methods=['GET', 'POST'])
+def matcher():
+    score = None
+    matched_skills = []
+    missing_skills = []
+    student_skills_raw = ""
+    job_skills_raw = ""
+
+    # Pre-fill student skills if logged in
+    if 'student_email' in session and request.method == 'GET':
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT skills FROM students WHERE email = ?', (session['student_email'],))
+        row = cursor.fetchone()
+        conn.close()
+        if row and row['skills']:
+            student_skills_raw = row['skills']
+
+    if request.method == 'POST':
+        student_skills_raw = request.form.get('student_skills', '').strip()
+        job_skills_raw = request.form.get('job_skills', '').strip()
+
+        s_list = [s.strip() for s in student_skills_raw.split(',') if s.strip()]
+        j_list = [s.strip() for s in job_skills_raw.split(',') if s.strip()]
+
+        s_lower = {s.lower(): s for s in s_list}
+        j_lower = {j.lower(): j for j in j_list}
+
+        if j_list:
+            matched_keys = set(s_lower.keys()).intersection(set(j_lower.keys()))
+            missing_keys = set(j_lower.keys()) - set(s_lower.keys())
+
+            matched_skills = [j_lower[k] for k in matched_keys]
+            missing_skills = [j_lower[k] for k in missing_keys]
+            score = round((len(matched_keys) / len(j_list)) * 100)
+        else:
+            score = 0
+
+    return render_template('index.html', score=score,
+                           matched_skills=matched_skills,
+                           missing_skills=missing_skills,
+                           student_skills_raw=student_skills_raw,
+                           job_skills_raw=job_skills_raw)
+
+# --- STUDENT DASHBOARD WITH PFP SUPPORT ---
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        updated_skills = request.form.get('skills', '').strip()
+        avatar_url = request.form.get('avatar_url', '').strip()
+        
+        cursor.execute('UPDATE students SET skills = ?, avatar_url = ? WHERE email = ?', 
+                       (updated_skills, avatar_url, session['student_email']))
+        conn.commit()
+
+    cursor.execute('SELECT name, email, skills, avatar_url FROM students WHERE email = ?', (session['student_email'],))
+    student = cursor.fetchone()
+
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status
+        FROM internships
+        JOIN applications ON internships.id = applications.job_id
+        WHERE applications.student_email = ?
+        ORDER BY applications.id DESC
+    ''', (session['student_email'],))
+    applied_jobs = cursor.fetchall()
+
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company, internships.required_skills
+        FROM internships
+        JOIN saved_jobs ON internships.id = saved_jobs.job_id
+        WHERE saved_jobs.student_email = ?
+        ORDER BY saved_jobs.id DESC
+    ''', (session['student_email'],))
+    saved_jobs = cursor.fetchall()
+
+    conn.close()
+    return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
+
+# --- RESUME & APPLICATIONS ---
 
 @app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
 def apply(job_id):
@@ -454,26 +526,19 @@ def interview_prep(job_id):
 
     interview_bank = {
         'python': [
-            {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable (elements can be modified, appended, removed), while tuples are immutable once created. Tuples are faster and used for fixed data integrity."},
-            {"q": "How does memory management work in Python?", "a": "Python uses a private heap containing all objects and data structures. It relies on Reference Counting and a generational Garbage Collector to detect and destroy cyclic references."},
-            {"q": "Explain decorators and write a typical use case.", "a": "Decorators are functions that take another function as an argument and extend its behavior without modifying it directly (e.g. @app.route in Flask or authentication checks)."}
+            {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable, while tuples are immutable once created. Tuples are faster and protect fixed data integrity."},
+            {"q": "How does memory management work in Python?", "a": "Python uses a private heap managed by Reference Counting and a generational Garbage Collector to destroy cyclic references."},
+            {"q": "Explain decorators in Python.", "a": "Decorators wrap another function to extend its behavior dynamically without modifying its source code directly."}
         ],
         'sql': [
-            {"q": "Explain the difference between WHERE and HAVING clauses.", "a": "WHERE filters rows before aggregation occurs. HAVING filters aggregated data after the GROUP BY clause has executed."},
-            {"q": "What are primary keys, foreign keys, and unique indexes?", "a": "A Primary Key uniquely identifies each record and cannot be NULL. A Foreign Key references a primary key in another table to enforce referential integrity."},
-            {"q": "What is database normalization (1NF, 2NF, 3NF)?", "a": "Normalization organizes database columns and tables to minimize redundancy and prevent dependency anomalies during insert, update, and delete actions."}
+            {"q": "Explain WHERE vs. HAVING clause.", "a": "WHERE filters rows before aggregation occurs; HAVING filters aggregated groups after GROUP BY executes."},
+            {"q": "What are primary and foreign keys?", "a": "Primary key uniquely identifies records in a table; foreign key references another primary key to maintain referential integrity."}
         ],
         'html': [
-            {"q": "What are Semantic HTML5 tags and why are they critical?", "a": "Tags like <header>, <nav>, <article>, <section>, and <footer> clearly describe their meaning to both browser and developer, improving accessibility and SEO rankings."},
-            {"q": "Explain the CSS Box Model.", "a": "The Box Model consists of four concentric layers: Content, Padding, Border, and Margin."}
-        ],
-        'react': [
-            {"q": "What is the Virtual DOM in React and how does reconciliation work?", "a": "Virtual DOM is a lightweight memory copy of the real DOM. When state changes, React compares Virtual DOM with the previous snapshot (diffing algorithm) and only updates changed nodes in the real DOM."},
-            {"q": "What is the purpose of useEffect dependency array?", "a": "It specifies when the effect should re-run. An empty array [] means it runs only once on mount; passing variables means it re-runs whenever those state values change."}
+            {"q": "What are Semantic HTML5 tags?", "a": "Tags like <header>, <nav>, <article>, and <footer> clearly communicate structural meaning to browsers and accessibility screen readers."}
         ],
         'c': [
-            {"q": "What is a Pointer and how does dereferencing work in C?", "a": "A pointer is a variable that stores the memory address of another variable. The dereference operator (*) accesses the value stored at that address."},
-            {"q": "What is the difference between malloc() and calloc()?", "a": "malloc() allocates uninitialized memory containing garbage values; calloc() allocates memory and initializes all allocated bytes to zero."}
+            {"q": "What is a pointer in C?", "a": "A pointer is a variable that stores the memory address of another variable. The dereference operator (*) accesses the value stored at that address."}
         ]
     }
 
@@ -487,8 +552,7 @@ def interview_prep(job_id):
 
     if not curated_qa:
         curated_qa = [
-            {"skill": "CORE CS", "q": "Explain the Time and Space Complexity of QuickSort and MergeSort.", "a": "MergeSort is O(N log N) in all cases with O(N) auxiliary space. QuickSort average time is O(N log N) but worst case is O(N^2) if pivot selection is unoptimized."},
-            {"skill": "CORE CS", "q": "What are ACID properties in transactional systems?", "a": "Atomicity, Consistency, Isolation, and Durability."}
+            {"skill": "CORE CS", "q": "Explain QuickSort vs. MergeSort.", "a": "MergeSort is always O(N log N) with O(N) space. QuickSort is average O(N log N) in-place but worst case O(N^2) if pivot is unoptimized."}
         ]
 
     return render_template('interview_prep.html', job=job, curated_qa=curated_qa)
@@ -550,43 +614,6 @@ def update_status(app_id):
     conn.commit()
     conn.close()
     return redirect(url_for('view_applicants', job_id=job_id))
-
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
-    if 'student_email' not in session:
-        return redirect(url_for('login'))
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    if request.method == 'POST':
-        updated_skills = request.form.get('skills', '').strip()
-        cursor.execute('UPDATE students SET skills = ? WHERE email = ?', (updated_skills, session['student_email']))
-        conn.commit()
-
-    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
-    student = cursor.fetchone()
-
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status
-        FROM internships
-        JOIN applications ON internships.id = applications.job_id
-        WHERE applications.student_email = ?
-        ORDER BY applications.id DESC
-    ''', (session['student_email'],))
-    applied_jobs = cursor.fetchall()
-
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills
-        FROM internships
-        JOIN saved_jobs ON internships.id = saved_jobs.job_id
-        WHERE saved_jobs.student_email = ?
-        ORDER BY saved_jobs.id DESC
-    ''', (session['student_email'],))
-    saved_jobs = cursor.fetchall()
-
-    conn.close()
-    return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
 
 @app.route('/build_resume', methods=['GET', 'POST'])
 def build_resume():
@@ -681,19 +708,6 @@ def resume():
 
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()] if student and student['skills'] else []
     return render_template('resume.html', student=student, resume=resume_data, skills_list=skills_list)
-
-@app.route('/matcher', methods=['GET', 'POST'])
-def matcher():
-    score = None
-    if request.method == 'POST':
-        student_skills = [s.strip().lower() for s in request.form.get('student_skills', '').split(',') if s.strip()]
-        job_skills = [s.strip().lower() for s in request.form.get('job_skills', '').split(',') if s.strip()]
-        if job_skills:
-            matches = set(student_skills).intersection(set(job_skills))
-            score = round((len(matches) / len(job_skills)) * 100, 2)
-        else:
-            score = 0
-    return render_template('index.html', score=score)
 
 @app.route('/login')
 def login():
