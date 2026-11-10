@@ -86,6 +86,9 @@
             background: var(--nav-bg) !important;
             border-bottom: 1px solid var(--border-color);
             padding: 0.85rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
             transition: background-color 0.25s ease, border-color 0.25s ease;
         }
 
@@ -105,6 +108,35 @@
 
         .nav-link:hover {
             color: var(--primary) !important;
+        }
+
+        /* Mobile Hamburger & Dropdown Fix */
+        .mobile-toggle-btn {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-heading) !important;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            outline: none !important;
+            box-shadow: none !important;
+            z-index: 1050;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: var(--nav-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 14px;
+                padding: 1rem;
+                margin-top: 0.75rem;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            }
         }
 
         .card, .card-custom {
@@ -213,14 +245,17 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+<nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
             <i class="bi bi-briefcase-fill"></i> Skill2Career
         </a>
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <i class="bi bi-list fs-2 text-secondary"></i>
+        
+        <!-- Reliable Mobile Hamburger Button -->
+        <button id="navToggleBtn" class="mobile-toggle-btn d-lg-none" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
         </button>
+
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0 gap-lg-1">
                 <li class="nav-item">
@@ -281,3 +316,61 @@
     <div class="container">
         <p class="mb-0">Skill2Career Portal &bull; Designed & Built by Karan Sahu & Yuvraj Yadav (MITS Gwalior)</p>
     </div>
+</footer>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Theme Switcher Logic
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeToggleIcon');
+    const htmlNode = document.documentElement;
+
+    function applyTheme(theme) {
+        htmlNode.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            themeIcon.className = 'bi bi-sun-fill text-warning';
+        } else {
+            themeIcon.className = 'bi bi-moon-stars';
+        }
+    }
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(currentTheme);
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const active = htmlNode.getAttribute('data-bs-theme');
+            applyTheme(active === 'dark' ? 'light' : 'dark');
+        });
+    }
+
+    // Direct Mobile Hamburger Toggle (Works 100% on all mobile devices)
+    const navBtn = document.getElementById('navToggleBtn');
+    const navMenu = document.getElementById('navMenu');
+
+    if (navBtn && navMenu) {
+        navBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (navMenu.classList.contains('show')) {
+                navMenu.classList.remove('show');
+            } else {
+                navMenu.classList.add('show');
+            }
+        });
+
+        // Close menu when tapping a link on mobile
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 992) {
+                    navMenu.classList.remove('show');
+                }
+            });
+        });
+    }
+</script>
+</body>
+</html>
