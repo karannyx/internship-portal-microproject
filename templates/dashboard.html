@@ -2,14 +2,54 @@
 {% block title %}Student Dashboard | Skill2Career{% endblock %}
 
 {% block content %}
+<style>
+    .avatar-preview-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary);
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+    }
+    .avatar-letter-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: #ffffff;
+        font-size: 2rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+    }
+    .avatar-preset-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid var(--border-color);
+        transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .avatar-preset-btn:hover {
+        transform: scale(1.15);
+        border-color: var(--primary);
+    }
+</style>
+
 <div class="container py-4">
     <!-- Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <h2 class="fw-bold mb-1" style="color: var(--text-heading);">Student Dashboard</h2>
-            <p class="mb-0 text-muted">Manage profile skills, track recruiter status, and view saved opportunities</p>
+            <p class="mb-0 text-muted">Manage profile avatar, technical skills, and track recruiter stages</p>
         </div>
         <div class="d-flex gap-2">
+            <!-- Share Public Portfolio Button -->
+            <a href="/u/{{ student.id }}" target="_blank" class="btn btn-outline-custom rounded-pill px-3">
+                <i class="bi bi-qr-code me-1"></i> Public Portfolio & QR
+            </a>
             <a href="/resume" class="btn btn-outline-custom rounded-pill px-3">
                 <i class="bi bi-file-earmark-person me-1"></i> View Resume
             </a>
@@ -23,10 +63,19 @@
         <!-- Profile & Skill Editor -->
         <div class="col-lg-4">
             <div class="card p-4 h-100" style="border-radius: 18px;">
-                <div class="text-center mb-4">
-                    <div style="width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; font-size: 1.8rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
-                        {{ student.name[0]|upper }}
-                    </div>
+                <!-- Profile Picture / Avatar Display -->
+                <div class="text-center mb-3">
+                    {% if student.avatar_url %}
+                        <img src="{{ student.avatar_url }}" alt="Profile Avatar" class="avatar-preview-box mb-2" onerror="this.style.display='none'; document.getElementById('letterAvatar').style.display='inline-flex';">
+                        <div id="letterAvatar" class="avatar-letter-box mb-2" style="display: none;">
+                            {{ student.name[0]|upper }}
+                        </div>
+                    {% else %}
+                        <div class="avatar-letter-box mb-2">
+                            {{ student.name[0]|upper }}
+                        </div>
+                    {% endif %}
+
                     <h5 class="fw-bold mb-0" style="color: var(--text-heading);">{{ student.name }}</h5>
                     <p class="small text-muted mb-2">{{ student.email }}</p>
                     <span class="badge border px-3 py-1 rounded-pill" style="background: var(--badge-bg); color: var(--badge-text);">
@@ -37,15 +86,33 @@
                 <hr style="border-color: var(--border-color);">
 
                 <form method="POST" action="/dashboard">
+                    <!-- Profile Picture (Avatar URL / Preset Selector) -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold small" style="color: var(--text-heading);">
-                            My Core Skills (comma-separated)
+                            <i class="bi bi-image text-primary me-1"></i> Profile Picture / Avatar
+                        </label>
+                        <input type="url" name="avatar_url" id="avatarInput" class="form-control form-control-sm mb-2" placeholder="Paste custom image URL..." value="{{ student.avatar_url or '' }}">
+                        
+                        <div class="small text-muted mb-1">Or choose an avatar preset:</div>
+                        <div class="d-flex gap-2 justify-content-center pt-1 mb-2">
+                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=karan" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/bottts/svg?seed=karan')" title="Bot Avatar">
+                            <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Alex" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/adventurer/svg?seed=Alex')" title="Coder Avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix')" title="Executive Avatar">
+                            <img src="https://api.dicebear.com/7.x/shapes/svg?seed=Skill" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/shapes/svg?seed=Skill')" title="Geometric Avatar">
+                        </div>
+                    </div>
+
+                    <!-- Core Skills -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small" style="color: var(--text-heading);">
+                            <i class="bi bi-cpu text-primary me-1"></i> Core Skills (comma-separated)
                         </label>
                         <textarea name="skills" rows="3" class="form-control" placeholder="e.g. Python, SQL, C, HTML" required>{{ student.skills }}</textarea>
-                        <div class="form-text small">Updating skills instantly recalculates all your job match percentages.</div>
+                        <div class="form-text small">Updating skills instantly recalculates your job match percentages.</div>
                     </div>
+
                     <button type="submit" class="btn btn-primary-custom w-100">
-                        <i class="bi bi-arrow-clockwise me-1"></i> Update Skills
+                        <i class="bi bi-check-circle-fill me-1"></i> Save Profile & Skills
                     </button>
                 </form>
 
@@ -75,6 +142,7 @@
                                 <tr class="text-muted small text-uppercase">
                                     <th>Role & Company</th>
                                     <th>Tech Stack</th>
+                                    <th>Quiz Score</th>
                                     <th>Application Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -92,6 +160,11 @@
                                                 <span class="badge badge-skill" style="font-size: 0.7rem;">{{ sk.strip() }}</span>
                                             {% endfor %}
                                         </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary border px-2 py-1 small fw-bold">
+                                            {{ job.quiz_score }}
+                                        </span>
                                     </td>
                                     <td>
                                         {% if job.status == 'Shortlisted' %}
@@ -164,4 +237,10 @@
         </div>
     </div>
 </div>
+
+<script>
+    function selectAvatar(url) {
+        document.getElementById('avatarInput').value = url;
+    }
+</script>
 {% endblock %}

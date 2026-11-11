@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} &bull; Verified Student Profile | Skill2Career{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 880px;">
+    <div class="card p-4 p-md-5 mb-4" style="border-radius: 20px;">
+        <div class="row align-items-center g-4">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    {% if student.avatar_url %}
+                        <img src="{{ student.avatar_url }}" alt="{{ student.name }}" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
+                    {% else %}
+                        <div style="width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-size: 2rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">
+                            {{ student.name[0]|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: var(--text-heading);">{{ student.name }}</h2>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
+                            <i class="bi bi-patch-check-fill me-1"></i> Certified Candidate &bull; MITS Gwalior
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    {{ resume.summary if resume and resume.summary else 'First-year Computer Science & Engineering undergraduate focusing on software systems, full-stack architecture, and algorithmic design.' }}
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 text-muted small">
+                    <span><i class="bi bi-mortarboard text-primary me-1"></i> {{ resume.degree if resume and resume.degree else 'B.Tech CSE' }}</span>
+                    <span>&bull;</span>
+                    <span><i class="bi bi-buildings text-primary me-1"></i> {{ resume.college if resume and resume.college else 'M.I.T.S. Gwalior' }}</span>
+                    {% if resume and resume.cgpa %}
+                    <span>&bull;</span>
+                    <span><i class="bi bi-award-fill text-warning me-1"></i> CGPA: <strong>{{ resume.cgpa }}</strong></span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center border-start ps-md-4" style="border-color: var(--border-color) !important;">
+                <div class="p-2 border rounded-3 bg-white d-inline-block shadow-sm mb-2">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data={{ request.url }}" alt="Portfolio QR Code" style="width: 130px; height: 130px; display: block;">
+                </div>
+                <div class="small fw-semibold text-muted" style="font-size: 0.75rem;">
+                    <i class="bi bi-camera me-1"></i> Scan with phone to verify credentials
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card p-4 h-100" style="border-radius: 18px;">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-cpu text-primary me-2"></i> Verified Technical Skills
+                </h5>
+                <div class="d-flex flex-wrap gap-1 mb-4">
+                    {% for sk in skills_list %}
+                        <span class="badge badge-skill" style="font-size: 0.85rem; padding: 0.45rem 0.75rem;">
+                            <i class="bi bi-check2 text-success me-1"></i> {{ sk }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card p-4 h-100" style="border-radius: 18px;">
+                <h5 class="fw-bold mb-3" style="color: var(--text-heading);">
+                    <i class="bi bi-folder-check text-primary me-2"></i> Academic Projects
+                </h5>
+                <div class="p-3 border rounded-3 bg-body-tertiary mb-3">
+                    <div class="fw-bold" style="color: var(--text-heading);">Skill2Career — Career Enablement Portal</div>
+                    <div class="small text-primary mb-1">Python, Flask, SQLite3, Bootstrap 5.3</div>
+                    <p class="small text-muted mb-0">Engineered closed-loop placement platform featuring live telemetry, algorithmic matching, and dynamic ATS resume export.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

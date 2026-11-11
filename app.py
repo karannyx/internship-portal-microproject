@@ -1,14 +1,26 @@
 import sqlite3
 import requests
 import time
+import csv
+import os
+import smtplib
+from io import StringIO
 from collections import Counter
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
 
 app = Flask(__name__)
 app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
 
 ADMIN_PASSKEY = "admin2026"
+
+# Email Configuration (Set via Render Environment Variables if available)
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "placement.cell.mits@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")  # App Password
 
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300  
@@ -32,18 +44,13 @@ def init_db():
         )
     ''')
 
-    # Migration check: Ensure avatar_url column exists in students table
-    cursor.execute("PRAGMA table_info(students)")
-    s_cols = [col[1] for col in cursor.fetchall()]
-    if 'avatar_url' not in s_cols:
-        cursor.execute("ALTER TABLE students ADD COLUMN avatar_url TEXT DEFAULT ''")
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS internships (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             company TEXT NOT NULL,
-            required_skills TEXT NOT NULL
+            required_skills TEXT NOT NULL,
+            deadline TEXT DEFAULT 'Nov 25, 2026'
         )
     ''')
 
@@ -52,14 +59,26 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_email TEXT NOT NULL,
             job_id INTEGER NOT NULL,
-            status TEXT DEFAULT 'Under Review'
+            status TEXT DEFAULT 'Under Review',
+            quiz_score TEXT DEFAULT 'N/A'
         )
     ''')
 
+    # Schema Migrations
+    cursor.execute("PRAGMA table_info(students)")
+    s_cols = [col[1] for col in cursor.fetchall()]
+    if 'avatar_url' not in s_cols:
+        cursor.execute("ALTER TABLE students ADD COLUMN avatar_url TEXT DEFAULT ''")
+
+    cursor.execute("PRAGMA table_info(internships)")
+    i_cols = [col[1] for col in cursor.fetchall()]
+    if 'deadline' not in i_cols:
+        cursor.execute("ALTER TABLE internships ADD COLUMN deadline TEXT DEFAULT 'Nov 25, 2026'")
+
     cursor.execute("PRAGMA table_info(applications)")
-    columns = [col[1] for col in cursor.fetchall()]
-    if 'status' not in columns:
-        cursor.execute("ALTER TABLE applications ADD COLUMN status TEXT DEFAULT 'Under Review'")
+    a_cols = [col[1] for col in cursor.fetchall()]
+    if 'quiz_score' not in a_cols:
+        cursor.execute("ALTER TABLE applications ADD COLUMN quiz_score TEXT DEFAULT 'N/A'")
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS saved_jobs (
@@ -97,19 +116,62 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM internships')
     if cursor.fetchone()[0] == 0:
         openings = [
-            ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML"),
-            ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C"),
-            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C"),
-            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL")
+            ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML", "Nov 22, 2026"),
+            ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C", "Nov 26, 2026"),
+            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C", "Nov 20, 2026"),
+            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL", "Nov 30, 2026")
         ]
-        cursor.executemany('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', openings)
+        cursor.executemany('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', openings)
 
     conn.commit()
     conn.close()
 
 init_db()
 
-# --- AUTOMATIC JOB SYNC ENGINE ---
+# --- AUTOMATED EMAIL DISPATCHER ---
+
+def dispatch_notification_email(student_email, student_name, job_title, company, status):
+    """Sends automated email or gracefully logs mock notification if SMTP not configured."""
+    subject = f"Placement Cell Notice: Application Status Updated for {job_title}"
+    body = f"""
+Dear {student_name},
+
+Greetings from the Training & Placement Cell, MITS Gwalior.
+
+Your application status for the following campus opening has been updated:
+Role: {job_title}
+Organization: {company}
+Updated Status: {status}
+
+{'Congratulations! Please check your portal dashboard for round instructions.' if status in ['Shortlisted', 'Interview Scheduled'] else 'Login to Skill2Career to review role analytics and recommendations.'}
+
+Portal Access: https://skill2career.onrender.com/dashboard
+
+Regards,
+Training & Placement Cell
+Madhav Institute of Technology & Science, Gwalior
+"""
+    if not SENDER_PASSWORD:
+        print(f"\n[MOCK EMAIL DISPATCHED] To: {student_email} | Subject: {subject} | Status: {status}\n")
+        return
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"MITS Placement Cell <{SENDER_EMAIL}>"
+        msg['To'] = student_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, student_email, msg.as_string())
+        server.quit()
+        print(f"[LIVE EMAIL SENT] Successfully notified {student_email}")
+    except Exception as e:
+        print(f"[SMTP WARNING] Could not send live email: {e}")
+
+# --- AUTO SYNC ENGINE ---
 
 def sync_live_jobs_automatically():
     global LAST_SYNC_TIME
@@ -135,15 +197,15 @@ def sync_live_jobs_automatically():
                 if title and company:
                     cursor.execute('SELECT id FROM internships WHERE title = ? AND company = ?', (title, company))
                     if not cursor.fetchone():
-                        cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
-                                       (title, company, skills))
+                        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', 
+                                       (title, company, skills, 'Rolling Basis'))
 
             conn.commit()
             conn.close()
     except Exception as e:
         print(f"Auto-sync note: {e}")
 
-# --- MAIN & NAVIGATION ROUTES ---
+# --- ROUTES ---
 
 @app.route('/')
 def home():
@@ -155,7 +217,7 @@ def jobs():
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, title, company, required_skills FROM internships ORDER BY id DESC')
+    cursor.execute('SELECT id, title, company, required_skills, deadline FROM internships ORDER BY id DESC')
     raw_internships = cursor.fetchall()
 
     student_skills = []
@@ -201,12 +263,175 @@ def jobs():
 
     announcements = [
         "T&P Drive: TCS Digital applications closing this Friday at 5:00 PM.",
-        "Notice: India Post (CEPT) shortlisted candidates list updated for Technical Trainee roles.",
+        "Notice: India Post (CEPT) technical screening assessments are now live.",
         "Pro-Tip: Complete Harvard CS50 in the Courses section to boost your Software Trainee match score to 100%."
     ]
 
     conn.close()
     return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships), announcements=announcements)
+
+# --- SCREENING QUIZ BEFORE APPLYING ---
+
+QUIZ_QUESTION_BANK = {
+    'python': [
+        {"q": "What is the output of print(type([]) is list)?", "opts": ["True", "False", "TypeError", "None"], "ans": "True"},
+        {"q": "Which data structure is immutable in Python?", "opts": ["Tuple", "List", "Dictionary", "Set"], "ans": "Tuple"}
+    ],
+    'sql': [
+        {"q": "Which clause is used to filter aggregated groups?", "opts": ["HAVING", "WHERE", "GROUP BY", "ORDER BY"], "ans": "HAVING"},
+        {"q": "Which constraint enforces uniqueness across rows?", "opts": ["UNIQUE / PRIMARY KEY", "FOREIGN KEY", "DEFAULT", "CHECK"], "ans": "UNIQUE / PRIMARY KEY"}
+    ],
+    'c': [
+        {"q": "Which operator returns the memory address of a variable?", "opts": ["& (Address-of)", "* (Dereference)", "->", "sizeof"], "ans": "& (Address-of)"},
+        {"q": "In C, strings terminate with which character?", "opts": ["\\0 (Null)", "\\n", "EOF", "\\t"], "ans": "\\0 (Null)"}
+    ],
+    'html': [
+        {"q": "Which HTML5 tag is semantic for site navigation links?", "opts": ["<nav>", "<menu>", "<header>", "<section>"], "ans": "<nav>"},
+        {"q": "Which tag embeds a responsive canvas for Chart.js?", "opts": ["<canvas>", "<svg>", "<paint>", "<graphic>"], "ans": "<canvas>"}
+    ]
+}
+
+@app.route('/apply/<int:job_id>')
+def apply(job_id):
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
+    existing = cursor.fetchone()
+    if existing:
+        conn.close()
+        return redirect(url_for('dashboard'))
+
+    cursor.execute('SELECT title, company, required_skills FROM internships WHERE id = ?', (job_id,))
+    job = cursor.fetchone()
+    conn.close()
+
+    if not job:
+        return redirect(url_for('jobs'))
+
+    req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
+    selected_questions = []
+
+    for sk in req_skills:
+        for bank_key in QUIZ_QUESTION_BANK:
+            if bank_key in sk:
+                for q in QUIZ_QUESTION_BANK[bank_key]:
+                    if q not in selected_questions and len(selected_questions) < 3:
+                        selected_questions.append(q)
+
+    if not selected_questions:
+        selected_questions = QUIZ_QUESTION_BANK['python'][:2] + [QUIZ_QUESTION_BANK['sql'][0]]
+
+    return render_template('screening_quiz.html', job=job, job_id=job_id, questions=selected_questions)
+
+@app.route('/submit_quiz/<int:job_id>', methods=['POST'])
+def submit_quiz(job_id):
+    if 'student_email' not in session:
+        return redirect(url_for('login'))
+
+    total_q = int(request.form.get('total_questions', 0))
+    correct = 0
+
+    for i in range(total_q):
+        user_ans = request.form.get(f'q_{i}', '')
+        correct_ans = request.form.get(f'ans_{i}', '')
+        if user_ans and user_ans == correct_ans:
+            correct += 1
+
+    quiz_score = f"{correct}/{total_q}"
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
+    if not cursor.fetchone():
+        cursor.execute('INSERT INTO applications (student_email, job_id, status, quiz_score) VALUES (?, ?, ?, ?)', 
+                       (session['student_email'], job_id, 'Under Review', quiz_score))
+        conn.commit()
+    conn.close()
+
+    return redirect(url_for('dashboard'))
+
+# --- RECRUITER 1-CLICK EXCEL / CSV EXPORT ---
+
+@app.route('/export_applicants/<int:job_id>')
+def export_applicants(job_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT title, company FROM internships WHERE id = ?', (job_id,))
+    job = cursor.fetchone()
+    job_title = job['title'] if job else "Drive"
+
+    cursor.execute('''
+        SELECT applications.id, students.name, students.email, students.skills, applications.quiz_score, applications.status
+        FROM students
+        JOIN applications ON students.email = applications.student_email
+        WHERE applications.job_id = ?
+        ORDER BY applications.id DESC
+    ''', (job_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['App ID', 'Student Name', 'Registered Email', 'Candidate Skills', 'Screening Quiz Score', 'Application Status'])
+
+    for r in rows:
+        cw.writerow([r['id'], r['name'], r['email'], r['skills'], r['quiz_score'], r['status']])
+
+    output = Response(si.getvalue(), mimetype='text/csv')
+    filename = f"Applicants_{job_title.replace(' ', '_')}.csv"
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return output
+
+@app.route('/update_status/<int:app_id>', methods=['POST'])
+def update_status(app_id):
+    new_status = request.form.get('status', 'Under Review')
+    job_id = request.form.get('job_id')
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
+    conn.commit()
+
+    # Get student & job info to trigger email
+    cursor.execute('''
+        SELECT students.name, students.email, internships.title, internships.company
+        FROM applications
+        JOIN students ON applications.student_email = students.email
+        JOIN internships ON applications.job_id = internships.id
+        WHERE applications.id = ?
+    ''', (app_id,))
+    rec = cursor.fetchone()
+    conn.close()
+
+    if rec:
+        dispatch_notification_email(rec['email'], rec['name'], rec['title'], rec['company'], new_status)
+
+    return redirect(url_for('view_applicants', job_id=job_id))
+
+# --- PUBLIC PORTFOLIO WITH DYNAMIC QR CODE ---
+
+@app.route('/u/<int:student_id>')
+def public_portfolio(student_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM students WHERE id = ?', (student_id,))
+    student = cursor.fetchone()
+
+    if not student:
+        conn.close()
+        return redirect(url_for('jobs'))
+
+    cursor.execute('SELECT * FROM student_resumes WHERE student_email = ?', (student['email'],))
+    resume = cursor.fetchone()
+    conn.close()
+
+    skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()]
+    return render_template('portfolio.html', student=student, resume=resume, skills_list=skills_list)
+
+# --- STANDARD PORTAL ROUTES ---
 
 @app.route('/live_jobs')
 def live_jobs():
@@ -272,8 +497,7 @@ def live_jobs():
         response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=12', timeout=4)
         if response.status_code == 200:
             data = response.json()
-            raw_jobs = data.get('jobs', [])
-            for rj in raw_jobs:
+            for rj in data.get('jobs', []):
                 external_jobs.append({
                     "title": rj.get('title'),
                     "company_name": rj.get('company_name'),
@@ -286,8 +510,7 @@ def live_jobs():
     except Exception as e:
         print(f"Error fetching live jobs: {e}")
 
-    all_openings = indian_internships + external_jobs
-    return render_template('live_jobs.html', jobs=all_openings)
+    return render_template('live_jobs.html', jobs=indian_internships + external_jobs)
 
 @app.route('/courses')
 def courses():
@@ -379,13 +602,9 @@ def courses():
     ]
     return render_template('courses.html', courses=curated_courses)
 
-# --- DEVELOPERS / TEAM SHOWCASE ROUTE ---
-
 @app.route('/developers')
 def developers():
     return render_template('developers.html')
-
-# --- SKILL MATCHER (DARK MODE & INTERACTIVE) ---
 
 @app.route('/matcher', methods=['GET', 'POST'])
 def matcher():
@@ -395,7 +614,6 @@ def matcher():
     student_skills_raw = ""
     job_skills_raw = ""
 
-    # Pre-fill student skills if logged in
     if 'student_email' in session and request.method == 'GET':
         conn = get_db()
         cursor = conn.cursor()
@@ -431,8 +649,6 @@ def matcher():
                            student_skills_raw=student_skills_raw,
                            job_skills_raw=job_skills_raw)
 
-# --- STUDENT DASHBOARD WITH PFP SUPPORT ---
-
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'student_email' not in session:
@@ -444,16 +660,15 @@ def dashboard():
     if request.method == 'POST':
         updated_skills = request.form.get('skills', '').strip()
         avatar_url = request.form.get('avatar_url', '').strip()
-        
         cursor.execute('UPDATE students SET skills = ?, avatar_url = ? WHERE email = ?', 
                        (updated_skills, avatar_url, session['student_email']))
         conn.commit()
 
-    cursor.execute('SELECT name, email, skills, avatar_url FROM students WHERE email = ?', (session['student_email'],))
+    cursor.execute('SELECT id, name, email, skills, avatar_url FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
     cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status
+        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status, applications.quiz_score
         FROM internships
         JOIN applications ON internships.id = applications.job_id
         WHERE applications.student_email = ?
@@ -472,23 +687,6 @@ def dashboard():
 
     conn.close()
     return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
-
-# --- RESUME & APPLICATIONS ---
-
-@app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
-def apply(job_id):
-    if 'student_email' not in session:
-        return redirect(url_for('login'))
-
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
-    if not cursor.fetchone():
-        cursor.execute('INSERT INTO applications (student_email, job_id, status) VALUES (?, ?, ?)', 
-                       (session['student_email'], job_id, 'Under Review'))
-        conn.commit()
-    conn.close()
-    return redirect(url_for('dashboard'))
 
 @app.route('/toggle_save/<int:job_id>', methods=['POST'])
 def toggle_save(job_id):
@@ -526,7 +724,7 @@ def interview_prep(job_id):
 
     interview_bank = {
         'python': [
-            {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable, while tuples are immutable once created. Tuples are faster and protect fixed data integrity."},
+            {"q": "What is the difference between list and tuple in Python?", "a": "Lists are mutable; tuples are immutable, faster, and preserve fixed data integrity."},
             {"q": "How does memory management work in Python?", "a": "Python uses a private heap managed by Reference Counting and a generational Garbage Collector to destroy cyclic references."},
             {"q": "Explain decorators in Python.", "a": "Decorators wrap another function to extend its behavior dynamically without modifying its source code directly."}
         ],
@@ -535,10 +733,10 @@ def interview_prep(job_id):
             {"q": "What are primary and foreign keys?", "a": "Primary key uniquely identifies records in a table; foreign key references another primary key to maintain referential integrity."}
         ],
         'html': [
-            {"q": "What are Semantic HTML5 tags?", "a": "Tags like <header>, <nav>, <article>, and <footer> clearly communicate structural meaning to browsers and accessibility screen readers."}
+            {"q": "What are Semantic HTML5 tags?", "a": "Tags like <header>, <nav>, <article>, and <footer> communicate structural meaning to browsers and accessibility tools."}
         ],
         'c': [
-            {"q": "What is a pointer in C?", "a": "A pointer is a variable that stores the memory address of another variable. The dereference operator (*) accesses the value stored at that address."}
+            {"q": "What is a pointer in C?", "a": "A pointer is a variable that stores the memory address of another variable. The dereference operator (*) accesses the value at that address."}
         ]
     }
 
@@ -552,7 +750,7 @@ def interview_prep(job_id):
 
     if not curated_qa:
         curated_qa = [
-            {"skill": "CORE CS", "q": "Explain QuickSort vs. MergeSort.", "a": "MergeSort is always O(N log N) with O(N) space. QuickSort is average O(N log N) in-place but worst case O(N^2) if pivot is unoptimized."}
+            {"skill": "CORE CS", "q": "Explain QuickSort vs. MergeSort.", "a": "MergeSort is always O(N log N) with O(N) space. QuickSort is average O(N log N) in-place."}
         ]
 
     return render_template('interview_prep.html', job=job, curated_qa=curated_qa)
@@ -603,17 +801,6 @@ def analytics():
                            student_readiness=student_readiness,
                            student_skills_count=student_skills_count,
                            total_openings=total_openings, total_apps=total_apps)
-
-@app.route('/update_status/<int:app_id>', methods=['POST'])
-def update_status(app_id):
-    new_status = request.form.get('status', 'Under Review')
-    job_id = request.form.get('job_id')
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('view_applicants', job_id=job_id))
 
 @app.route('/build_resume', methods=['GET', 'POST'])
 def build_resume():
@@ -696,7 +883,7 @@ def resume():
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT name, email, skills FROM students WHERE email = ?', (session['student_email'],))
+    cursor.execute('SELECT id, name, email, skills FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
     cursor.execute('SELECT * FROM student_resumes WHERE student_email = ?', (session['student_email'],))
@@ -763,6 +950,7 @@ def add_job():
         title = request.form.get('title', '').strip()
         company = request.form.get('company', '').strip()
         required_skills = request.form.get('required_skills', '').strip()
+        deadline = request.form.get('deadline', 'Nov 30, 2026').strip()
 
         if pin != ADMIN_PASSKEY:
             error = "Invalid Coordinator Passkey. Only authorized officers can post listings."
@@ -770,8 +958,8 @@ def add_job():
 
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO internships (title, company, required_skills) VALUES (?, ?, ?)', 
-                       (title, company, required_skills))
+        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', 
+                       (title, company, required_skills, deadline))
         conn.commit()
         conn.close()
         return redirect(url_for('jobs'))
@@ -782,12 +970,12 @@ def add_job():
 def view_applicants(job_id):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT title FROM internships WHERE id = ?', (job_id,))
+    cursor.execute('SELECT id, title, company, required_skills FROM internships WHERE id = ?', (job_id,))
     job = cursor.fetchone()
     job_title = job['title'] if job else "Unknown Role"
 
     cursor.execute('''
-        SELECT applications.id as app_id, students.name, students.email, students.skills, applications.status
+        SELECT applications.id as app_id, students.id as student_id, students.name, students.email, students.skills, applications.status, applications.quiz_score
         FROM students
         JOIN applications ON students.email = applications.student_email
         WHERE applications.job_id = ?
@@ -795,7 +983,7 @@ def view_applicants(job_id):
     ''', (job_id,))
     applicants = cursor.fetchall()
     conn.close()
-    return render_template('view_applicants.html', applicants=applicants, job_title=job_title, job_id=job_id)
+    return render_template('view_applicants.html', applicants=applicants, job=job, job_title=job_title, job_id=job_id)
 
 if __name__ == '__main__':
     app.run(debug=True)

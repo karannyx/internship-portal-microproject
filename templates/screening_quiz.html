@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Technical Screening Assessment | Skill2Career{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 780px;">
+    <!-- Title & Drive Meta -->
+    <div class="card p-4 mb-4" style="border-radius: 18px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small">
+                <i class="bi bi-shield-check me-1"></i> Technical Screening Qualifier
+            </span>
+            <span class="small text-muted"><i class="bi bi-clock me-1"></i> Time Estimate: ~2 Mins</span>
+        </div>
+        <h2 class="fw-bold mb-1" style="color: var(--text-heading);">{{ job.title }}</h2>
+        <p class="text-muted mb-0"><i class="bi bi-buildings me-1"></i> {{ job.company }} &bull; Required: {{ job.required_skills }}</p>
+    </div>
+
+    <!-- Quiz Form -->
+    <form method="POST" action="/submit_quiz/{{ job_id }}">
+        <input type="hidden" name="total_questions" value="{{ questions|length }}">
+
+        {% for q in questions %}
+        <div class="card p-4 mb-3" style="border-radius: 16px;">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge rounded-circle bg-primary text-white" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem;">
+                    {{ loop.index }}
+                </span>
+                <h6 class="fw-bold mb-0" style="color: var(--text-heading); font-size: 1rem;">{{ q.q }}</h6>
+            </div>
+
+            <input type="hidden" name="ans_{{ loop.index0 }}" value="{{ q.ans }}">
+
+            <div class="row g-2">
+                {% for opt in q.opts %}
+                <div class="col-md-6">
+                    <label class="p-3 border rounded-3 w-100 d-flex align-items-center gap-2 cursor-pointer" style="background: var(--body-bg); border-color: var(--border-color) !important;">
+                        <input type="radio" name="q_{{ loop.parent.loop.index0 }}" value="{{ opt }}" required>
+                        <span class="small fw-semibold" style="color: var(--text-heading);">{{ opt }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="card p-3 text-center" style="border-radius: 16px;">
+            <p class="small text-muted mb-3">
+                <i class="bi bi-info-circle me-1"></i> Your test score will be attached directly to your application file for placement cell evaluation.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="/jobs" class="btn btn-outline-custom px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary-custom px-5">
+                    <i class="bi bi-check2-circle me-1"></i> Submit Assessment & Apply
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
