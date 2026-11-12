@@ -667,23 +667,36 @@ def dashboard():
     cursor.execute('SELECT id, name, email, skills, avatar_url FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status, applications.quiz_score
-        FROM internships
-        JOIN applications ON internships.id = applications.job_id
-        WHERE applications.student_email = ?
-        ORDER BY applications.id DESC
-    ''', (session['student_email'],))
-    applied_jobs = cursor.fetchall()
+    # Safety Fallback: Agar session me email hai par student table me entry nahi mili
+    if not student:
+        conn.close()
+        session.clear()
+        return redirect(url_for('login'))
 
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company, internships.required_skills
-        FROM internships
-        JOIN saved_jobs ON internships.id = saved_jobs.job_id
-        WHERE saved_jobs.student_email = ?
-        ORDER BY saved_jobs.id DESC
-    ''', (session['student_email'],))
-    saved_jobs = cursor.fetchall()
+    # Safe Query with default fallback
+    try:
+        cursor.execute('''
+            SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status, applications.quiz_score
+            FROM internships
+            JOIN applications ON internships.id = applications.job_id
+            WHERE applications.student_email = ?
+            ORDER BY applications.id DESC
+        ''', (session['student_email'],))
+        applied_jobs = cursor.fetchall()
+    except Exception:
+        applied_jobs = []
+
+    try:
+        cursor.execute('''
+            SELECT internships.id, internships.title, internships.company, internships.required_skills
+            FROM internships
+            JOIN saved_jobs ON internships.id = saved_jobs.job_id
+            WHERE saved_jobs.student_email = ?
+            ORDER BY saved_jobs.id DESC
+        ''', (session['student_email'],))
+        saved_jobs = cursor.fetchall()
+    except Exception:
+        saved_jobs = []
 
     conn.close()
     return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
