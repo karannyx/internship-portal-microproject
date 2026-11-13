@@ -1,206 +1,235 @@
 {% extends "base.html" %}
-{% block title %}Engineering Team & Developers | Skill2Career{% endblock %}
+{% block title %}Meet the Developers | Skill2Career{% endblock %}
 
 {% block content %}
 <style>
-    .dev-profile-card {
+    .dev-hero-banner {
+        position: relative;
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 20px;
-        padding: 2.5rem 2rem;
-        box-shadow: var(--card-shadow);
-        transition: transform 0.25s ease, border-color 0.25s ease;
-        position: relative;
+        border-radius: 22px;
+        padding: 2.2rem;
         overflow: hidden;
+        box-shadow: var(--card-shadow);
     }
-    .dev-profile-card:hover {
-        transform: translateY(-4px);
-        border-color: var(--primary) !important;
-    }
-    .dev-banner {
-        height: 8px;
+    .dev-hero-banner::before {
+        content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        top: -55%;
+        right: -8%;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, transparent 72%);
+        pointer-events: none;
     }
-    .dev-avatar-circle {
-        width: 88px;
-        height: 88px;
+
+    .dev-card {
+        position: relative;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 22px;
+        overflow: hidden;
+        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .dev-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(139, 92, 246, 0.7) !important;
+        box-shadow: 0 20px 40px -14px rgba(124, 58, 237, 0.3);
+    }
+
+    .dev-cover-strip {
+        height: 92px;
+        background: linear-gradient(135deg, #4c1d95, #7c3aed, #6366f1);
+        position: relative;
+    }
+    .dev-cover-strip-alt {
+        height: 92px;
+        background: linear-gradient(135deg, #312e81, #6d28d9, #0ea5e9);
+        position: relative;
+    }
+
+    .dev-avatar-wrap {
+        margin-top: -50px;
+        position: relative;
+        z-index: 2;
+        display: inline-block;
+    }
+    .dev-pfp {
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.2rem;
-        font-weight: 800;
+        object-fit: cover;
+        object-position: top center;
+        border: 4px solid var(--card-bg);
+        background: var(--body-bg);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+    }
+    .dev-monogram {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid var(--card-bg);
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
         color: #ffffff;
-        margin-bottom: 1.25rem;
-        box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.4);
-    }
-    .dev-badge-role {
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        border-radius: 20px;
-        padding: 0.35rem 0.8rem;
-    }
-    .social-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
+        font-size: 2rem;
+        font-weight: 800;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+    }
+
+    .social-pill-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0.52rem 1.05rem;
+        border-radius: 11px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-decoration: none;
         border: 1px solid var(--border-color);
+        background: var(--body-bg);
         color: var(--text-heading);
         transition: all 0.2s ease;
-        text-decoration: none;
     }
-    .social-btn:hover {
+    .social-pill-btn:hover {
         border-color: var(--primary);
-        color: var(--primary);
-        transform: scale(1.08);
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        transform: translateY(-2px);
+    }
+    .social-pill-btn.github-btn:hover {
+        border-color: #a78bfa;
+    }
+    .social-pill-btn.linkedin-btn:hover {
+        border-color: #38bdf8;
+        color: #38bdf8;
     }
 </style>
 
-<div class="container py-3">
-    <!-- Header Title -->
-    <div class="text-center mb-5">
-        <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--badge-bg); color: var(--badge-text);">
-            <i class="bi bi-people-fill me-1"></i> Core Engineering Team
-        </span>
-        <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
-            Meet the Developers Behind Skill2Career
-        </h1>
-        <p class="text-muted mx-auto" style="max-width: 650px;">
-            Engineered as a high-performance student career enablement platform for Department of Computer Science & Engineering, Madhav Institute of Technology & Science (MITS), Gwalior.
-        </p>
+<div class="container py-3" style="max-width: 1020px;">
+    <!-- Hero Header -->
+    <div class="dev-hero-banner mb-4 text-center text-md-start">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--body-bg); color: var(--badge-text);">
+                    <i class="bi bi-code-slash me-1"></i> Engineering & Architecture Team
+                </span>
+                <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
+                    Built by Students at MITS Gwalior
+                </h1>
+                <p class="text-muted mb-0" style="font-size: 0.94rem;">
+                    Designed and engineered from the ground up to automate campus placement workflows, skill-gap matching, and verified student portfolios.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-inline-flex flex-wrap gap-1.5 justify-content-md-end">
+                    <span class="badge badge-skill">Python & Flask</span>
+                    <span class="badge badge-skill">SQLite3</span>
+                    <span class="badge badge-skill">Firebase Auth</span>
+                    <span class="badge badge-skill">Bootstrap 5.3</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Developer Profile Cards -->
-    <div class="row g-4 mb-5">
-        <!-- Lead Developer 1: Karan Sahu -->
+    <!-- Developers Cards Grid -->
+    <div class="row g-4">
+        <!-- Developer 1: Karan Sahu -->
         <div class="col-lg-6">
-            <div class="dev-profile-card h-100 d-flex flex-column justify-content-between">
-                <div class="dev-banner"></div>
+            <div class="card dev-card h-100 d-flex flex-column justify-content-between">
                 <div>
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="dev-avatar-circle" style="background: linear-gradient(135deg, #7c3aed, #4c1d95);">
-                            K
+                    <div class="dev-cover-strip"></div>
+                    <div class="px-4 pb-4">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <div class="dev-avatar-wrap">
+                                <img src="/static/karan.jpg" alt="Karan Sahu" class="dev-pfp"
+                                     onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/karannyx.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
+                                <div class="dev-monogram" style="display: none;">KS</div>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 small fw-semibold">
+                                <i class="bi bi-cpu me-1"></i> Full-Stack & Backend Lead
+                            </span>
                         </div>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle dev-badge-role">
-                            Full-Stack Architect
-                        </span>
-                    </div>
 
-                    <h3 class="fw-bold mb-1" style="color: var(--text-heading);">Karan Sahu</h3>
-                    <div class="small text-muted mb-3">
-                        <i class="bi bi-mortarboard me-1"></i> B.Tech CSE &bull; Roll: <strong>BTCS26O1062</strong>
-                    </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--text-heading);">Karan Sahu</h4>
+                        <p class="small text-muted fw-semibold mb-3">
+                            <i class="bi bi-mortarboard-fill text-primary me-1"></i> B.Tech Computer Science & Engineering &bull; MITS Gwalior
+                        </p>
 
-                    <p class="small text-muted mb-4" style="line-height: 1.6;">
-                        Architected the core application engine, SQLite database schema normalization, algorithmic skill compatibility scoring, ATS single-page resume generator, and real-time live telemetry ingestion.
-                    </p>
+                        <p class="small text-muted mb-3" style="line-height: 1.6;">
+                            Architected the Flask backend, relational SQLite schema, Firebase authentication sync, automated SMTP dispatch engine, and cloud deployment pipeline.
+                        </p>
 
-                    <div class="mb-4">
-                        <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-                            Core Engineering Stack
-                        </div>
-                        <div class="d-flex flex-wrap gap-1">
-                            <span class="badge badge-skill">Python 3</span>
-                            <span class="badge badge-skill">Flask WSGI</span>
-                            <span class="badge badge-skill">SQLite3 3NF</span>
+                        <div class="d-flex flex-wrap gap-1.5 mb-4">
+                            <span class="badge badge-skill">Python / Flask</span>
+                            <span class="badge badge-skill">SQL & Database</span>
                             <span class="badge badge-skill">REST APIs</span>
-                            <span class="badge badge-skill">Firebase Auth</span>
-                            <span class="badge badge-skill">ReportLab PDF</span>
+                            <span class="badge badge-skill">Git & Render</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color) !important;">
-                    <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i> MITS Gwalior</span>
-                    <div class="d-flex gap-2">
-                        <a href="https://github.com/karannyx" target="_blank" class="social-btn" title="GitHub Profile">
-                            <i class="bi bi-github"></i>
-                        </a>
-                        <a href="mailto:karansahu1594@gmail.com" class="social-btn" title="Send Email">
-                            <i class="bi bi-envelope-fill"></i>
-                        </a>
-                    </div>
+                <!-- Social & Contact Links -->
+                <div class="px-4 py-3 border-top d-flex flex-wrap gap-2" style="border-color: var(--border-color) !important;">
+                    <a href="https://github.com/karannyx" target="_blank" rel="noopener noreferrer" class="social-pill-btn github-btn">
+                        <i class="bi bi-github"></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/karannyx" target="_blank" rel="noopener noreferrer" class="social-pill-btn linkedin-btn">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </a>
+                    <a href="mailto:karansahu1594@gmail.com" class="social-pill-btn">
+                        <i class="bi bi-envelope-fill text-primary"></i> Email
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Developer 2: Yuvraj Yadav -->
         <div class="col-lg-6">
-            <div class="dev-profile-card h-100 d-flex flex-column justify-content-between">
-                <div class="dev-banner" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+            <div class="card dev-card h-100 d-flex flex-column justify-content-between">
                 <div>
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="dev-avatar-circle" style="background: linear-gradient(135deg, #10b981, #047857);">
-                            Y
+                    <div class="dev-cover-strip-alt"></div>
+                    <div class="px-4 pb-4">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <div class="dev-avatar-wrap">
+                                <img src="/static/yuvraj.jpg" alt="Yuvraj Yadav" class="dev-pfp"
+                                     onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/yyadavind.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
+                                <div class="dev-monogram" style="display: none;">YY</div>
+                            </div>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 small fw-semibold">
+                                <i class="bi bi-palette me-1"></i> Frontend & QA Co-Developer
+                            </span>
                         </div>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle dev-badge-role">
-                            UI/UX & Frontend Lead
-                        </span>
-                    </div>
 
-                    <h3 class="fw-bold mb-1" style="color: var(--text-heading);">Yuvraj Yadav</h3>
-                    <div class="small text-muted mb-3">
-                        <i class="bi bi-mortarboard me-1"></i> B.Tech CSE &bull; Roll: <strong>BTCS26O1156</strong>
-                    </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--text-heading);">Yuvraj Yadav</h4>
+                        <p class="small text-muted fw-semibold mb-3">
+                            <i class="bi bi-mortarboard-fill text-primary me-1"></i> B.Tech Computer Science & Engineering &bull; MITS Gwalior
+                        </p>
 
-                    <p class="small text-muted mb-4" style="line-height: 1.6;">
-                        Spearheaded the developer-centric Obsidian Violet user interface, responsive Bootstrap styling, dark/light theme switching mechanisms, client-side live filtering, and interactive Chart.js analytics visualizations.
-                    </p>
+                        <p class="small text-muted mb-3" style="line-height: 1.6;">
+                            Engineered responsive Bootstrap interfaces, interactive student workflows, ATS resume templates, and end-to-end screening & recruiter testing.
+                        </p>
 
-                    <div class="mb-4">
-                        <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-                            Design & UI Systems
-                        </div>
-                        <div class="d-flex flex-wrap gap-1">
-                            <span class="badge badge-skill">HTML5 Semantic</span>
-                            <span class="badge badge-skill">CSS3 Custom Properties</span>
-                            <span class="badge badge-skill">Bootstrap 5.3</span>
-                            <span class="badge badge-skill">Chart.js</span>
-                            <span class="badge badge-skill">JavaScript (ES6+)</span>
+                        <div class="d-flex flex-wrap gap-1.5 mb-4">
+                            <span class="badge badge-skill">HTML5 & CSS3</span>
+                            <span class="badge badge-skill">Bootstrap 5</span>
+                            <span class="badge badge-skill">JavaScript</span>
+                            <span class="badge badge-skill">UI / UX Design</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color) !important;">
-                    <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i> MITS Gwalior</span>
-                    <div class="d-flex gap-2">
-                        <a href="https://github.com" target="_blank" class="social-btn" title="GitHub Profile">
-                            <i class="bi bi-github"></i>
-                        </a>
-                        <a href="mailto:yuvrajyadav@example.com" class="social-btn" title="Send Email">
-                            <i class="bi bi-envelope-fill"></i>
-                        </a>
-                    </div>
+                <!-- Social & Contact Links -->
+                <div class="px-4 py-3 border-top d-flex flex-wrap gap-2" style="border-color: var(--border-color) !important;">
+                    <a href="https://github.com/yyadavind" target="_blank" rel="noopener noreferrer" class="social-pill-btn github-btn">
+                        <i class="bi bi-github"></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/yuvraj-yadav-436579403" target="_blank" rel="noopener noreferrer" class="social-pill-btn linkedin-btn">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </a>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Academic Supervision & Institution Banner -->
-    <div class="card p-4 text-center" style="border-radius: 18px;">
-        <div class="d-flex flex-wrap justify-content-center align-items-center gap-4">
-            <div>
-                <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1 rounded-pill small mb-1">
-                    PROJECT SUPERVISION
-                </span>
-                <h5 class="fw-bold mb-0" style="color: var(--text-heading);">Dr. Ranjeet Kumar Singh</h5>
-                <p class="small text-muted mb-0">Department of Computer Science & Engineering &bull; M.I.T.S. Gwalior</p>
-            </div>
-            <div class="border-start ps-4 d-none d-md-block" style="border-color: var(--border-color) !important;">
-                <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1 rounded-pill small mb-1">
-                    ACCREDITATION
-                </span>
-                <h6 class="fw-bold mb-0" style="color: var(--text-heading);">NAAC A++ Accredited University</h6>
-                <p class="small text-muted mb-0">Established 1957 &bull; Deemed to be University</p>
             </div>
         </div>
     </div>
