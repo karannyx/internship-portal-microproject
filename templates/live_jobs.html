@@ -2,103 +2,515 @@
 {% block title %}Live Online Openings | Skill2Career{% endblock %}
 
 {% block content %}
-<div class="container py-3">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--badge-bg); color: var(--badge-text);">
-                <i class="bi bi-broadcast me-1"></i> Live Telemetry Feed
-            </span>
-            <h1 class="h3 fw-bold mb-1" style="color: var(--text-heading);">Indian & Global Tech Openings</h1>
-            <p class="text-muted small mb-0">Direct verified career portals and live remote engineering internships</p>
-        </div>
-    </div>
+<style>
+    /* Hero Banner with Mesh Glow */
+    .hero-telemetry-banner {
+        position: relative;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        padding: 2rem;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+    }
+    .hero-telemetry-banner::before {
+        content: "";
+        position: absolute;
+        top: -60%;
+        right: -10%;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, rgba(124, 58, 237, 0) 70%);
+        pointer-events: none;
+    }
 
-    <div class="card p-3 mb-4" style="border-radius: 14px;">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-7">
-                <input type="text" id="liveSearchInput" class="form-control" placeholder="Search company, role, or tech stack...">
+    /* Pulsing Live Dot */
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: pulseGreen 1.8s infinite;
+    }
+    @keyframes pulseGreen {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Stat Mini Pills */
+    .stat-pill-box {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 0.65rem 1rem;
+        min-width: 115px;
+    }
+
+    /* Command Search & Filter Deck */
+    .command-deck {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 1.15rem;
+        box-shadow: var(--card-shadow);
+    }
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .search-wrapper .search-icon {
+        position: absolute;
+        left: 14px;
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+    .search-wrapper input {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--body-bg) !important;
+        font-size: 0.92rem;
+    }
+    .clear-search-btn {
+        position: absolute;
+        right: 12px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        display: none;
+        cursor: pointer;
+    }
+
+    /* Segmented Tabs */
+    .region-tabs {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 4px;
+        display: inline-flex;
+        gap: 4px;
+    }
+    .region-tab-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 0.45rem 0.95rem;
+        border-radius: 9px;
+        transition: all 0.2s ease;
+    }
+    .region-tab-btn:hover {
+        color: var(--text-heading);
+    }
+    .region-tab-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
+    }
+
+    /* Quick Skill Chips */
+    .skill-chip {
+        border: 1px solid var(--border-color);
+        background: var(--body-bg);
+        color: var(--text-body);
+        font-size: 0.76rem;
+        font-weight: 600;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .skill-chip:hover, .skill-chip.active {
+        border-color: var(--primary);
+        background: var(--badge-bg);
+        color: var(--badge-text);
+    }
+
+    /* Premium Job Card */
+    .premium-job-card {
+        position: relative;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .premium-job-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(139, 92, 246, 0.65) !important;
+        box-shadow: 0 18px 36px -12px rgba(124, 58, 237, 0.28);
+    }
+    .card-top-accent-india {
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #34d399, #059669);
+    }
+    .card-top-accent-global {
+        height: 4px;
+        background: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6);
+    }
+
+    /* Company Monogram Avatar */
+    .company-monogram {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.05rem;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+    }
+    .monogram-india {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.28));
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .monogram-global {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(99, 102, 241, 0.28));
+        color: #a78bfa;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+    }
+
+    /* Meta Micro Pills */
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        padding: 0.28rem 0.65rem;
+        border-radius: 8px;
+    }
+
+    /* Interactive Card Tag */
+    .clickable-tag {
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .clickable-tag:hover {
+        transform: translateY(-1px);
+        border-color: var(--primary) !important;
+    }
+
+    /* Copy Link Button */
+    .copy-link-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--body-bg);
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .copy-link-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    /* CTA Arrow Animation */
+    .btn-portal-cta {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+        color: #ffffff !important;
+        border: none;
+        border-radius: 11px;
+        padding: 0.5rem 1.1rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+        transition: all 0.2s ease;
+    }
+    .btn-portal-cta:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
+        color: #ffffff !important;
+    }
+    .btn-portal-cta i {
+        transition: transform 0.2s ease;
+    }
+    .btn-portal-cta:hover i {
+        transform: translate(2px, -2px);
+    }
+</style>
+
+<div class="container py-3">
+    <!-- Hero Telemetry Header -->
+    <div class="hero-telemetry-banner mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill border mb-3" style="background: var(--body-bg); border-color: var(--border-color) !important;">
+                    <span class="live-dot"></span>
+                    <span class="small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.06em; color: var(--text-heading);">
+                        Live Career Telemetry &bull; Verified Direct Links
+                    </span>
+                </div>
+                <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
+                    Explore Indian & Global Tech Openings
+                </h1>
+                <p class="text-muted mb-0" style="max-width: 620px; font-size: 0.94rem;">
+                    Curated government tech traineeships, flagship Indian corporate internships, and real-time global remote engineering roles—zero middlemen.
+                </p>
             </div>
-            <div class="col-md-5 text-md-end">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-custom active" onclick="filterRegion('all', this)">All ({{ jobs|length }})</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom" onclick="filterRegion('india', this)">Indian Portals</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom" onclick="filterRegion('global', this)">Global Remote</button>
+            <div class="col-lg-4">
+                <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+                    <div class="stat-pill-box text-center">
+                        <div class="h4 fw-bold mb-0" style="color: var(--primary);">{{ jobs|length }}</div>
+                        <div class="small text-muted" style="font-size: 0.72rem;">Active Openings</div>
+                    </div>
+                    <div class="stat-pill-box text-center">
+                        <div class="h4 fw-bold mb-0 text-success">
+                            {{ jobs | selectattr('is_indian') | list | length }}
+                        </div>
+                        <div class="small text-muted" style="font-size: 0.72rem;">India Portals</div>
+                    </div>
+                    <div class="stat-pill-box text-center">
+                        <div class="h4 fw-bold mb-0" style="color: #60a5fa;">
+                            {{ jobs | rejectattr('is_indian') | list | length }}
+                        </div>
+                        <div class="small text-muted" style="font-size: 0.72rem;">Global Remote</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Command Search & Filter Bar -->
+    <div class="command-deck mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-7">
+                <div class="search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="liveSearchInput" class="form-control" placeholder="Search by role, company (TCS, ISRO, Infosys), or stack...">
+                    <button type="button" id="clearSearchBtn" class="clear-search-btn" onclick="resetAllFilters()" title="Clear search">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-5 text-lg-end">
+                <div class="region-tabs">
+                    <button type="button" class="region-tab-btn active" onclick="filterRegion('all', this)">
+                        All ({{ jobs|length }})
+                    </button>
+                    <button type="button" class="region-tab-btn" onclick="filterRegion('india', this)">
+                        <i class="bi bi-geo-alt-fill me-1"></i> Indian Portals
+                    </button>
+                    <button type="button" class="region-tab-btn" onclick="filterRegion('global', this)">
+                        <i class="bi bi-globe2 me-1"></i> Global Remote
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Skill Filter Chips -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mt-3 pt-3 border-top" style="border-color: var(--border-color) !important;">
+            <span class="small text-muted fw-semibold me-1" style="font-size: 0.75rem;">
+                <i class="bi bi-funnel me-1"></i> Quick Stack:
+            </span>
+            <button type="button" class="skill-chip active" onclick="quickSkillFilter('', this)">All Stacks</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('Python', this)">Python</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('SQL', this)">SQL</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('C', this)">C / DSA</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('HTML', this)">HTML / Web</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('React', this)">React</button>
+            <button type="button" class="skill-chip" onclick="quickSkillFilter('Cloud', this)">Cloud / Docker</button>
+            <span class="ms-auto small text-muted" id="visibleCountLabel" style="font-size: 0.76rem;">
+                Showing {{ jobs|length }} opportunities
+            </span>
+        </div>
+    </div>
+
+    <!-- Job Cards Grid -->
     <div class="row g-4" id="liveJobsGrid">
         {% for job in jobs %}
-        <div class="col-lg-6 live-job-card" data-region="{{ 'india' if job.is_indian else 'global' }}" data-search="{{ (job.title ~ ' ' ~ job.company_name ~ ' ' ~ (job.tags|join(' ')))|lower }}">
-            <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
-                <div>
-                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                        <div>
-                            <h5 class="fw-bold mb-1" style="color: var(--text-heading);">{{ job.title }}</h5>
-                            <div class="small text-muted fw-semibold">
-                                <i class="bi bi-buildings me-1"></i> {{ job.company_name }}
+        <div class="col-lg-6 live-job-card" data-region="{{ 'india' if job.is_indian else 'global' }}" data-search="{{ (job.title ~ ' ' ~ job.company_name ~ ' ' ~ job.candidate_required_location ~ ' ' ~ (job.tags|join(' ')))|lower }}">
+            <div class="card premium-job-card h-100 d-flex flex-column justify-content-between">
+                <!-- Top Colored Strip -->
+                <div class="{{ 'card-top-accent-india' if job.is_indian else 'card-top-accent-global' }}"></div>
+
+                <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Header: Monogram + Title + Region Badge -->
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="company-monogram {{ 'monogram-india' if job.is_indian else 'monogram-global' }}">
+                                    {{ job.company_name[:2]|upper }}
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.08rem; line-height: 1.3;">
+                                        {{ job.title }}
+                                    </h5>
+                                    <div class="small fw-semibold text-muted d-flex align-items-center gap-1">
+                                        <i class="bi bi-buildings"></i> {{ job.company_name }}
+                                        <i class="bi bi-patch-check-fill text-primary ms-1" style="font-size: 0.8rem;" title="Verified Organization"></i>
+                                    </div>
+                                </div>
                             </div>
+
+                            {% if job.is_indian %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small flex-shrink-0">
+                                    <i class="bi bi-flag-fill me-1" style="font-size: 0.68rem;"></i> India Portal
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small flex-shrink-0">
+                                    <i class="bi bi-globe me-1" style="font-size: 0.68rem;"></i> Global Remote
+                                </span>
+                            {% endif %}
                         </div>
-                        {% if job.is_indian %}
-                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">
-                                India Portal
+
+                        <!-- Location & Role Type Pills -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="meta-pill">
+                                <i class="bi bi-geo-alt text-primary"></i> {{ job.candidate_required_location }}
                             </span>
-                        {% else %}
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small">
-                                Global Remote
+                            <span class="meta-pill">
+                                <i class="bi bi-briefcase text-primary"></i> {{ job.job_type }}
                             </span>
-                        {% endif %}
+                        </div>
+
+                        <!-- Clickable Tech Tags -->
+                        <div class="d-flex flex-wrap gap-1.5 mb-3">
+                            {% for tag in job.tags %}
+                                <span class="badge badge-skill clickable-tag" onclick="clickTagFilter('{{ tag }}')" title="Filter by {{ tag }}">
+                                    {{ tag }}
+                                </span>
+                            {% endfor %}
+                        </div>
                     </div>
 
-                    <div class="small text-muted mb-3">
-                        <i class="bi bi-geo-alt me-1"></i> {{ job.candidate_required_location }} &bull; {{ job.job_type }}
-                    </div>
+                    <!-- Footer: Verified Indicator + Copy Button + Official CTA -->
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center gap-2" style="border-color: var(--border-color) !important;">
+                        <span class="small text-muted d-flex align-items-center gap-1" style="font-size: 0.78rem;">
+                            <i class="bi bi-shield-lock-fill text-success"></i> Direct Career Portal
+                        </span>
 
-                    <div class="d-flex flex-wrap gap-1 mb-3">
-                        {% for tag in job.tags %}
-                            <span class="badge badge-skill">{{ tag }}</span>
-                        {% endfor %}
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="copy-link-btn" onclick="copyPortalUrl(this, '{{ job.url }}')" title="Copy portal link">
+                                <i class="bi bi-link-45deg fs-5"></i>
+                            </button>
+                            <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="btn-portal-cta">
+                                Visit Official Portal <i class="bi bi-arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
-
-                <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--border-color) !important;">
-                    <span class="small text-muted"><i class="bi bi-shield-check text-success me-1"></i> Official Career Link</span>
-                    <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="btn btn-sm btn-primary-custom px-3">
-                        Visit Official Portal <i class="bi bi-box-arrow-up-right ms-1"></i>
-                    </a>
                 </div>
             </div>
         </div>
         {% endfor %}
+    </div>
+
+    <!-- Empty Filter State -->
+    <div id="emptyFilterState" class="card p-5 text-center mt-3" style="border-radius: 20px; display: none;">
+        <div class="mb-2" style="font-size: 2.5rem; color: var(--primary);">
+            <i class="bi bi-search-heart"></i>
+        </div>
+        <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Openings Found</h5>
+        <p class="text-muted small mb-3">Try clearing your search keyword or switching back to "All Portals".</p>
+        <div>
+            <button type="button" class="btn btn-primary-custom px-4" onclick="resetAllFilters()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
     let activeRegion = 'all';
     const liveSearch = document.getElementById('liveSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
     const liveCards = document.querySelectorAll('.live-job-card');
+    const emptyState = document.getElementById('emptyFilterState');
+    const countLabel = document.getElementById('visibleCountLabel');
 
     function applyLiveFilters() {
         const q = liveSearch.value.toLowerCase().trim();
+        clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+
+        let visibleCount = 0;
         liveCards.forEach(card => {
             const region = card.getAttribute('data-region');
             const text = card.getAttribute('data-search');
             const matchesRegion = (activeRegion === 'all' || region === activeRegion);
             const matchesSearch = text.includes(q);
-            card.style.display = (matchesRegion && matchesSearch) ? 'block' : 'none';
+
+            if (matchesRegion && matchesSearch) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
         });
+
+        countLabel.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'opportunity' : 'opportunities'}`;
+        emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
     function filterRegion(region, btn) {
         activeRegion = region;
-        document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.region-tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         applyLiveFilters();
     }
 
+    function quickSkillFilter(skill, chipBtn) {
+        document.querySelectorAll('.skill-chip').forEach(c => c.classList.remove('active'));
+        if (chipBtn) chipBtn.classList.add('active');
+        liveSearch.value = skill;
+        applyLiveFilters();
+    }
+
+    function clickTagFilter(tag) {
+        liveSearch.value = tag;
+        document.querySelectorAll('.skill-chip').forEach(c => c.classList.remove('active'));
+        applyLiveFilters();
+        window.scrollTo({ top: 180, behavior: 'smooth' });
+    }
+
+    function resetAllFilters() {
+        activeRegion = 'all';
+        liveSearch.value = '';
+        document.querySelectorAll('.region-tab-btn').forEach((b, idx) => {
+            b.classList.toggle('active', idx === 0);
+        });
+        document.querySelectorAll('.skill-chip').forEach((c, idx) => {
+            c.classList.toggle('active', idx === 0);
+        });
+        applyLiveFilters();
+    }
+
+    function copyPortalUrl(btn, url) {
+        navigator.clipboard.writeText(url).then(() => {
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2 text-success fs-5"></i>';
+            btn.style.borderColor = '#10b981';
+            setTimeout(() => {
+                btn.innerHTML = origHTML;
+                btn.style.borderColor = '';
+            }, 1500);
+        });
+    }
+
     if (liveSearch) {
-        liveSearch.addEventListener('input', applyLiveFilters);
+        liveSearch.addEventListener('input', () => {
+            document.querySelectorAll('.skill-chip').forEach(c => c.classList.remove('active'));
+            applyLiveFilters();
+        });
     }
 </script>
 {% endblock %}
