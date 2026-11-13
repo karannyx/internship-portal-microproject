@@ -48,9 +48,28 @@
         height: 4px;
         background: linear-gradient(90deg, #8b5cf6, #7c3aed, #ec4899);
     }
+    .company-logo-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .company-logo-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
     .company-logo-avatar {
-        width: 48px;
-        height: 48px;
+        width: 50px;
+        height: 50px;
         border-radius: 14px;
         display: flex;
         align-items: center;
@@ -173,12 +192,23 @@
 
                 <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
                     <div>
-                        <!-- Top Row: Avatar, Title, Deadline & Bookmark -->
+                        <!-- Top Row: Logo/Avatar, Title, Deadline & Bookmark -->
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
                             <div class="d-flex gap-3 align-items-center">
-                                <div class="company-logo-avatar">
-                                    {{ job.company[:2]|upper }}
-                                </div>
+                                {% if job.logo %}
+                                    <div class="company-logo-box">
+                                        <img src="{{ job.logo }}" alt="{{ job.company }}" referrerpolicy="no-referrer"
+                                             onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                    </div>
+                                    <div class="company-logo-avatar" style="display: none;">
+                                        {{ job.company[:2]|upper }}
+                                    </div>
+                                {% else %}
+                                    <div class="company-logo-avatar">
+                                        {{ job.company[:2]|upper }}
+                                    </div>
+                                {% endif %}
+
                                 <div>
                                     <h5 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.06rem;">{{ job.title }}</h5>
                                     <div class="small text-muted fw-semibold"><i class="bi bi-buildings me-1"></i>{{ job.company }}</div>

@@ -30,6 +30,34 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_company_logo(company_name, api_logo=None):
+    """Returns official high-res company logo URL with domain matching."""
+    if api_logo:
+        return api_logo
+    name = (company_name or "").lower()
+    domain_map = {
+        'india post': 'indiapost.gov.in',
+        'cept': 'indiapost.gov.in',
+        'tcs': 'tcs.com',
+        'tata': 'tcs.com',
+        'infosys': 'infosys.com',
+        'zoho': 'zoho.com',
+        'razorpay': 'razorpay.com',
+        'isro': 'isro.gov.in',
+        'google': 'google.com',
+        'microsoft': 'microsoft.com',
+        'amazon': 'amazon.com',
+        'wipro': 'wipro.com',
+        'hcl': 'hcltech.com',
+        'accenture': 'accenture.com',
+        'flipkart': 'flipkart.com',
+        'paytm': 'paytm.com'
+    }
+    for key, domain in domain_map.items():
+        if key in name:
+            return f"https://www.google.com/s2/favicons?domain={domain}&sz=128"
+    return ""
+
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
@@ -243,6 +271,7 @@ def jobs():
 
         job_dict['is_applied'] = job['id'] in applied_job_ids
         job_dict['is_saved'] = job['id'] in saved_job_ids
+        job_dict['logo'] = get_company_logo(job['company'])
 
         if student_skills and job_req:
             matched_items = [orig for orig in job_req if orig.lower() in student_skills]
@@ -429,7 +458,7 @@ def public_portfolio(student_id):
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()]
     return render_template('portfolio.html', student=student, resume=resume, skills_list=skills_list)
 
-# --- STANDARD PORTAL ROUTES ---
+# --- LIVE ONLINE OPENINGS WITH COMPANY LOGOS ---
 
 @app.route('/live_jobs')
 def live_jobs():
@@ -441,6 +470,7 @@ def live_jobs():
             "job_type": "Govt Tech Trainee",
             "tags": ["Python", "SQL", "HTML", "C"],
             "url": "https://www.indiapost.gov.in/",
+            "logo": get_company_logo("India Post"),
             "is_indian": True
         },
         {
@@ -450,6 +480,7 @@ def live_jobs():
             "job_type": "Corporate Internship",
             "tags": ["Python", "SQL", "C", "DSA"],
             "url": "https://www.tcs.com/careers",
+            "logo": get_company_logo("TCS"),
             "is_indian": True
         },
         {
@@ -459,6 +490,7 @@ def live_jobs():
             "job_type": "Flagship Internship",
             "tags": ["Python", "Cloud", "SQL", "Flask"],
             "url": "https://www.infosys.com/careers.html",
+            "logo": get_company_logo("Infosys"),
             "is_indian": True
         },
         {
@@ -468,6 +500,7 @@ def live_jobs():
             "job_type": "Product Internship",
             "tags": ["HTML", "React", "JavaScript", "SQL"],
             "url": "https://www.zoho.com/careers/",
+            "logo": get_company_logo("Zoho"),
             "is_indian": True
         },
         {
@@ -477,6 +510,7 @@ def live_jobs():
             "job_type": "Fintech Internship",
             "tags": ["Python", "SQL", "REST APIs", "Docker"],
             "url": "https://razorpay.com/jobs/",
+            "logo": get_company_logo("Razorpay"),
             "is_indian": True
         },
         {
@@ -486,6 +520,7 @@ def live_jobs():
             "job_type": "Govt Research Trainee",
             "tags": ["Python", "C", "Data Analysis", "GIS"],
             "url": "https://www.isro.gov.in/",
+            "logo": get_company_logo("ISRO"),
             "is_indian": True
         }
     ]
@@ -496,13 +531,16 @@ def live_jobs():
         if response.status_code == 200:
             data = response.json()
             for rj in data.get('jobs', []):
+                c_name = rj.get('company_name', '')
+                api_logo = rj.get('company_logo') or rj.get('company_logo_url')
                 external_jobs.append({
                     "title": rj.get('title'),
-                    "company_name": rj.get('company_name'),
+                    "company_name": c_name,
                     "candidate_required_location": rj.get('candidate_required_location') or 'Worldwide',
                     "job_type": rj.get('job_type') or 'Remote Tech',
                     "tags": rj.get('tags', [])[:5],
                     "url": rj.get('url'),
+                    "logo": get_company_logo(c_name, api_logo),
                     "is_indian": False
                 })
     except Exception as e:
