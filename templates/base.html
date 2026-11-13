@@ -259,18 +259,18 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0 gap-lg-1">
                 <li class="nav-item">
-                    <a class="nav-link px-2" href="/jobs"><i class="bi bi-grid me-1"></i> Browse Jobs</a>
+                    <a class="nav-link px-2" href="/live_jobs">
+                        <span class="badge rounded-pill me-1 border" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.65rem;">LIVE</span> Online Openings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-2" href="/jobs"><i class="bi bi-building-check me-1"></i> Campus Drives</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-2" href="/courses"><i class="bi bi-mortarboard me-1"></i> Free Courses</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-2" href="/analytics"><i class="bi bi-graph-up-arrow me-1"></i> Analytics</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-2" href="/live_jobs">
-                        <span class="badge rounded-pill me-1 border" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.65rem;">LIVE</span> Online Openings
-                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-2" href="/matcher"><i class="bi bi-cpu me-1"></i> Matcher</a>
@@ -347,7 +347,7 @@
         });
     }
 
-    // Direct Mobile Hamburger Toggle (Works 100% on all mobile devices)
+    // Direct Mobile Hamburger Toggle
     const navBtn = document.getElementById('navToggleBtn');
     const navMenu = document.getElementById('navMenu');
 
@@ -362,7 +362,6 @@
             }
         });
 
-        // Close menu when tapping a link on mobile
         document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (window.innerWidth < 992) {

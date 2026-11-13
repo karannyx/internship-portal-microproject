@@ -131,7 +131,6 @@ init_db()
 # --- AUTOMATED EMAIL DISPATCHER ---
 
 def dispatch_notification_email(student_email, student_name, job_title, company, status):
-    """Sends automated email or gracefully logs mock notification if SMTP not configured."""
     subject = f"Placement Cell Notice: Application Status Updated for {job_title}"
     body = f"""
 Dear {student_name},
@@ -209,7 +208,7 @@ def sync_live_jobs_automatically():
 
 @app.route('/')
 def home():
-    return redirect(url_for('jobs'))
+    return redirect(url_for('live_jobs'))
 
 @app.route('/jobs')
 def jobs():
@@ -395,7 +394,6 @@ def update_status(app_id):
     cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
     conn.commit()
 
-    # Get student & job info to trigger email
     cursor.execute('''
         SELECT students.name, students.email, internships.title, internships.company
         FROM applications
@@ -667,13 +665,11 @@ def dashboard():
     cursor.execute('SELECT id, name, email, skills, avatar_url FROM students WHERE email = ?', (session['student_email'],))
     student = cursor.fetchone()
 
-    # Safety Fallback: Agar session me email hai par student table me entry nahi mili
     if not student:
         conn.close()
         session.clear()
         return redirect(url_for('login'))
 
-    # Safe Query with default fallback
     try:
         cursor.execute('''
             SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status, applications.quiz_score
@@ -920,7 +916,7 @@ def register():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('jobs'))
+    return redirect(url_for('live_jobs'))
 
 @app.route('/sync_firebase', methods=['POST'])
 def sync_firebase():
