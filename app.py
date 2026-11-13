@@ -442,7 +442,7 @@ def live_jobs():
             "candidate_required_location": "India (Bengaluru / Hybrid)",
             "job_type": "Govt Tech Trainee",
             "tags": ["Python", "SQL", "HTML", "C"],
-            "url": "https://cept.gov.in/",
+            "url": "https://www.indiapost.gov.in/",
             "is_indian": True
         },
         {
@@ -451,7 +451,7 @@ def live_jobs():
             "candidate_required_location": "Pan India / Remote",
             "job_type": "Corporate Internship",
             "tags": ["Python", "SQL", "C", "DSA"],
-            "url": "https://www.tcs.com/careers/india",
+            "url": "https://www.tcs.com/careers",
             "is_indian": True
         },
         {
@@ -460,7 +460,7 @@ def live_jobs():
             "candidate_required_location": "Bengaluru / Pune, India",
             "job_type": "Flagship Internship",
             "tags": ["Python", "Cloud", "SQL", "Flask"],
-            "url": "https://www.infosys.com/instep/",
+            "url": "https://www.infosys.com/careers.html",
             "is_indian": True
         },
         {
@@ -487,7 +487,7 @@ def live_jobs():
             "candidate_required_location": "India (IIRS / SAC Dehradun)",
             "job_type": "Govt Research Trainee",
             "tags": ["Python", "C", "Data Analysis", "GIS"],
-            "url": "https://www.isro.gov.in/Internship.html",
+            "url": "https://www.isro.gov.in/",
             "is_indian": True
         }
     ]
