@@ -1,234 +1,346 @@
 {% extends "base.html" %}
-{% block title %}Curated YouTube Lectures & Certifications | Skill2Career{% endblock %}
+{% block title %}Free YouTube Tech Courses | Skill2Career{% endblock %}
 
 {% block content %}
 <style>
-    .yt-badge {
-        background-color: rgba(239, 68, 68, 0.15) !important;
-        color: #ef4444 !important;
-        border: 1px solid rgba(239, 68, 68, 0.35) !important;
-        font-weight: 700;
-        font-size: 0.72rem;
-        padding: 0.25rem 0.6rem;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-    .cert-badge {
-        background-color: rgba(16, 185, 129, 0.15) !important;
-        color: #10b981 !important;
-        border: 1px solid rgba(16, 185, 129, 0.35) !important;
-        font-weight: 700;
-        font-size: 0.72rem;
-        padding: 0.25rem 0.6rem;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-    .lang-pill {
+    .courses-hero-banner {
+        position: relative;
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        color: var(--text-heading);
-        font-size: 0.72rem;
-        font-weight: 600;
-        padding: 0.2rem 0.55rem;
-        border-radius: 20px;
+        border-radius: 22px;
+        padding: 2rem;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
     }
-    .btn-youtube-watch {
-        background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: 600;
-        border-radius: 10px;
-        padding: 0.6rem 1.25rem;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
-        transition: all 0.2s ease;
-        text-decoration: none;
+    .courses-hero-banner::before {
+        content: "";
+        position: absolute;
+        top: -55%;
+        right: -8%;
+        width: 360px;
+        height: 360px;
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.16) 0%, rgba(124, 58, 237, 0.14) 45%, transparent 72%);
+        pointer-events: none;
+    }
+
+    .command-deck {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 1.15rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .lang-tabs {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 4px;
         display: inline-flex;
+        gap: 4px;
+    }
+    .lang-tab-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.42rem 0.9rem;
+        border-radius: 9px;
+        transition: all 0.2s ease;
+    }
+    .lang-tab-btn:hover {
+        color: var(--text-heading);
+    }
+    .lang-tab-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
+    }
+
+    .tech-chip {
+        border: 1px solid var(--border-color);
+        background: var(--body-bg);
+        color: var(--text-body);
+        font-size: 0.77rem;
+        font-weight: 600;
+        padding: 0.32rem 0.8rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .tech-chip:hover, .tech-chip.active {
+        border-color: var(--primary);
+        background: var(--badge-bg);
+        color: var(--badge-text);
+    }
+
+    .course-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .course-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(139, 92, 246, 0.65) !important;
+        box-shadow: 0 18px 36px -12px rgba(124, 58, 237, 0.26);
+    }
+    .course-top-strip {
+        height: 4px;
+        background: linear-gradient(90deg, #ef4444, #8b5cf6, #6366f1);
+    }
+    .yt-icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+        display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
     }
-    .btn-youtube-watch:hover {
-        background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        padding: 0.25rem 0.62rem;
+        border-radius: 8px;
+    }
+    .btn-watch-yt {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+        color: #ffffff !important;
+        border: none;
+        border-radius: 11px;
+        padding: 0.48rem 1.05rem;
+        font-size: 0.83rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+        transition: all 0.2s ease;
+    }
+    .btn-watch-yt:hover {
         transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
         color: #ffffff !important;
     }
 </style>
 
 <div class="container py-3">
-    <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-danger rounded-pill px-2.5 py-1 fw-bold small">
-                    <i class="bi bi-youtube me-1"></i> YouTube Lectures & Certifications
-                </span>
-                <h2 class="fw-bold mb-0" style="color: var(--text-heading);">Skill Learning Hub</h2>
+    <!-- Hero Header -->
+    <div class="courses-hero-banner mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill border mb-3" style="background: var(--body-bg); border-color: var(--border-color) !important;">
+                    <i class="bi bi-youtube text-danger"></i>
+                    <span class="small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.06em; color: var(--text-heading);">
+                        Curated YouTube Learning Hub &bull; 100% Free
+                    </span>
+                </div>
+                <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
+                    Master Every Programming Language on YouTube
+                </h1>
+                <p class="text-muted mb-0" style="max-width: 640px; font-size: 0.94rem;">
+                    Hand-picked full playlists and one-shot masterclasses across C, C++, Python, Java, JavaScript, React, SQL, and DSA in Hindi, Hinglish, and English.
+                </p>
             </div>
-            <p class="mb-0 text-muted">
-                Free high-yield YouTube masterclasses, playlists, and accredited certifications to bridge your required internship skills.
-            </p>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-inline-flex gap-2">
+                    <div class="px-3 py-2 rounded-3 border text-center" style="background: var(--body-bg); border-color: var(--border-color) !important;">
+                        <div class="h4 fw-bold mb-0" style="color: var(--primary);">{{ courses|length }}</div>
+                        <div class="small text-muted" style="font-size: 0.72rem;">Full Courses</div>
+                    </div>
+                    <div class="px-3 py-2 rounded-3 border text-center" style="background: var(--body-bg); border-color: var(--border-color) !important;">
+                        <div class="h4 fw-bold mb-0 text-danger">9</div>
+                        <div class="small text-muted" style="font-size: 0.72rem;">Languages & Stacks</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <a href="/jobs" class="btn btn-outline-custom rounded-pill px-3">
-            <i class="bi bi-briefcase me-1"></i> Explore Jobs
-        </a>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="card p-3 mb-4 shadow-sm" style="border-radius: 14px;">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-5">
+    <!-- Search & Multi-Language Filter Deck -->
+    <div class="command-deck mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-7">
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0">
+                    <span class="input-group-text border-end-0" style="background: var(--body-bg); border-color: var(--border-color);">
                         <i class="bi bi-search text-muted"></i>
                     </span>
-                    <input type="text" id="courseSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by topic (Python, C, SQL), creator, or channel...">
+                    <input type="text" id="courseSearchInput" class="form-control border-start-0" style="background: var(--body-bg) !important;" placeholder="Search creator (Striver, Chai aur Code, Apna College), topic, or language...">
                 </div>
             </div>
-            <div class="col-md-7">
-                <div class="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
-                    <span class="small fw-semibold text-muted me-1">Type:</span>
-                    <button type="button" class="btn btn-sm btn-outline-custom course-filter active" data-type="all">All ({{ courses|length }})</button>
-                    <button type="button" class="btn btn-sm btn-outline-custom course-filter" data-type="youtube">
-                        <i class="bi bi-youtube text-danger me-1"></i> YouTube Lectures
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-custom course-filter" data-type="cert">
-                        <i class="bi bi-award text-success me-1"></i> Certifications
-                    </button>
+            <div class="col-lg-5 text-lg-end">
+                <div class="lang-tabs">
+                    <button type="button" class="lang-tab-btn active" onclick="filterAudioLang('all', this)">All Languages</button>
+                    <button type="button" class="lang-tab-btn" onclick="filterAudioLang('hindi', this)">Hindi / Hinglish</button>
+                    <button type="button" class="lang-tab-btn" onclick="filterAudioLang('english', this)">English</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Tech Stack Chips -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mt-3 pt-3 border-top" style="border-color: var(--border-color) !important;">
+            <span class="small text-muted fw-semibold me-1" style="font-size: 0.75rem;">
+                <i class="bi bi-code-square me-1"></i> Language / Stack:
+            </span>
+            <button type="button" class="tech-chip active" onclick="filterTechTag('all', this)">All ({{ courses|length }})</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('C', this)">C</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('C++', this)">C++</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('Python', this)">Python</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('Java', this)">Java</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('JavaScript', this)">JavaScript</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('HTML/CSS', this)">HTML / CSS</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('React', this)">React</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('DSA', this)">DSA</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('SQL', this)">SQL</button>
+            <button type="button" class="tech-chip" onclick="filterTechTag('Git', this)">Git & GitHub</button>
+            <span class="ms-auto small text-muted" id="coursesCountLabel" style="font-size: 0.76rem;">
+                Showing {{ courses|length }} courses
+            </span>
         </div>
     </div>
 
     <!-- Courses Grid -->
     <div class="row g-4" id="coursesGrid">
-        {% for course in courses %}
-        <div class="col-md-6 col-lg-4 course-card-col" 
-             data-title="{{ course.title|lower }}" 
-             data-provider="{{ course.provider|lower }}" 
-             data-tag="{{ course.tag|lower }}"
-             data-platform="{{ 'youtube' if 'YouTube' in course.type else 'cert' }}">
-            <div class="card p-4 h-100 d-flex flex-column justify-content-between" style="border-radius: 18px;">
-                <div>
-                    <!-- Badge and Language -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        {% if 'YouTube' in course.type %}
-                            <span class="yt-badge">
-                                <i class="bi bi-youtube"></i> {{ course.type }}
-                            </span>
-                        {% else %}
-                            <span class="cert-badge">
-                                <i class="bi bi-patch-check-fill"></i> {{ course.type }}
-                            </span>
-                        {% endif %}
+        {% for c in courses %}
+        <div class="col-lg-6 course-item"
+             data-tag="{{ c.tag }}"
+             data-lang="{{ 'hindi' if 'hindi' in c.language|lower or 'hinglish' in c.language|lower else 'english' }}"
+             data-search="{{ (c.title ~ ' ' ~ c.provider ~ ' ' ~ c.tag ~ ' ' ~ c.language ~ ' ' ~ c.desc)|lower }}">
+            <div class="card course-card h-100 d-flex flex-column justify-content-between">
+                <div class="course-top-strip"></div>
 
-                        <div class="d-flex gap-1 align-items-center">
-                            <span class="lang-pill">{{ course.language }}</span>
-                            <span class="badge border" style="background: var(--badge-bg); color: var(--badge-text);">
-                                {{ course.tag }}
+                <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="yt-icon-box">
+                                    <i class="bi bi-play-btn-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.05rem; line-height: 1.3;">
+                                        {{ c.title }}
+                                    </h5>
+                                    <div class="small fw-semibold text-muted">
+                                        <i class="bi bi-person-video3 me-1 text-primary"></i> {{ c.provider }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span class="badge badge-skill flex-shrink-0">{{ c.tag }}</span>
+                        </div>
+
+                        <p class="small text-muted mb-3" style="line-height: 1.55;">
+                            {{ c.desc }}
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="meta-pill">
+                                <i class="bi bi-translate text-primary"></i> {{ c.language }}
+                            </span>
+                            <span class="meta-pill">
+                                <i class="bi bi-clock text-primary"></i> {{ c.duration }}
+                            </span>
+                            <span class="meta-pill">
+                                <i class="bi bi-bar-chart text-primary"></i> {{ c.level }}
                             </span>
                         </div>
                     </div>
 
-                    <!-- Title & Creator -->
-                    <h4 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.15rem; line-height: 1.35;">
-                        {{ course.title }}
-                    </h4>
-                    <div class="small text-muted mb-3">
-                        <i class="bi bi-person-video3 me-1"></i> {{ course.provider }}
-                    </div>
-
-                    <p class="small text-muted mb-3" style="line-height: 1.55;">
-                        {{ course.desc }}
-                    </p>
-
-                    <!-- Duration & Level Specs -->
-                    <div class="d-flex justify-content-between small text-muted mb-4 pt-2 border-top" style="border-color: var(--border-color) !important;">
-                        <div><i class="bi bi-speedometer2 me-1"></i> {{ course.level }}</div>
-                        <div><i class="bi bi-clock-history me-1"></i> {{ course.duration }}</div>
-                    </div>
-                </div>
-
-                <!-- Action Button -->
-                <div>
-                    {% if 'YouTube' in course.type %}
-                        <a href="{{ course.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-youtube-watch w-100">
-                            <i class="bi bi-play-circle-fill me-1.5"></i> Watch on YouTube <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center gap-2" style="border-color: var(--border-color) !important;">
+                        <span class="small text-muted" style="font-size: 0.78rem;">
+                            <i class="bi bi-collection-play text-danger me-1"></i> {{ c.type }}
+                        </span>
+                        <a href="{{ c.url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="btn-watch-yt">
+                            Watch Course <i class="bi bi-box-arrow-up-right"></i>
                         </a>
-                    {% else %}
-                        <a href="{{ course.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary-custom w-100">
-                            Start Certification <i class="bi bi-box-arrow-up-right ms-1"></i>
-                        </a>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Empty Search Notice -->
-    <div id="noCourseResults" class="text-center py-5 d-none">
-        <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
-        <h5 class="fw-bold" style="color: var(--text-heading);">No Matching Courses Found</h5>
-        <p class="text-muted">Try clearing your search query or selecting a different filter.</p>
+    <!-- Empty Filter State -->
+    <div id="emptyCoursesState" class="card p-5 text-center mt-3" style="border-radius: 20px; display: none;">
+        <h5 class="fw-bold" style="color: var(--text-heading);">No Courses Match This Filter</h5>
+        <p class="text-muted small mb-3">Try switching back to "All Languages" or clearing your search box.</p>
+        <div>
+            <button type="button" class="btn btn-primary-custom px-4" onclick="resetCourseFilters()">Reset Filters</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const searchInput = document.getElementById('courseSearchInput');
-    const filterButtons = document.querySelectorAll('.course-filter');
-    const cards = document.querySelectorAll('.course-card-col');
-    const noResults = document.getElementById('noCourseResults');
+    let selectedTech = 'all';
+    let selectedLang = 'all';
+    const courseSearch = document.getElementById('courseSearchInput');
+    const courseItems = document.querySelectorAll('.course-item');
+    const countLabel = document.getElementById('coursesCountLabel');
+    const emptyBox = document.getElementById('emptyCoursesState');
 
-    let activeFilter = 'all';
+    function applyCourseFilters() {
+        const q = courseSearch.value.toLowerCase().trim();
+        let visible = 0;
 
-    function filterCourses() {
-        const query = searchInput.value.toLowerCase().trim();
-        let visibleCount = 0;
+        courseItems.forEach(item => {
+            const tag = item.getAttribute('data-tag');
+            const lang = item.getAttribute('data-lang');
+            const text = item.getAttribute('data-search');
 
-        cards.forEach(card => {
-            const title = card.getAttribute('data-title');
-            const provider = card.getAttribute('data-provider');
-            const tag = card.getAttribute('data-tag');
-            const platform = card.getAttribute('data-platform');
+            const okTech = (selectedTech === 'all' || tag === selectedTech);
+            const okLang = (selectedLang === 'all' || lang === selectedLang);
+            const okSearch = text.includes(q);
 
-            const matchesQuery = !query || title.includes(query) || provider.includes(query) || tag.includes(query);
-            
-            let matchesFilter = true;
-            if (activeFilter === 'youtube') {
-                matchesFilter = (platform === 'youtube');
-            } else if (activeFilter === 'cert') {
-                matchesFilter = (platform === 'cert');
-            }
-
-            if (matchesQuery && matchesFilter) {
-                card.style.display = '';
-                visibleCount++;
+            if (okTech && okLang && okSearch) {
+                item.style.display = 'block';
+                visible++;
             } else {
-                card.style.display = 'none';
+                item.style.display = 'none';
             }
         });
 
-        if (visibleCount === 0 && cards.length > 0) {
-            noResults.classList.remove('d-none');
-        } else {
-            noResults.classList.add('d-none');
-        }
+        countLabel.textContent = `Showing ${visible} ${visible === 1 ? 'course' : 'courses'}`;
+        emptyBox.style.display = visible === 0 ? 'block' : 'none';
     }
 
-    searchInput.addEventListener('input', filterCourses);
+    function filterTechTag(tag, btn) {
+        selectedTech = tag;
+        document.querySelectorAll('.tech-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        applyCourseFilters();
+    }
 
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeFilter = btn.getAttribute('data-type');
-            filterCourses();
-        });
-    });
+    function filterAudioLang(lang, btn) {
+        selectedLang = lang;
+        document.querySelectorAll('.lang-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyCourseFilters();
+    }
+
+    function resetCourseFilters() {
+        selectedTech = 'all';
+        selectedLang = 'all';
+        courseSearch.value = '';
+        document.querySelectorAll('.tech-chip').forEach((c, idx) => c.classList.toggle('active', idx === 0));
+        document.querySelectorAll('.lang-tab-btn').forEach((b, idx) => b.classList.toggle('active', idx === 0));
+        applyCourseFilters();
+    }
+
+    if (courseSearch) {
+        courseSearch.addEventListener('input', applyCourseFilters);
+    }
 </script>
 {% endblock %}

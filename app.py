@@ -548,11 +548,14 @@ def live_jobs():
 
     return render_template('live_jobs.html', jobs=indian_internships + external_jobs)
 
+# --- MULTI-LANGUAGE YOUTUBE COURSES HUB ---
+
 @app.route('/courses')
 def courses():
     curated_courses = [
+        # --- C LANGUAGE ---
         {
-            "title": "Complete C Language & Data Structures in One Shot",
+            "title": "Complete C Language & Pointers Masterclass (One Shot)",
             "provider": "CodeWithHarry",
             "platform": "YouTube",
             "tag": "C",
@@ -561,22 +564,62 @@ def courses():
             "duration": "15 Hours Full Video",
             "type": "YouTube Lecture",
             "url": "https://www.youtube.com/watch?v=ZSPZob_1TOk",
-            "desc": "Complete masterclass covering C fundamentals, pointers, memory allocation, arrays, strings, and structures with practice problems."
+            "desc": "Master C syntax, memory allocation, pointers, arrays, strings, file I/O, and structures with hands-on problem sets."
         },
         {
-            "title": "Python for Beginners (Full Course)",
-            "provider": "Programming with Mosh / FreeCodeCamp",
+            "title": "C Programming Tutorial for Beginners (Full Course)",
+            "provider": "Apna College (Shradha Khapra)",
             "platform": "YouTube",
-            "tag": "Python",
-            "language": "English",
+            "tag": "C",
+            "language": "Hindi",
             "level": "Beginner",
-            "duration": "6 Hours Masterclass",
+            "duration": "10 Hours One-Shot",
             "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=_uQrJ0TkZlc",
-            "desc": "Hands-on project-based Python introduction covering variables, loops, lists, dictionaries, functions, and building a mini automation script."
+            "url": "https://www.youtube.com/watch?v=irqbmMNs2Bo",
+            "desc": "College-exam and placement-focused C programming course covering loops, recursion, pointers, and dynamic memory."
         },
         {
-            "title": "Chai aur Python (Complete Backend & Core)",
+            "title": "CS50's Introduction to Computer Science",
+            "provider": "Harvard University / edX",
+            "platform": "Harvard / YouTube",
+            "tag": "C",
+            "language": "English",
+            "level": "Beginner to Intermediate",
+            "duration": "10 Weeks Series",
+            "type": "Free Certificate",
+            "url": "https://cs50.harvard.edu/x/",
+            "desc": "Harvard's flagship CS course covering low-level C memory management, algorithms, data structures, and web basics."
+        },
+
+        # --- C++ ---
+        {
+            "title": "Complete C++ Placement & DSA Course",
+            "provider": "CodeHelp (Love Babbar)",
+            "platform": "YouTube",
+            "tag": "C++",
+            "language": "Hindi",
+            "level": "Placement Ready",
+            "duration": "140+ Lectures Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA",
+            "desc": "Comprehensive C++ STL, Object-Oriented Programming (OOPs), recursion, and competitive programming preparation."
+        },
+        {
+            "title": "C++ Full Course for Free (6 Hours)",
+            "provider": "Bro Code",
+            "platform": "YouTube",
+            "tag": "C++",
+            "language": "English",
+            "level": "Beginner to Intermediate",
+            "duration": "6 Hours Full Video",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=-TkoO8Z07hI",
+            "desc": "Fast-paced, zero-fluff C++ tutorial covering pointers, dynamic memory, classes, inheritance, and polymorphism."
+        },
+
+        # --- PYTHON ---
+        {
+            "title": "Chai aur Python (Complete Backend & Core Python)",
             "provider": "Chai aur Code (Hitesh Choudhary)",
             "platform": "YouTube",
             "tag": "Python",
@@ -585,10 +628,114 @@ def courses():
             "duration": "Complete Playlist",
             "type": "YouTube Playlist",
             "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoBsMugTFALhdOoZ5OqCGt7j",
-            "desc": "Deep dive into Python internals, virtual environments, decorators, generators, SQLite integration, and backend development."
+            "desc": "Deep dive into Python internals, virtual environments, decorators, generators, SQLite/MongoDB, and API handling."
         },
         {
-            "title": "Striver's A2Z DSA Complete Course",
+            "title": "100 Days of Code: Complete Python Pro Playlist",
+            "provider": "CodeWithHarry",
+            "platform": "YouTube",
+            "tag": "Python",
+            "language": "Hindi",
+            "level": "Beginner to Pro",
+            "duration": "100 Videos Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu0W_9lII9agwh1XjRt242xIpHhPT2llg",
+            "desc": "Step-by-step daily Python lessons with real-world automation projects, OOPs, Flask basics, and exercises."
+        },
+        {
+            "title": "Python for Beginners — Full Masterclass",
+            "provider": "Programming with Mosh",
+            "platform": "YouTube",
+            "tag": "Python",
+            "language": "English",
+            "level": "Beginner",
+            "duration": "6 Hours Full Video",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=_uQrJ0TkZlc",
+            "desc": "Hands-on Python introduction covering data structures, modules, packages, and building automation & web scripts."
+        },
+
+        # --- JAVA ---
+        {
+            "title": "Java + DSA + Interview Preparation Bootcamp",
+            "provider": "Kunal Kushwaha",
+            "platform": "YouTube",
+            "tag": "Java",
+            "language": "English",
+            "level": "Beginner to Advanced",
+            "duration": "Complete Bootcamp",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ",
+            "desc": "Industry-standard Java OOPs, Collections Framework, Git, and complete Data Structures & Algorithms bootcamp."
+        },
+        {
+            "title": "Java Complete Placement Course (OOPs & Collections)",
+            "provider": "Apna College",
+            "platform": "YouTube",
+            "tag": "Java",
+            "language": "Hindi",
+            "level": "Beginner to Placement",
+            "duration": "Complete Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLfqMhTWNBTe3LtFWcvwpqTkUSlB32kJop",
+            "desc": "Structured Java course covering core syntax, object-oriented principles, exception handling, and interview coding problems."
+        },
+
+        # --- JAVASCRIPT & WEB DEV ---
+        {
+            "title": "Chai aur JavaScript (Complete Modern JS)",
+            "provider": "Chai aur Code (Hitesh Choudhary)",
+            "platform": "YouTube",
+            "tag": "JavaScript",
+            "language": "Hindi",
+            "level": "Beginner to Advanced",
+            "duration": "Complete Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37",
+            "desc": "Master JS execution context, closures, Promises, Async/Await, Fetch API, DOM projects, and ES6+ internals."
+        },
+        {
+            "title": "Complete Web Development Bootcamp (HTML, CSS, JS)",
+            "provider": "Chai aur Code",
+            "platform": "YouTube",
+            "tag": "HTML/CSS",
+            "language": "Hindi",
+            "level": "Beginner",
+            "duration": "Full Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDBNF5s-WH6QBD3Ia43RR28",
+            "desc": "Build responsive websites from scratch with semantic HTML5, modern CSS3 Flexbox & Grid, Tailwind, and DOM logic."
+        },
+        {
+            "title": "JavaScript Full Course for Free (12 Hours)",
+            "provider": "Bro Code",
+            "platform": "YouTube",
+            "tag": "JavaScript",
+            "language": "English",
+            "level": "Beginner to Intermediate",
+            "duration": "12 Hours Full Video",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=lfmg-EJ8gm4",
+            "desc": "Complete project-driven JavaScript course covering ES6 modules, asynchronous programming, and interactive web apps."
+        },
+
+        # --- REACT ---
+        {
+            "title": "Chai aur React — Complete Frontend Framework Series",
+            "provider": "Chai aur Code (Hitesh Choudhary)",
+            "platform": "YouTube",
+            "tag": "React",
+            "language": "Hindi",
+            "level": "Intermediate",
+            "duration": "Complete Playlist",
+            "type": "YouTube Playlist",
+            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDqgPchmvIsL4hTnJIrtige",
+            "desc": "Learn React hooks, Virtual DOM, Context API, Redux Toolkit, React Router, and production app architecture."
+        },
+
+        # --- DSA ---
+        {
+            "title": "Striver's A2Z DSA Complete Placement Course",
             "provider": "take U forward (Striver)",
             "platform": "YouTube",
             "tag": "DSA",
@@ -597,43 +744,47 @@ def courses():
             "duration": "450+ Problems Playlist",
             "type": "YouTube Playlist",
             "url": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz",
-            "desc": "The gold-standard placement prep playlist for TCS, Google, and Infosys. Covers Arrays, Linked Lists, Trees, Graphs, and Dynamic Programming."
+            "desc": "Gold-standard DSA series for TCS Digital, Infosys, Amazon, and Google—covering Arrays, Trees, Graphs, and DP."
         },
+
+        # --- SQL & DATABASES ---
         {
-            "title": "Complete Web Development Bootcamp (HTML, CSS, JS)",
-            "provider": "Chai aur Code",
+            "title": "Complete SQL & Relational Database Course (One Shot)",
+            "provider": "Apna College",
             "platform": "YouTube",
-            "tag": "HTML",
+            "tag": "SQL",
             "language": "Hindi",
-            "level": "Beginner",
-            "duration": "Full Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDBNF5s-WH6QBD3Ia43RR28",
-            "desc": "Master semantic HTML5, modern CSS3 Flexbox & Grid, DOM manipulation, responsive layouts, and modern JavaScript from scratch."
+            "level": "Beginner to Intermediate",
+            "duration": "3.5 Hours One-Shot",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=hlGoQC332VM",
+            "desc": "Learn SQL commands, constraints, primary/foreign keys, Joins, subqueries, and DBMS interview questions."
         },
         {
-            "title": "SQL Tutorial - Full Database Course for Beginners",
+            "title": "SQL Tutorial — Full Database Course for Beginners",
             "provider": "freeCodeCamp.org",
             "platform": "YouTube",
             "tag": "SQL",
             "language": "English",
             "level": "Beginner",
-            "duration": "4.5 Hours",
+            "duration": "4.5 Hours Full Video",
             "type": "YouTube Lecture",
             "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
-            "desc": "Step-by-step introduction to relational database schemas, CRUD operations, foreign keys, table joins, and SQL query optimization."
+            "desc": "Step-by-step relational database design, CRUD queries, aggregate functions, and schema normalization."
         },
+
+        # --- GIT & GITHUB ---
         {
-            "title": "CS50's Introduction to Computer Science",
-            "provider": "Harvard University / edX",
-            "platform": "Harvard / edX",
-            "tag": "C",
-            "language": "English",
-            "level": "Beginner to Intermediate",
-            "duration": "10 Weeks",
-            "type": "Free Certificate",
-            "url": "https://cs50.harvard.edu/x/",
-            "desc": "Foundational programming course covering C, memory management, algorithms, data structures, and web development fundamentals."
+            "title": "Complete Git & GitHub Masterclass in One Shot",
+            "provider": "Chai aur Code (Hitesh Choudhary)",
+            "platform": "YouTube",
+            "tag": "Git",
+            "language": "Hindi",
+            "level": "Essential Tool",
+            "duration": "Full Masterclass",
+            "type": "YouTube Lecture",
+            "url": "https://www.youtube.com/watch?v=q8EevlEpQ2A",
+            "desc": "Master version control, branching, merge conflicts, pull requests, and open-source GitHub workflows."
         }
     ]
     return render_template('courses.html', courses=curated_courses)
