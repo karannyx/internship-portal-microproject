@@ -5,7 +5,8 @@ import csv
 import os
 import hashlib
 import smtplib
-from datetime import datetime
+from datetime import datetime, timedelta
+from urllib.parse import urlencode
 from io import StringIO
 from collections import Counter
 from email.mime.text import MIMEText
@@ -48,6 +49,44 @@ def get_db():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def format_interview_slot(date_str, time_str):
+    """Formats YYYY-MM-DD and HH:MM into clean display strings."""
+    formatted_date = date_str or ""
+    formatted_time = time_str or ""
+    if date_str:
+        try:
+            formatted_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%b %d, %Y")
+        except ValueError:
+            pass
+    if time_str:
+        try:
+            formatted_time = datetime.strptime(time_str, "%H:%M").strftime("%I:%M %p")
+        except ValueError:
+            pass
+    return formatted_date, formatted_time
+
+
+def build_gcal_link(job_title, company, date_str, time_str, venue):
+    """Builds a 1-click Google Calendar event URL for scheduled interviews."""
+    if not date_str:
+        return ""
+    try:
+        t_str = time_str if time_str else "10:00"
+        start_dt = datetime.strptime(f"{date_str} {t_str}", "%Y-%m-%d %H:%M")
+        end_dt = start_dt + timedelta(hours=1)
+        dates_param = f"{start_dt.strftime('%Y%m%dT%H%M%S')}/{end_dt.strftime('%Y%m%dT%H%M%S')}"
+        params = {
+            "action": "TEMPLATE",
+            "text": f"Interview: {job_title} ({company})",
+            "dates": dates_param,
+            "details": f"Campus Recruitment Interview for {job_title} at {company} via Skill2Career Portal (MITS Gwalior).",
+            "location": venue or "MITS Gwalior / Online"
+        }
+        return f"https://calendar.google.com/calendar/render?{urlencode(params)}"
+    except Exception:
+        return ""
 
 
 def get_company_logo(company_name, api_logo=None):
@@ -109,7 +148,10 @@ def init_db():
             student_email TEXT NOT NULL,
             job_id INTEGER NOT NULL,
             status TEXT DEFAULT 'Under Review',
-            quiz_score TEXT DEFAULT 'N/A'
+            quiz_score TEXT DEFAULT 'N/A',
+            interview_date TEXT DEFAULT '',
+            interview_time TEXT DEFAULT '',
+            interview_venue TEXT DEFAULT ''
         )
     ''')
 
@@ -130,6 +172,12 @@ def init_db():
         cursor.execute("ALTER TABLE applications ADD COLUMN status TEXT DEFAULT 'Under Review'")
     if 'quiz_score' not in a_cols:
         cursor.execute("ALTER TABLE applications ADD COLUMN quiz_score TEXT DEFAULT 'N/A'")
+    if 'interview_date' not in a_cols:
+        cursor.execute("ALTER TABLE applications ADD COLUMN interview_date TEXT DEFAULT ''")
+    if 'interview_time' not in a_cols:
+        cursor.execute("ALTER TABLE applications ADD COLUMN interview_time TEXT DEFAULT ''")
+    if 'interview_venue' not in a_cols:
+        cursor.execute("ALTER TABLE applications ADD COLUMN interview_venue TEXT DEFAULT ''")
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS saved_jobs (
@@ -183,8 +231,20 @@ init_db()
 
 # --- AUTOMATED EMAIL DISPATCHER ---
 
-def dispatch_notification_email(student_email, student_name, job_title, company, status):
+def dispatch_notification_email(student_email, student_name, job_title, company, status, i_date="", i_time="", i_venue=""):
     subject = f"Placement Cell Notice: Application Status Updated for {job_title}"
+    f_date, f_time = format_interview_slot(i_date, i_time)
+
+    slot_block = ""
+    if status == "Interview Scheduled" and (f_date or f_time or i_venue):
+        slot_block = f"""
+--- INTERVIEW SCHEDULE DETAILS ---
+Date: {f_date or 'To be announced'}
+Time: {f_time or 'To be announced'}
+Venue / Link: {i_venue or 'MITS T&P Cell'}
+----------------------------------
+"""
+
     body = f"""
 Dear {student_name},
 
@@ -194,8 +254,8 @@ Your application status for the following campus opening has been updated:
 Role: {job_title}
 Organization: {company}
 Updated Status: {status}
-
-{'Congratulations! Your official Shortlist / Selection Letter is now available on your dashboard.' if status in ['Shortlisted', 'Interview Scheduled', 'Selected'] else 'Login to Skill2Career to review role analytics and recommendations.'}
+{slot_block}
+{'Congratulations! Your official letter is now available on your portal dashboard.' if status in ['Shortlisted', 'Interview Scheduled', 'Selected'] else 'Login to Skill2Career to review role analytics and recommendations.'}
 
 Portal Access: https://skill2career-portal.onrender.com/dashboard
 
@@ -204,7 +264,7 @@ Training & Placement Cell
 Madhav Institute of Technology & Science, Gwalior
 """
     if not SENDER_PASSWORD:
-        print(f"\n[MOCK EMAIL DISPATCHED] To: {student_email} | Subject: {subject} | Status: {status}\n")
+        print(f"\n[MOCK EMAIL DISPATCHED] To: {student_email} | Subject: {subject} | Status: {status} {slot_block}\n")
         return
 
     try:
@@ -413,7 +473,7 @@ def submit_quiz(job_id):
     return redirect(url_for('dashboard'))
 
 
-# --- OFFICIAL SHORTLIST / SELECTION LETTER (PDF + VERIFICATION CODE) ---
+# --- OFFICIAL SHORTLIST / INTERVIEW CALL / SELECTION LETTER ---
 
 @app.route('/shortlist_letter/<int:app_id>')
 def shortlist_letter(app_id):
@@ -424,6 +484,7 @@ def shortlist_letter(app_id):
     cursor = conn.cursor()
     cursor.execute('''
         SELECT applications.id as app_id, applications.student_email, applications.status, applications.quiz_score,
+               applications.interview_date, applications.interview_time, applications.interview_venue,
                students.id as student_id, students.name as student_name, students.skills,
                internships.title as job_title, internships.company, internships.required_skills, internships.deadline,
                student_resumes.branch, student_resumes.cgpa, student_resumes.degree, student_resumes.college, student_resumes.grad_year
@@ -439,7 +500,6 @@ def shortlist_letter(app_id):
     if not record:
         return redirect(url_for('dashboard'))
 
-    # Allow only the candidate themselves or an unlocked T&P Admin
     if not session.get('is_admin') and session.get('student_email') != record['student_email']:
         return redirect(url_for('dashboard'))
 
@@ -450,12 +510,15 @@ def shortlist_letter(app_id):
     checksum = hashlib.sha256(raw_sig.encode()).hexdigest()[:6].upper()
     ref_no = f"MITS/TNP/2026/{record['app_id']:04d}-{checksum}"
     issue_date = datetime.now().strftime("%B %d, %Y")
+    f_date, f_time = format_interview_slot(record['interview_date'], record['interview_time'])
 
     return render_template(
         'shortlist_letter.html',
         rec=record,
         ref_no=ref_no,
-        issue_date=issue_date
+        issue_date=issue_date,
+        formatted_date=f_date,
+        formatted_time=f_time
     )
 
 
@@ -470,7 +533,8 @@ def export_applicants(job_id):
     job_title = job['title'] if job else "Drive"
 
     cursor.execute('''
-        SELECT applications.id, students.name, students.email, students.skills, applications.quiz_score, applications.status
+        SELECT applications.id, students.name, students.email, students.skills, applications.quiz_score,
+               applications.status, applications.interview_date, applications.interview_time, applications.interview_venue
         FROM students
         JOIN applications ON students.email = applications.student_email
         WHERE applications.job_id = ?
@@ -481,10 +545,10 @@ def export_applicants(job_id):
 
     si = StringIO()
     cw = csv.writer(si)
-    cw.writerow(['App ID', 'Student Name', 'Registered Email', 'Candidate Skills', 'Screening Quiz Score', 'Application Status'])
+    cw.writerow(['App ID', 'Student Name', 'Registered Email', 'Candidate Skills', 'Screening Quiz Score', 'Application Status', 'Interview Date', 'Interview Time', 'Venue / Link'])
 
     for r in rows:
-        cw.writerow([r['id'], r['name'], r['email'], r['skills'], r['quiz_score'], r['status']])
+        cw.writerow([r['id'], r['name'], r['email'], r['skills'], r['quiz_score'], r['status'], r['interview_date'] or '', r['interview_time'] or '', r['interview_venue'] or ''])
 
     output = Response(si.getvalue(), mimetype='text/csv')
     filename = f"Applicants_{job_title.replace(' ', '_')}.csv"
@@ -503,7 +567,8 @@ def update_status(app_id):
     conn.commit()
 
     cursor.execute('''
-        SELECT students.name, students.email, internships.title, internships.company
+        SELECT students.name, students.email, internships.title, internships.company,
+               applications.interview_date, applications.interview_time, applications.interview_venue
         FROM applications
         JOIN students ON applications.student_email = students.email
         JOIN internships ON applications.job_id = internships.id
@@ -513,7 +578,10 @@ def update_status(app_id):
     conn.close()
 
     if rec:
-        dispatch_notification_email(rec['email'], rec['name'], rec['title'], rec['company'], new_status)
+        dispatch_notification_email(
+            rec['email'], rec['name'], rec['title'], rec['company'], new_status,
+            rec['interview_date'], rec['interview_time'], rec['interview_venue']
+        )
 
     return redirect(url_for('view_applicants', job_id=job_id))
 
@@ -678,16 +746,27 @@ def dashboard():
         session.clear()
         return redirect(url_for('login'))
 
+    applied_jobs = []
     try:
         cursor.execute('''
             SELECT applications.id as app_id, internships.id, internships.title, internships.company,
-                   internships.required_skills, applications.status, applications.quiz_score
+                   internships.required_skills, applications.status, applications.quiz_score,
+                   applications.interview_date, applications.interview_time, applications.interview_venue
             FROM internships
             JOIN applications ON internships.id = applications.job_id
             WHERE applications.student_email = ?
             ORDER BY applications.id DESC
         ''', (session['student_email'],))
-        applied_jobs = cursor.fetchall()
+        for row in cursor.fetchall():
+            item = dict(row)
+            f_date, f_time = format_interview_slot(item.get('interview_date'), item.get('interview_time'))
+            item['formatted_date'] = f_date
+            item['formatted_time'] = f_time
+            item['gcal_url'] = build_gcal_link(
+                item['title'], item['company'],
+                item.get('interview_date'), item.get('interview_time'), item.get('interview_venue')
+            )
+            applied_jobs.append(item)
     except Exception:
         applied_jobs = []
 
@@ -1048,13 +1127,20 @@ def admin_panel():
         cursor.execute('''
             SELECT applications.id, applications.student_email, students.name as student_name,
                    internships.title as job_title, internships.company,
-                   applications.quiz_score, applications.status, applications.job_id
+                   applications.quiz_score, applications.status, applications.job_id,
+                   applications.interview_date, applications.interview_time, applications.interview_venue
             FROM applications
             LEFT JOIN students ON applications.student_email = students.email
             LEFT JOIN internships ON applications.job_id = internships.id
             ORDER BY applications.id DESC
         ''')
-        applications_list = cursor.fetchall()
+        applications_list = []
+        for row in cursor.fetchall():
+            item = dict(row)
+            f_date, f_time = format_interview_slot(item.get('interview_date'), item.get('interview_time'))
+            item['formatted_date'] = f_date
+            item['formatted_time'] = f_time
+            applications_list.append(item)
 
         cursor.execute('''
             SELECT internships.id, internships.title, internships.company,
@@ -1096,13 +1182,27 @@ def admin_update_status(app_id):
         return redirect(url_for('admin_panel'))
 
     new_status = request.form.get('status', 'Under Review')
+    interview_date = request.form.get('interview_date', '').strip()
+    interview_time = request.form.get('interview_time', '').strip()
+    interview_venue = request.form.get('interview_venue', '').strip()
+
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
+
+    if new_status == 'Interview Scheduled':
+        cursor.execute('''
+            UPDATE applications
+            SET status = ?, interview_date = ?, interview_time = ?, interview_venue = ?
+            WHERE id = ?
+        ''', (new_status, interview_date, interview_time, interview_venue, app_id))
+    else:
+        cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
+
     conn.commit()
 
     cursor.execute('''
-        SELECT students.name, students.email, internships.title, internships.company
+        SELECT students.name, students.email, internships.title, internships.company,
+               applications.interview_date, applications.interview_time, applications.interview_venue
         FROM applications
         JOIN students ON applications.student_email = students.email
         JOIN internships ON applications.job_id = internships.id
@@ -1112,7 +1212,10 @@ def admin_update_status(app_id):
     conn.close()
 
     if rec:
-        dispatch_notification_email(rec['email'], rec['name'], rec['title'], rec['company'], new_status)
+        dispatch_notification_email(
+            rec['email'], rec['name'], rec['title'], rec['company'], new_status,
+            rec['interview_date'], rec['interview_time'], rec['interview_venue']
+        )
 
     return redirect(url_for('admin_panel'))
 
@@ -1168,17 +1271,18 @@ def admin_export_csv(export_type):
         filename = "Skill2Career_All_Students.csv"
 
     else:
-        cw.writerow(['App ID', 'Student Name', 'Email', 'Company', 'Role', 'Quiz Score', 'Status'])
+        cw.writerow(['App ID', 'Student Name', 'Email', 'Company', 'Role', 'Quiz Score', 'Status', 'Interview Date', 'Interview Time', 'Venue / Link'])
         cursor.execute('''
             SELECT applications.id, students.name, applications.student_email,
-                   internships.company, internships.title, applications.quiz_score, applications.status
+                   internships.company, internships.title, applications.quiz_score, applications.status,
+                   applications.interview_date, applications.interview_time, applications.interview_venue
             FROM applications
             LEFT JOIN students ON applications.student_email = students.email
             LEFT JOIN internships ON applications.job_id = internships.id
             ORDER BY applications.id DESC
         ''')
         for r in cursor.fetchall():
-            cw.writerow([r['id'], r['name'] or 'Student', r['student_email'], r['company'], r['title'], r['quiz_score'], r['status']])
+            cw.writerow([r['id'], r['name'] or 'Student', r['student_email'], r['company'], r['title'], r['quiz_score'], r['status'], r['interview_date'] or '', r['interview_time'] or '', r['interview_venue'] or ''])
         filename = "Skill2Career_All_Applications.csv"
 
     conn.close()

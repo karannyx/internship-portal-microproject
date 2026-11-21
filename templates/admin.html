@@ -106,11 +106,19 @@
         justify-content: center;
         font-size: 1.75rem;
     }
+
+    .schedule-slot-box {
+        background: rgba(139, 92, 246, 0.08);
+        border: 1px dashed rgba(139, 92, 246, 0.4);
+        border-radius: 10px;
+        padding: 0.55rem;
+        margin-top: 0.5rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-3" style="max-width: 1320px;">
+<div class="container py-3" style="max-width: 1360px;">
 
     {% if not is_admin %}
     <!-- T&P Coordinator Passkey Lock Screen -->
@@ -156,7 +164,7 @@
                 </div>
                 <h2 class="fw-bold mb-1">T&amp;P Master Control Panel</h2>
                 <p class="text-muted small mb-0">
-                    Real-time student registry, 1-click application shortlisting, official PDF letters &amp; recruiter CSV exports
+                    Real-time student registry, 1-click shortlisting, interview slot scheduler, official PDF letters &amp; CSV exports
                 </p>
             </div>
 
@@ -260,7 +268,7 @@
     <!-- Tab Panes -->
     <div class="tab-content">
 
-        <!-- 1. APPLICATIONS TAB (With 1-Click Shortlist Dropdown & Official Letter) -->
+        <!-- 1. APPLICATIONS TAB (With Interview Date/Time Scheduler & Official Letter) -->
         <div class="tab-pane fade show active" id="apps-pane" role="tabpanel">
             <div class="admin-table-card">
                 <div class="table-responsive">
@@ -270,9 +278,9 @@
                                 <th>ID</th>
                                 <th>Candidate</th>
                                 <th>Company &amp; Role</th>
-                                <th>Quiz Score</th>
-                                <th>Current Status</th>
-                                <th>1-Click Shortlist &amp; Letter</th>
+                                <th>Quiz</th>
+                                <th>Status &amp; Scheduled Slot</th>
+                                <th>Shortlist / Interview Scheduler</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -297,6 +305,16 @@
                                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
                                     {% elif a.status == 'Interview Scheduled' %}
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
+                                        {% if a.formatted_date or a.formatted_time %}
+                                        <div class="small text-info fw-semibold mt-1">
+                                            <i class="bi bi-calendar-event me-1"></i>{{ a.formatted_date }} {% if a.formatted_time %}&bull; {{ a.formatted_time }}{% endif %}
+                                        </div>
+                                        {% endif %}
+                                        {% if a.interview_venue %}
+                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ a.interview_venue }}
+                                        </div>
+                                        {% endif %}
                                     {% elif a.status == 'Rejected' %}
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
                                     {% else %}
@@ -304,26 +322,36 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <form method="POST" action="{{ url_for('admin_update_status', app_id=a.id) }}" class="d-flex align-items-center gap-2">
-                                            <select name="status" class="form-select form-select-sm rounded-3" style="max-width: 170px; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                                    <form method="POST" action="{{ url_for('admin_update_status', app_id=a.id) }}">
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <select name="status" onchange="toggleSlotBox(this, 'slot-box-{{ a.id }}')" class="form-select form-select-sm rounded-3" style="max-width: 170px; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
                                                 <option value="Under Review" {% if a.status == 'Under Review' %}selected{% endif %}>Under Review</option>
                                                 <option value="Shortlisted" {% if a.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
                                                 <option value="Interview Scheduled" {% if a.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
                                                 <option value="Selected" {% if a.status == 'Selected' %}selected{% endif %}>Selected</option>
                                                 <option value="Rejected" {% if a.status == 'Rejected' %}selected{% endif %}>Rejected</option>
                                             </select>
+
                                             <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
                                                 Save
                                             </button>
-                                        </form>
 
-                                        {% if a.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
-                                        <a href="{{ url_for('shortlist_letter', app_id=a.id) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-3 px-2.5 fw-semibold" title="View Official Shortlist Letter PDF">
-                                            <i class="bi bi-file-earmark-check"></i> Letter
-                                        </a>
-                                        {% endif %}
-                                    </div>
+                                            {% if a.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
+                                            <a href="{{ url_for('shortlist_letter', app_id=a.id) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-3 px-2.5 fw-semibold" title="View Official PDF Letter">
+                                                <i class="bi bi-file-earmark-check"></i> Letter
+                                            </a>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Inline Interview Date, Time & Venue Drafter -->
+                                        <div id="slot-box-{{ a.id }}" class="schedule-slot-box {% if a.status != 'Interview Scheduled' %}d-none{% endif %}">
+                                            <div class="d-flex flex-wrap gap-1.5 align-items-center">
+                                                <input type="date" name="interview_date" value="{{ a.interview_date or '' }}" class="form-control form-control-sm rounded-2" title="Interview Date" style="max-width: 132px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                                                <input type="time" name="interview_time" value="{{ a.interview_time or '' }}" class="form-control form-control-sm rounded-2" title="Interview Time" style="max-width: 108px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                                                <input type="text" name="interview_venue" value="{{ a.interview_venue or '' }}" placeholder="Room / Meet Link" class="form-control form-control-sm rounded-2" style="max-width: 155px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                                            </div>
+                                        </div>
+                                    </form>
                                 </td>
                             </tr>
                             {% else %}
@@ -502,6 +530,16 @@
 
 {% block extra_js %}
 <script>
+    function toggleSlotBox(selectEl, boxId) {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        if (selectEl.value === "Interview Scheduled") {
+            box.classList.remove("d-none");
+        } else {
+            box.classList.add("d-none");
+        }
+    }
+
     function filterAdminTables() {
         const query = (document.getElementById("adminSearchInput")?.value || "").toLowerCase().trim();
         const rows = document.querySelectorAll(".admin-filter-table tbody tr");

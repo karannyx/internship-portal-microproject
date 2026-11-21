@@ -69,6 +69,14 @@
         background: linear-gradient(135deg, #34d399, #10b981);
         transform: translateY(-1px);
     }
+
+    .interview-slot-banner {
+        margin-top: 0.85rem;
+        padding: 0.72rem 0.95rem;
+        border-radius: 12px;
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.32);
+    }
 </style>
 {% endblock %}
 
@@ -192,7 +200,7 @@
                         <h5 class="fw-bold mb-0">
                             <i class="bi bi-send-check text-primary me-1"></i> My Campus Drive Applications
                         </h5>
-                        <div class="text-muted small">Track live T&amp;P status and download official shortlist/selection letters</div>
+                        <div class="text-muted small">Track live T&amp;P status, scheduled interview slots &amp; official PDF letters</div>
                     </div>
                     <a href="{{ url_for('jobs') }}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
                         + Explore Drives
@@ -249,6 +257,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        {% if job.status == 'Interview Scheduled' and (job.formatted_date or job.formatted_time or job.interview_venue) %}
+                        <div class="interview-slot-banner d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="small">
+                                <span class="fw-bold text-info"><i class="bi bi-camera-video-fill me-1"></i> Scheduled Slot:</span>
+                                <span class="fw-semibold ms-1">{{ job.formatted_date }}</span>
+                                {% if job.formatted_time %}
+                                    <span>at <strong>{{ job.formatted_time }}</strong></span>
+                                {% endif %}
+                                {% if job.interview_venue %}
+                                    <span class="text-muted ms-2"><i class="bi bi-geo-alt-fill text-info"></i> {{ job.interview_venue }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if job.gcal_url %}
+                            <a href="{{ job.gcal_url }}" target="_blank" class="btn btn-sm btn-info text-dark fw-bold rounded-3 px-2.5 py-1" style="font-size: 0.78rem;">
+                                <i class="bi bi-calendar-plus me-1"></i> Add to Google Calendar
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>

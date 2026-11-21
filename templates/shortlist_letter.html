@@ -250,6 +250,16 @@
                 <th>Screening Quiz Score</th>
                 <td><strong>{{ rec.quiz_score or 'Verified' }}</strong> &bull; Verified Skills: {{ rec.skills }}</td>
             </tr>
+            {% if rec.status == 'Interview Scheduled' and (formatted_date or formatted_time or rec.interview_venue) %}
+            <tr style="background: #f5f3ff;">
+                <th>Scheduled Interview Slot</th>
+                <td>
+                    <strong>{{ formatted_date or 'Date TBD' }}</strong>
+                    {% if formatted_time %} at <strong>{{ formatted_time }}</strong>{% endif %}
+                    {% if rec.interview_venue %}<br><span style="color: #4c1d95;">Venue / Meeting Link: <strong>{{ rec.interview_venue }}</strong></span>{% endif %}
+                </td>
+            </tr>
+            {% endif %}
             <tr>
                 <th>Current Drive Status</th>
                 <td>
@@ -259,7 +269,7 @@
         </table>
 
         <p style="font-size: 0.9rem; line-height: 1.65; text-align: justify;">
-            You are advised to keep a printed or digital copy of this verification letter along with your institute identity card and ATS-verified resume for document verification during the recruitment process. Further schedule instructions will be communicated via your registered email and portal dashboard.
+            You are advised to keep a printed or digital copy of this verification letter along with your institute identity card and ATS-verified resume for document verification during the recruitment process. Please report at least 15 minutes prior to your scheduled slot.
         </p>
 
         <!-- Seal & Signatory -->
