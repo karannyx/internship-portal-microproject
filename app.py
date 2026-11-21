@@ -1152,5 +1152,147 @@ def view_applicants(job_id):
     conn.close()
     return render_template('view_applicants.html', applicants=applicants, job=job, job_title=job_title, job_id=job_id)
 
+# --- T&P MASTER ADMIN & LIVE DATABASE VIEWER ---
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_panel():
+    error = None
+    if request.method == 'POST':
+        pin = request.form.get('admin_pin', '').strip()
+        if pin == ADMIN_PASSKEY:
+            session['is_admin'] = True
+            return redirect(url_for('admin_panel'))
+        else:
+            error = "Invalid Coordinator Passkey. Access Denied."
+
+    if not session.get('is_admin'):
+        return render_template('admin.html', is_admin=False, error=error)
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. All Registered Students + Resume Status
+    cursor.execute('''
+        SELECT students.id, students.name, students.email, students.skills,
+               student_resumes.branch, student_resumes.cgpa, student_resumes.phone
+        FROM students
+        LEFT JOIN student_resumes ON students.email = student_resumes.student_email
+        ORDER BY students.id DESC
+    ''')
+    students_list = cursor.fetchall()
+
+    # 2. All Applications Joined with Student & Job Info
+    cursor.execute('''
+        SELECT applications.id, applications.student_email, students.name as student_name,
+               internships.title as job_title, internships.company,
+               applications.quiz_score, applications.status, applications.job_id
+        FROM applications
+        LEFT JOIN students ON applications.student_email = students.email
+        LEFT JOIN internships ON applications.job_id = internships.id
+        ORDER BY applications.id DESC
+    ''')
+    applications_list = cursor.fetchall()
+
+    # 3. All Campus Drives + Applicant Count
+    cursor.execute('''
+        SELECT internships.id, internships.title, internships.company,
+               internships.required_skills, internships.deadline,
+               COUNT(applications.id) as app_count
+        FROM internships
+        LEFT JOIN applications ON internships.id = applications.job_id
+        GROUP BY internships.id
+        ORDER BY internships.id DESC
+    ''')
+    drives_list = cursor.fetchall()
+
+    # 4. All Submitted ATS Resumes
+    cursor.execute('''
+        SELECT student_resumes.*, students.id as student_id, students.name as student_name, students.skills
+        FROM student_resumes
+        LEFT JOIN students ON student_resumes.student_email = students.email
+        ORDER BY student_resumes.id DESC
+    ''')
+    resumes_list = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'admin.html',
+        is_admin=True,
+        students=students_list,
+        applications=applications_list,
+        drives=drives_list,
+        resumes=resumes_list
+    )
+
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('is_admin', None)
+    return redirect(url_for('admin_panel'))
+
+
+@app.route('/admin/delete_student/<int:student_id>', methods=['POST'])
+def admin_delete_student(student_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT email FROM students WHERE id = ?', (student_id,))
+    row = cursor.fetchone()
+    if row:
+        email = row['email']
+        cursor.execute('DELETE FROM applications WHERE student_email = ?', (email,))
+        cursor.execute('DELETE FROM saved_jobs WHERE student_email = ?', (email,))
+        cursor.execute('DELETE FROM student_resumes WHERE student_email = ?', (email,))
+        cursor.execute('DELETE FROM students WHERE id = ?', (student_id,))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel'))
+
+
+@app.route('/admin/export/<string:export_type>')
+def admin_export_csv(export_type):
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    si = StringIO()
+    cw = csv.writer(si)
+
+    if export_type == 'students':
+        cw.writerow(['Student ID', 'Full Name', 'Email', 'Verified Skills', 'Branch', 'CGPA', 'Phone'])
+        cursor.execute('''
+            SELECT students.id, students.name, students.email, students.skills,
+                   student_resumes.branch, student_resumes.cgpa, student_resumes.phone
+            FROM students
+            LEFT JOIN student_resumes ON students.email = student_resumes.student_email
+            ORDER BY students.id DESC
+        ''')
+        for r in cursor.fetchall():
+            cw.writerow([r['id'], r['name'], r['email'], r['skills'], r['branch'] or 'N/A', r['cgpa'] or 'N/A', r['phone'] or 'N/A'])
+        filename = "Skill2Career_All_Students.csv"
+
+    else:
+        cw.writerow(['App ID', 'Student Name', 'Email', 'Company', 'Role', 'Quiz Score', 'Status'])
+        cursor.execute('''
+            SELECT applications.id, students.name, applications.student_email,
+                   internships.company, internships.title, applications.quiz_score, applications.status
+            FROM applications
+            LEFT JOIN students ON applications.student_email = students.email
+            LEFT JOIN internships ON applications.job_id = internships.id
+            ORDER BY applications.id DESC
+        ''')
+        for r in cursor.fetchall():
+            cw.writerow([r['id'], r['name'] or 'Student', r['student_email'], r['company'], r['title'], r['quiz_score'], r['status']])
+        filename = "Skill2Career_All_Applications.csv"
+
+    conn.close()
+    output = Response(si.getvalue(), mimetype='text/csv')
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return output
+
 if __name__ == '__main__':
     app.run(debug=True)

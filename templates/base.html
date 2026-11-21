@@ -159,6 +159,16 @@
             padding: 1.15rem 0;
             margin-top: 3rem;
         }
+
+        .admin-footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.18s ease;
+        }
+
+        .admin-footer-link:hover {
+            color: var(--primary);
+        }
     </style>
 
     <script>
@@ -255,10 +265,11 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Footer with T&P Admin Access -->
     <footer class="s2c-footer text-center">
         <div class="container">
             Skill2Career Portal &bull; Designed &amp; Built by <strong>Karan Sahu</strong> &amp; <strong>Yuvraj Yadav</strong> (MITS Gwalior)
+            &bull; <a href="{{ url_for('admin_panel') }}" class="admin-footer-link"><i class="bi bi-shield-lock"></i> T&amp;P Admin</a>
         </div>
     </footer>
 
