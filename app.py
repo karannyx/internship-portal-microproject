@@ -23,12 +23,14 @@ SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "placement.cell.mits@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")  # App Password
 
 LAST_SYNC_TIME = 0
-SYNC_INTERVAL = 300  
+SYNC_INTERVAL = 300
+
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def get_company_logo(company_name, api_logo=None):
     """Returns official high-res company logo URL with domain matching."""
@@ -58,10 +60,11 @@ def get_company_logo(company_name, api_logo=None):
             return f"https://www.google.com/s2/favicons?domain={domain}&sz=128"
     return ""
 
+
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,7 +95,7 @@ def init_db():
         )
     ''')
 
-    # Schema Migrations
+    # Schema Migrations for Existing Cloud Databases
     cursor.execute("PRAGMA table_info(students)")
     s_cols = [col[1] for col in cursor.fetchall()]
     if 'avatar_url' not in s_cols:
@@ -105,6 +108,8 @@ def init_db():
 
     cursor.execute("PRAGMA table_info(applications)")
     a_cols = [col[1] for col in cursor.fetchall()]
+    if 'status' not in a_cols:
+        cursor.execute("ALTER TABLE applications ADD COLUMN status TEXT DEFAULT 'Under Review'")
     if 'quiz_score' not in a_cols:
         cursor.execute("ALTER TABLE applications ADD COLUMN quiz_score TEXT DEFAULT 'N/A'")
 
@@ -154,7 +159,9 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 init_db()
+
 
 # --- AUTOMATED EMAIL DISPATCHER ---
 
@@ -172,7 +179,7 @@ Updated Status: {status}
 
 {'Congratulations! Please check your portal dashboard for round instructions.' if status in ['Shortlisted', 'Interview Scheduled'] else 'Login to Skill2Career to review role analytics and recommendations.'}
 
-Portal Access: https://skill2career.onrender.com/dashboard
+Portal Access: https://skill2career-portal.onrender.com/dashboard
 
 Regards,
 Training & Placement Cell
@@ -197,6 +204,7 @@ Madhav Institute of Technology & Science, Gwalior
         print(f"[LIVE EMAIL SENT] Successfully notified {student_email}")
     except Exception as e:
         print(f"[SMTP WARNING] Could not send live email: {e}")
+
 
 # --- AUTO SYNC ENGINE ---
 
@@ -224,7 +232,7 @@ def sync_live_jobs_automatically():
                 if title and company:
                     cursor.execute('SELECT id FROM internships WHERE title = ? AND company = ?', (title, company))
                     if not cursor.fetchone():
-                        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', 
+                        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)',
                                        (title, company, skills, 'Rolling Basis'))
 
             conn.commit()
@@ -232,11 +240,13 @@ def sync_live_jobs_automatically():
     except Exception as e:
         print(f"Auto-sync note: {e}")
 
+
 # --- ROUTES ---
 
 @app.route('/')
 def home():
     return redirect(url_for('live_jobs'))
+
 
 @app.route('/jobs')
 def jobs():
@@ -298,6 +308,7 @@ def jobs():
     conn.close()
     return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships), announcements=announcements)
 
+
 # --- SCREENING QUIZ BEFORE APPLYING ---
 
 QUIZ_QUESTION_BANK = {
@@ -318,6 +329,7 @@ QUIZ_QUESTION_BANK = {
         {"q": "Which tag embeds a responsive canvas for Chart.js?", "opts": ["<canvas>", "<svg>", "<paint>", "<graphic>"], "ans": "<canvas>"}
     ]
 }
+
 
 @app.route('/apply/<int:job_id>')
 def apply(job_id):
@@ -354,6 +366,7 @@ def apply(job_id):
 
     return render_template('screening_quiz.html', job=job, job_id=job_id, questions=selected_questions)
 
+
 @app.route('/submit_quiz/<int:job_id>', methods=['POST'])
 def submit_quiz(job_id):
     if 'student_email' not in session:
@@ -374,12 +387,13 @@ def submit_quiz(job_id):
     cursor = conn.cursor()
     cursor.execute('SELECT id FROM applications WHERE student_email = ? AND job_id = ?', (session['student_email'], job_id))
     if not cursor.fetchone():
-        cursor.execute('INSERT INTO applications (student_email, job_id, status, quiz_score) VALUES (?, ?, ?, ?)', 
+        cursor.execute('INSERT INTO applications (student_email, job_id, status, quiz_score) VALUES (?, ?, ?, ?)',
                        (session['student_email'], job_id, 'Under Review', quiz_score))
         conn.commit()
     conn.close()
 
     return redirect(url_for('dashboard'))
+
 
 # --- RECRUITER 1-CLICK EXCEL / CSV EXPORT ---
 
@@ -413,6 +427,7 @@ def export_applicants(job_id):
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     return output
 
+
 @app.route('/update_status/<int:app_id>', methods=['POST'])
 def update_status(app_id):
     new_status = request.form.get('status', 'Under Review')
@@ -438,6 +453,7 @@ def update_status(app_id):
 
     return redirect(url_for('view_applicants', job_id=job_id))
 
+
 # --- PUBLIC PORTFOLIO WITH DYNAMIC QR CODE ---
 
 @app.route('/u/<int:student_id>')
@@ -457,6 +473,7 @@ def public_portfolio(student_id):
 
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()]
     return render_template('portfolio.html', student=student, resume=resume, skills_list=skills_list)
+
 
 # --- LIVE ONLINE OPENINGS WITH COMPANY LOGOS ---
 
@@ -548,250 +565,18 @@ def live_jobs():
 
     return render_template('live_jobs.html', jobs=indian_internships + external_jobs)
 
+
 # --- MULTI-LANGUAGE YOUTUBE COURSES HUB ---
 
 @app.route('/courses')
 def courses():
-    curated_courses = [
-        # --- C LANGUAGE ---
-        {
-            "title": "Complete C Language & Pointers Masterclass (One Shot)",
-            "provider": "CodeWithHarry",
-            "platform": "YouTube",
-            "tag": "C",
-            "language": "Hindi",
-            "level": "Beginner to Advanced",
-            "duration": "15 Hours Full Video",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=ZSPZob_1TOk",
-            "desc": "Master C syntax, memory allocation, pointers, arrays, strings, file I/O, and structures with hands-on problem sets."
-        },
-        {
-            "title": "C Programming Tutorial for Beginners (Full Course)",
-            "provider": "Apna College (Shradha Khapra)",
-            "platform": "YouTube",
-            "tag": "C",
-            "language": "Hindi",
-            "level": "Beginner",
-            "duration": "10 Hours One-Shot",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=irqbmMNs2Bo",
-            "desc": "College-exam and placement-focused C programming course covering loops, recursion, pointers, and dynamic memory."
-        },
-        {
-            "title": "CS50's Introduction to Computer Science",
-            "provider": "Harvard University / edX",
-            "platform": "Harvard / YouTube",
-            "tag": "C",
-            "language": "English",
-            "level": "Beginner to Intermediate",
-            "duration": "10 Weeks Series",
-            "type": "Free Certificate",
-            "url": "https://cs50.harvard.edu/x/",
-            "desc": "Harvard's flagship CS course covering low-level C memory management, algorithms, data structures, and web basics."
-        },
+    return render_template('courses.html')
 
-        # --- C++ ---
-        {
-            "title": "Complete C++ Placement & DSA Course",
-            "provider": "CodeHelp (Love Babbar)",
-            "platform": "YouTube",
-            "tag": "C++",
-            "language": "Hindi",
-            "level": "Placement Ready",
-            "duration": "140+ Lectures Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA",
-            "desc": "Comprehensive C++ STL, Object-Oriented Programming (OOPs), recursion, and competitive programming preparation."
-        },
-        {
-            "title": "C++ Full Course for Free (6 Hours)",
-            "provider": "Bro Code",
-            "platform": "YouTube",
-            "tag": "C++",
-            "language": "English",
-            "level": "Beginner to Intermediate",
-            "duration": "6 Hours Full Video",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=-TkoO8Z07hI",
-            "desc": "Fast-paced, zero-fluff C++ tutorial covering pointers, dynamic memory, classes, inheritance, and polymorphism."
-        },
-
-        # --- PYTHON ---
-        {
-            "title": "Chai aur Python (Complete Backend & Core Python)",
-            "provider": "Chai aur Code (Hitesh Choudhary)",
-            "platform": "YouTube",
-            "tag": "Python",
-            "language": "Hindi",
-            "level": "Beginner to Intermediate",
-            "duration": "Complete Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoBsMugTFALhdOoZ5OqCGt7j",
-            "desc": "Deep dive into Python internals, virtual environments, decorators, generators, SQLite/MongoDB, and API handling."
-        },
-        {
-            "title": "100 Days of Code: Complete Python Pro Playlist",
-            "provider": "CodeWithHarry",
-            "platform": "YouTube",
-            "tag": "Python",
-            "language": "Hindi",
-            "level": "Beginner to Pro",
-            "duration": "100 Videos Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu0W_9lII9agwh1XjRt242xIpHhPT2llg",
-            "desc": "Step-by-step daily Python lessons with real-world automation projects, OOPs, Flask basics, and exercises."
-        },
-        {
-            "title": "Python for Beginners — Full Masterclass",
-            "provider": "Programming with Mosh",
-            "platform": "YouTube",
-            "tag": "Python",
-            "language": "English",
-            "level": "Beginner",
-            "duration": "6 Hours Full Video",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=_uQrJ0TkZlc",
-            "desc": "Hands-on Python introduction covering data structures, modules, packages, and building automation & web scripts."
-        },
-
-        # --- JAVA ---
-        {
-            "title": "Java + DSA + Interview Preparation Bootcamp",
-            "provider": "Kunal Kushwaha",
-            "platform": "YouTube",
-            "tag": "Java",
-            "language": "English",
-            "level": "Beginner to Advanced",
-            "duration": "Complete Bootcamp",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ",
-            "desc": "Industry-standard Java OOPs, Collections Framework, Git, and complete Data Structures & Algorithms bootcamp."
-        },
-        {
-            "title": "Java Complete Placement Course (OOPs & Collections)",
-            "provider": "Apna College",
-            "platform": "YouTube",
-            "tag": "Java",
-            "language": "Hindi",
-            "level": "Beginner to Placement",
-            "duration": "Complete Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLfqMhTWNBTe3LtFWcvwpqTkUSlB32kJop",
-            "desc": "Structured Java course covering core syntax, object-oriented principles, exception handling, and interview coding problems."
-        },
-
-        # --- JAVASCRIPT & WEB DEV ---
-        {
-            "title": "Chai aur JavaScript (Complete Modern JS)",
-            "provider": "Chai aur Code (Hitesh Choudhary)",
-            "platform": "YouTube",
-            "tag": "JavaScript",
-            "language": "Hindi",
-            "level": "Beginner to Advanced",
-            "duration": "Complete Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37",
-            "desc": "Master JS execution context, closures, Promises, Async/Await, Fetch API, DOM projects, and ES6+ internals."
-        },
-        {
-            "title": "Complete Web Development Bootcamp (HTML, CSS, JS)",
-            "provider": "Chai aur Code",
-            "platform": "YouTube",
-            "tag": "HTML/CSS",
-            "language": "Hindi",
-            "level": "Beginner",
-            "duration": "Full Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDBNF5s-WH6QBD3Ia43RR28",
-            "desc": "Build responsive websites from scratch with semantic HTML5, modern CSS3 Flexbox & Grid, Tailwind, and DOM logic."
-        },
-        {
-            "title": "JavaScript Full Course for Free (12 Hours)",
-            "provider": "Bro Code",
-            "platform": "YouTube",
-            "tag": "JavaScript",
-            "language": "English",
-            "level": "Beginner to Intermediate",
-            "duration": "12 Hours Full Video",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=lfmg-EJ8gm4",
-            "desc": "Complete project-driven JavaScript course covering ES6 modules, asynchronous programming, and interactive web apps."
-        },
-
-        # --- REACT ---
-        {
-            "title": "Chai aur React — Complete Frontend Framework Series",
-            "provider": "Chai aur Code (Hitesh Choudhary)",
-            "platform": "YouTube",
-            "tag": "React",
-            "language": "Hindi",
-            "level": "Intermediate",
-            "duration": "Complete Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLu71SKxNbfoDqgPchmvIsL4hTnJIrtige",
-            "desc": "Learn React hooks, Virtual DOM, Context API, Redux Toolkit, React Router, and production app architecture."
-        },
-
-        # --- DSA ---
-        {
-            "title": "Striver's A2Z DSA Complete Placement Course",
-            "provider": "take U forward (Striver)",
-            "platform": "YouTube",
-            "tag": "DSA",
-            "language": "Hinglish",
-            "level": "Placement Ready",
-            "duration": "450+ Problems Playlist",
-            "type": "YouTube Playlist",
-            "url": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz",
-            "desc": "Gold-standard DSA series for TCS Digital, Infosys, Amazon, and Google—covering Arrays, Trees, Graphs, and DP."
-        },
-
-        # --- SQL & DATABASES ---
-        {
-            "title": "Complete SQL & Relational Database Course (One Shot)",
-            "provider": "Apna College",
-            "platform": "YouTube",
-            "tag": "SQL",
-            "language": "Hindi",
-            "level": "Beginner to Intermediate",
-            "duration": "3.5 Hours One-Shot",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=hlGoQC332VM",
-            "desc": "Learn SQL commands, constraints, primary/foreign keys, Joins, subqueries, and DBMS interview questions."
-        },
-        {
-            "title": "SQL Tutorial — Full Database Course for Beginners",
-            "provider": "freeCodeCamp.org",
-            "platform": "YouTube",
-            "tag": "SQL",
-            "language": "English",
-            "level": "Beginner",
-            "duration": "4.5 Hours Full Video",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
-            "desc": "Step-by-step relational database design, CRUD queries, aggregate functions, and schema normalization."
-        },
-
-        # --- GIT & GITHUB ---
-        {
-            "title": "Complete Git & GitHub Masterclass in One Shot",
-            "provider": "Chai aur Code (Hitesh Choudhary)",
-            "platform": "YouTube",
-            "tag": "Git",
-            "language": "Hindi",
-            "level": "Essential Tool",
-            "duration": "Full Masterclass",
-            "type": "YouTube Lecture",
-            "url": "https://www.youtube.com/watch?v=q8EevlEpQ2A",
-            "desc": "Master version control, branching, merge conflicts, pull requests, and open-source GitHub workflows."
-        }
-    ]
-    return render_template('courses.html', courses=curated_courses)
 
 @app.route('/developers')
 def developers():
     return render_template('developers.html')
+
 
 @app.route('/matcher', methods=['GET', 'POST'])
 def matcher():
@@ -805,6 +590,7 @@ def matcher():
 
     return render_template('matcher.html', student=student)
 
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'student_email' not in session:
@@ -816,7 +602,7 @@ def dashboard():
     if request.method == 'POST':
         updated_skills = request.form.get('skills', '').strip()
         avatar_url = request.form.get('avatar_url', '').strip()
-        cursor.execute('UPDATE students SET skills = ?, avatar_url = ? WHERE email = ?', 
+        cursor.execute('UPDATE students SET skills = ?, avatar_url = ? WHERE email = ?',
                        (updated_skills, avatar_url, session['student_email']))
         conn.commit()
 
@@ -855,6 +641,7 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', student=student, applied_jobs=applied_jobs, saved_jobs=saved_jobs)
 
+
 @app.route('/toggle_save/<int:job_id>', methods=['POST'])
 def toggle_save(job_id):
     if 'student_email' not in session:
@@ -875,6 +662,7 @@ def toggle_save(job_id):
     conn.commit()
     conn.close()
     return jsonify({"status": "success", "is_saved": is_saved})
+
 
 @app.route('/interview_prep/<int:job_id>')
 def interview_prep(job_id):
@@ -922,6 +710,7 @@ def interview_prep(job_id):
 
     return render_template('interview_prep.html', job=job, curated_qa=curated_qa)
 
+
 @app.route('/analytics')
 def analytics():
     conn = get_db()
@@ -962,12 +751,13 @@ def analytics():
     total_apps = cursor.fetchone()[0]
     conn.close()
 
-    return render_template('analytics.html', 
+    return render_template('analytics.html',
                            skill_labels=skill_labels, skill_data=skill_data,
                            status_labels=status_labels, status_data=status_data,
                            student_readiness=student_readiness,
                            student_skills_count=student_skills_count,
                            total_openings=total_openings, total_apps=total_apps)
+
 
 @app.route('/build_resume', methods=['GET', 'POST'])
 def build_resume():
@@ -1043,6 +833,7 @@ def build_resume():
 
     return render_template('resume_builder.html', student=student, resume=resume_data)
 
+
 @app.route('/resume')
 def resume():
     if 'student_email' not in session:
@@ -1063,18 +854,22 @@ def resume():
     skills_list = [s.strip() for s in student['skills'].split(',') if s.strip()] if student and student['skills'] else []
     return render_template('resume.html', student=student, resume=resume_data, skills_list=skills_list)
 
+
 @app.route('/login')
 def login():
     return render_template('login.html')
+
 
 @app.route('/register')
 def register():
     return render_template('register.html')
 
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('live_jobs'))
+
 
 @app.route('/sync_firebase', methods=['POST'])
 def sync_firebase():
@@ -1109,6 +904,7 @@ def sync_firebase():
     conn.close()
     return jsonify({"status": "success"})
 
+
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
     error = None
@@ -1125,13 +921,14 @@ def add_job():
 
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', 
+        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)',
                        (title, company, required_skills, deadline))
         conn.commit()
         conn.close()
         return redirect(url_for('jobs'))
 
     return render_template('add_job.html', error=error)
+
 
 @app.route('/view_applicants/<int:job_id>')
 def view_applicants(job_id):
@@ -1152,78 +949,79 @@ def view_applicants(job_id):
     conn.close()
     return render_template('view_applicants.html', applicants=applicants, job=job, job_title=job_title, job_id=job_id)
 
+
 # --- T&P MASTER ADMIN & LIVE DATABASE VIEWER ---
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
-    error = None
-    if request.method == 'POST':
-        pin = request.form.get('admin_pin', '').strip()
-        if pin == ADMIN_PASSKEY:
-            session['is_admin'] = True
-            return redirect(url_for('admin_panel'))
-        else:
-            error = "Invalid Coordinator Passkey. Access Denied."
+    try:
+        error = None
+        if request.method == 'POST':
+            pin = request.form.get('admin_pin', '').strip()
+            if pin == ADMIN_PASSKEY:
+                session['is_admin'] = True
+                return redirect(url_for('admin_panel'))
+            else:
+                error = "Invalid Coordinator Passkey. Access Denied."
 
-    if not session.get('is_admin'):
-        return render_template('admin.html', is_admin=False, error=error)
+        if not session.get('is_admin'):
+            return render_template('admin.html', is_admin=False, error=error)
 
-    conn = get_db()
-    cursor = conn.cursor()
+        conn = get_db()
+        cursor = conn.cursor()
 
-    # 1. All Registered Students + Resume Status
-    cursor.execute('''
-        SELECT students.id, students.name, students.email, students.skills,
-               student_resumes.branch, student_resumes.cgpa, student_resumes.phone
-        FROM students
-        LEFT JOIN student_resumes ON students.email = student_resumes.student_email
-        ORDER BY students.id DESC
-    ''')
-    students_list = cursor.fetchall()
+        cursor.execute('''
+            SELECT students.id, students.name, students.email, students.skills,
+                   student_resumes.branch, student_resumes.cgpa, student_resumes.phone
+            FROM students
+            LEFT JOIN student_resumes ON students.email = student_resumes.student_email
+            ORDER BY students.id DESC
+        ''')
+        students_list = cursor.fetchall()
 
-    # 2. All Applications Joined with Student & Job Info
-    cursor.execute('''
-        SELECT applications.id, applications.student_email, students.name as student_name,
-               internships.title as job_title, internships.company,
-               applications.quiz_score, applications.status, applications.job_id
-        FROM applications
-        LEFT JOIN students ON applications.student_email = students.email
-        LEFT JOIN internships ON applications.job_id = internships.id
-        ORDER BY applications.id DESC
-    ''')
-    applications_list = cursor.fetchall()
+        cursor.execute('''
+            SELECT applications.id, applications.student_email, students.name as student_name,
+                   internships.title as job_title, internships.company,
+                   applications.quiz_score, applications.status, applications.job_id
+            FROM applications
+            LEFT JOIN students ON applications.student_email = students.email
+            LEFT JOIN internships ON applications.job_id = internships.id
+            ORDER BY applications.id DESC
+        ''')
+        applications_list = cursor.fetchall()
 
-    # 3. All Campus Drives + Applicant Count
-    cursor.execute('''
-        SELECT internships.id, internships.title, internships.company,
-               internships.required_skills, internships.deadline,
-               COUNT(applications.id) as app_count
-        FROM internships
-        LEFT JOIN applications ON internships.id = applications.job_id
-        GROUP BY internships.id
-        ORDER BY internships.id DESC
-    ''')
-    drives_list = cursor.fetchall()
+        cursor.execute('''
+            SELECT internships.id, internships.title, internships.company,
+                   internships.required_skills, internships.deadline,
+                   COUNT(applications.id) as app_count
+            FROM internships
+            LEFT JOIN applications ON internships.id = applications.job_id
+            GROUP BY internships.id
+            ORDER BY internships.id DESC
+        ''')
+        drives_list = cursor.fetchall()
 
-    # 4. All Submitted ATS Resumes
-    cursor.execute('''
-        SELECT student_resumes.*, students.id as student_id, students.name as student_name, students.skills
-        FROM student_resumes
-        LEFT JOIN students ON student_resumes.student_email = students.email
-        ORDER BY student_resumes.id DESC
-    ''')
-    resumes_list = cursor.fetchall()
+        cursor.execute('''
+            SELECT student_resumes.*, students.id as student_id, students.name as student_name, students.skills
+            FROM student_resumes
+            LEFT JOIN students ON student_resumes.student_email = students.email
+            ORDER BY student_resumes.id DESC
+        ''')
+        resumes_list = cursor.fetchall()
 
-    conn.close()
+        conn.close()
 
-    return render_template(
-        'admin.html',
-        is_admin=True,
-        students=students_list,
-        applications=applications_list,
-        drives=drives_list,
-        resumes=resumes_list
-    )
+        return render_template(
+            'admin.html',
+            is_admin=True,
+            students=students_list,
+            applications=applications_list,
+            drives=drives_list,
+            resumes=resumes_list
+        )
+    except Exception:
+        import traceback
+        return f"<pre style='padding:20px;background:#111;color:#f87171;font-family:monospace;'>ADMIN ERROR:\n{traceback.format_exc()}</pre>", 500
 
 
 @app.route('/admin/logout')
@@ -1293,6 +1091,7 @@ def admin_export_csv(export_type):
     output = Response(si.getvalue(), mimetype='text/csv')
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     return output
+
 
 if __name__ == '__main__':
     app.run(debug=True)
