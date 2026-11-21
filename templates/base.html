@@ -138,9 +138,36 @@
 
         .s2c-nav-btn {
             font-size: 0.92rem;
-            padding: 0.48rem 1rem;
+            padding: 0.48rem 0.95rem;
             border-radius: 11px;
             font-weight: 600;
+        }
+
+        .tnp-admin-btn {
+            font-size: 0.88rem;
+            padding: 0.48rem 0.9rem;
+            border-radius: 11px;
+            font-weight: 600;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.18s ease;
+        }
+
+        .tnp-admin-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-heading);
+            transform: translateY(-1px);
+        }
+
+        .tnp-admin-btn.unlocked {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.4);
         }
 
         /* Shared Badge & Button Utilities */
@@ -176,16 +203,6 @@
             padding: 1.2rem 0;
             margin-top: 3rem;
         }
-
-        .admin-footer-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.18s ease;
-        }
-
-        .admin-footer-link:hover {
-            color: var(--primary);
-        }
     </style>
 
     <script>
@@ -202,7 +219,7 @@
 
     <!-- Top Navigation Bar -->
     <nav class="navbar navbar-expand-xl s2c-navbar sticky-top">
-        <div class="container-fluid px-3 px-lg-4" style="max-width: 1360px;">
+        <div class="container-fluid px-3 px-lg-4" style="max-width: 1380px;">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold s2c-brand-text" href="{{ url_for('live_jobs') }}" style="color: var(--text-heading);">
                 <span class="brand-logo-box">
                     <i class="bi bi-briefcase-fill"></i>
@@ -243,8 +260,13 @@
                     </li>
                 </ul>
 
-                <!-- Right Controls: Theme Toggle & Auth Buttons -->
+                <!-- Right Controls: T&P Admin, Theme Toggle & Auth Buttons -->
                 <div class="d-flex flex-wrap align-items-center gap-2">
+                    <a href="{{ url_for('admin_panel') }}" class="tnp-admin-btn {% if session.get('is_admin') %}unlocked{% endif %}" title="T&P Coordinator Master Panel">
+                        <i class="bi {% if session.get('is_admin') %}bi-shield-check{% else %}bi-shield-lock{% endif %}"></i>
+                        <span>T&amp;P Admin</span>
+                    </a>
+
                     <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleSiteTheme()" title="Toggle Light / Dark Theme">
                         <i class="bi bi-sun-fill" id="themeToggleIcon"></i>
                     </button>
@@ -277,11 +299,10 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer with T&P Admin Access -->
+    <!-- Footer -->
     <footer class="s2c-footer text-center">
         <div class="container">
             Skill2Career Portal &bull; Designed &amp; Built by <strong>Karan Sahu</strong> &amp; <strong>Yuvraj Yadav</strong> (MITS Gwalior)
-            &bull; <a href="{{ url_for('admin_panel') }}" class="admin-footer-link"><i class="bi bi-shield-lock"></i> T&amp;P Admin</a>
         </div>
     </footer>
 
