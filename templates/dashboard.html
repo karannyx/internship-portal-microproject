@@ -1,246 +1,315 @@
 {% extends "base.html" %}
-{% block title %}Student Dashboard | Skill2Career{% endblock %}
 
-{% block content %}
+{% block title %}Student Dashboard | {{ student.name }} - Skill2Career{% endblock %}
+
+{% block head %}
 <style>
-    .avatar-preview-box {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid var(--primary);
-        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+    .dash-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
     }
-    .avatar-letter-box {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+
+    .profile-banner {
+        background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.2), transparent 60%), var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        padding: 1.75rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .avatar-circle {
+        width: 74px;
+        height: 74px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
         color: #ffffff;
-        font-size: 2rem;
-        font-weight: 700;
-        display: inline-flex;
+        font-size: 1.85rem;
+        font-weight: 800;
+        display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        object-fit: cover;
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+        flex-shrink: 0;
     }
-    .avatar-preset-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 2px solid var(--border-color);
-        transition: transform 0.15s ease, border-color 0.15s ease;
+
+    .stat-mini-box {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        text-align: center;
     }
-    .avatar-preset-btn:hover {
-        transform: scale(1.15);
+
+    .app-item-card {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.15rem 1.25rem;
+        transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .app-item-card:hover {
+        transform: translateY(-2px);
         border-color: var(--primary);
     }
-</style>
 
-<div class="container py-4">
-    <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold mb-1" style="color: var(--text-heading);">Student Dashboard</h2>
-            <p class="mb-0 text-muted">Manage profile avatar, technical skills, and track recruiter stages</p>
-        </div>
-        <div class="d-flex gap-2">
-            <!-- Share Public Portfolio Button -->
-            <a href="/u/{{ student.id }}" target="_blank" class="btn btn-outline-custom rounded-pill px-3">
-                <i class="bi bi-qr-code me-1"></i> Public Portfolio & QR
-            </a>
-            <a href="/resume" class="btn btn-outline-custom rounded-pill px-3">
-                <i class="bi bi-file-earmark-person me-1"></i> View Resume
-            </a>
-            <a href="/jobs" class="btn btn-primary-custom rounded-pill px-3">
-                <i class="bi bi-briefcase me-1"></i> Browse Jobs
-            </a>
+    .shortlist-glow-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff !important;
+        border: none;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.32);
+        transition: all 0.18s ease;
+    }
+
+    .shortlist-glow-btn:hover {
+        background: linear-gradient(135deg, #34d399, #10b981);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 1280px;">
+
+    <!-- Top Student Profile & Quick Actions Banner -->
+    <div class="profile-banner mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if student.avatar_url %}
+                    <img src="{{ student.avatar_url }}" alt="{{ student.name }}" class="avatar-circle">
+                {% else %}
+                    <div class="avatar-circle">
+                        {{ (student.name or 'S')[0] | upper }}
+                    </div>
+                {% endif %}
+
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0">{{ student.name }}</h3>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small">
+                            <i class="bi bi-patch-check-fill me-1"></i> Verified Candidate
+                        </span>
+                    </div>
+                    <div class="text-muted small mb-2">
+                        <i class="bi bi-envelope me-1"></i> {{ student.email }}
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for sk in (student.skills or '').split(',') if sk.strip() %}
+                            <span class="badge badge-skill">{{ sk.strip() }}</span>
+                        {% else %}
+                            <span class="text-muted small">No skills added yet &mdash; update your stack below.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('public_portfolio', student_id=student.id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-3 px-3 py-2 fw-semibold">
+                    <i class="bi bi-qr-code me-1"></i> Public QR Portfolio
+                </a>
+                <a href="{{ url_for('build_resume') }}" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2 fw-semibold" style="border-color: var(--border-color); color: var(--text-heading);">
+                    <i class="bi bi-pencil-square me-1"></i> Edit ATS Resume
+                </a>
+                <a href="{{ url_for('resume') }}" class="btn btn-sm btn-primary rounded-3 px-3 py-2 fw-semibold">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> View ATS Resume
+                </a>
+            </div>
         </div>
     </div>
 
     <div class="row g-4">
-        <!-- Profile & Skill Editor -->
+        <!-- Left Column: Telemetry + Update Skills Form -->
         <div class="col-lg-4">
-            <div class="card p-4 h-100" style="border-radius: 18px;">
-                <!-- Profile Picture / Avatar Display -->
-                <div class="text-center mb-3">
-                    {% if student.avatar_url %}
-                        <img src="{{ student.avatar_url }}" alt="Profile Avatar" class="avatar-preview-box mb-2" onerror="this.style.display='none'; document.getElementById('letterAvatar').style.display='inline-flex';">
-                        <div id="letterAvatar" class="avatar-letter-box mb-2" style="display: none;">
-                            {{ student.name[0]|upper }}
-                        </div>
-                    {% else %}
-                        <div class="avatar-letter-box mb-2">
-                            {{ student.name[0]|upper }}
-                        </div>
+            <!-- Mini Stats -->
+            <div class="dash-card mb-4">
+                <h6 class="fw-bold text-uppercase text-muted small mb-3" style="letter-spacing: 0.6px;">
+                    <i class="bi bi-bar-chart-line me-1"></i> Placement Telemetry
+                </h6>
+                {% set shortlisted_count = namespace(value=0) %}
+                {% for j in applied_jobs %}
+                    {% if j.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
+                        {% set shortlisted_count.value = shortlisted_count.value + 1 %}
                     {% endif %}
-
-                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">{{ student.name }}</h5>
-                    <p class="small text-muted mb-2">{{ student.email }}</p>
-                    <span class="badge border px-3 py-1 rounded-pill" style="background: var(--badge-bg); color: var(--badge-text);">
-                        <i class="bi bi-patch-check-fill me-1"></i> Verified Student
-                    </span>
-                </div>
-
-                <hr style="border-color: var(--border-color);">
-
-                <form method="POST" action="/dashboard">
-                    <!-- Profile Picture (Avatar URL / Preset Selector) -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small" style="color: var(--text-heading);">
-                            <i class="bi bi-image text-primary me-1"></i> Profile Picture / Avatar
-                        </label>
-                        <input type="url" name="avatar_url" id="avatarInput" class="form-control form-control-sm mb-2" placeholder="Paste custom image URL..." value="{{ student.avatar_url or '' }}">
-                        
-                        <div class="small text-muted mb-1">Or choose an avatar preset:</div>
-                        <div class="d-flex gap-2 justify-content-center pt-1 mb-2">
-                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=karan" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/bottts/svg?seed=karan')" title="Bot Avatar">
-                            <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Alex" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/adventurer/svg?seed=Alex')" title="Coder Avatar">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix')" title="Executive Avatar">
-                            <img src="https://api.dicebear.com/7.x/shapes/svg?seed=Skill" class="avatar-preset-btn" onclick="selectAvatar('https://api.dicebear.com/7.x/shapes/svg?seed=Skill')" title="Geometric Avatar">
+                {% endfor %}
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="stat-mini-box">
+                            <div class="fs-4 fw-bold text-primary">{{ applied_jobs|length }}</div>
+                            <div class="text-muted" style="font-size: 0.74rem;">Applied</div>
                         </div>
                     </div>
-
-                    <!-- Core Skills -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small" style="color: var(--text-heading);">
-                            <i class="bi bi-cpu text-primary me-1"></i> Core Skills (comma-separated)
-                        </label>
-                        <textarea name="skills" rows="3" class="form-control" placeholder="e.g. Python, SQL, C, HTML" required>{{ student.skills }}</textarea>
-                        <div class="form-text small">Updating skills instantly recalculates your job match percentages.</div>
+                    <div class="col-4">
+                        <div class="stat-mini-box">
+                            <div class="fs-4 fw-bold text-success">{{ shortlisted_count.value }}</div>
+                            <div class="text-muted" style="font-size: 0.74rem;">Shortlisted</div>
+                        </div>
                     </div>
+                    <div class="col-4">
+                        <div class="stat-mini-box">
+                            <div class="fs-4 fw-bold text-info">{{ saved_jobs|length }}</div>
+                            <div class="text-muted" style="font-size: 0.74rem;">Bookmarked</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <button type="submit" class="btn btn-primary-custom w-100">
-                        <i class="bi bi-check-circle-fill me-1"></i> Save Profile & Skills
+            <!-- Edit Technical Stack & Avatar -->
+            <div class="dash-card">
+                <h6 class="fw-bold mb-1">
+                    <i class="bi bi-sliders me-1 text-primary"></i> Update Skill Stack &amp; Profile
+                </h6>
+                <p class="text-muted small mb-3">
+                    Updating your skills dynamically recalculates your match percentage across all Campus Drives.
+                </p>
+
+                <form method="POST" action="{{ url_for('dashboard') }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Verified Technical Skills (comma-separated)</label>
+                        <input type="text" name="skills" value="{{ student.skills }}" class="form-control rounded-3" placeholder="e.g., Python, SQL, HTML, C, Flask" required style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Profile Photo URL (Optional)</label>
+                        <input type="url" name="avatar_url" value="{{ student.avatar_url or '' }}" class="form-control rounded-3" placeholder="https://..." style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-3">
+                        <i class="bi bi-check2-circle me-1"></i> Save Profile Changes
                     </button>
                 </form>
-
-                <div class="mt-4 pt-3 border-top text-center" style="border-color: var(--border-color) !important;">
-                    <a href="/build_resume" class="btn btn-outline-custom w-100 btn-sm">
-                        <i class="bi bi-pencil-square me-1"></i> Edit Full Resume Data
-                    </a>
-                </div>
             </div>
         </div>
 
-        <!-- Applications & Saved Jobs -->
+        <!-- Right Column: Applied Drives & Saved Drives -->
         <div class="col-lg-8">
-            <!-- Applied Jobs Table -->
-            <div class="card p-4 mb-4" style="border-radius: 18px;">
+
+            <!-- My Applications & Official Letters -->
+            <div class="dash-card mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">
-                        My Applications ({{ applied_jobs|length }})
-                    </h5>
-                    <span class="small text-muted">Live Status Tracking</span>
+                    <div>
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-send-check text-primary me-1"></i> My Campus Drive Applications
+                        </h5>
+                        <div class="text-muted small">Track live T&amp;P status and download official shortlist/selection letters</div>
+                    </div>
+                    <a href="{{ url_for('jobs') }}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
+                        + Explore Drives
+                    </a>
                 </div>
 
                 {% if applied_jobs %}
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead>
-                                <tr class="text-muted small text-uppercase">
-                                    <th>Role & Company</th>
-                                    <th>Tech Stack</th>
-                                    <th>Quiz Score</th>
-                                    <th>Application Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for job in applied_jobs %}
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold" style="color: var(--text-heading);">{{ job.title }}</div>
-                                        <div class="small text-muted"><i class="bi bi-buildings me-1"></i>{{ job.company }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-wrap gap-1">
-                                            {% for sk in job.required_skills.split(',') %}
-                                                <span class="badge badge-skill" style="font-size: 0.7rem;">{{ sk.strip() }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary border px-2 py-1 small fw-bold">
-                                            {{ job.quiz_score }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {% if job.status == 'Shortlisted' %}
-                                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold">
-                                                <i class="bi bi-star-fill me-1"></i> Shortlisted
-                                            </span>
-                                        {% elif job.status == 'Interview Scheduled' %}
-                                            <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-bold">
-                                                <i class="bi bi-calendar-event-fill me-1"></i> Interview Call
-                                            </span>
-                                        {% elif job.status == 'Rejected' %}
-                                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 fw-semibold">
-                                                <i class="bi bi-x-circle me-1"></i> Archival
-                                            </span>
-                                        {% else %}
-                                            <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1 fw-semibold">
-                                                <i class="bi bi-hourglass-split me-1"></i> Under Review
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="/interview_prep/{{ job.id }}" class="btn btn-sm btn-outline-custom" title="Interview Q&A">
-                                            <i class="bi bi-lightning-charge"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-send-slash fs-2 text-muted mb-2 d-block"></i>
-                        <h6 class="fw-bold" style="color: var(--text-heading);">No Applications Yet</h6>
-                        <p class="text-muted small mb-2">Explore active campus drives and apply with 1-click.</p>
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Saved Bookmarked Jobs Card -->
-            <div class="card p-4" style="border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0" style="color: var(--text-heading);">
-                        <i class="bi bi-bookmark-fill text-warning me-2"></i> Saved Opportunities ({{ saved_jobs|length }})
-                    </h5>
-                    <span class="small text-muted">Bookmarked Roles</span>
-                </div>
-
-                {% if saved_jobs %}
-                    <div class="row g-3">
-                        {% for job in saved_jobs %}
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded-3 bg-body-tertiary d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="fw-bold mb-0" style="color: var(--text-heading);">{{ job.title }}</div>
-                                    <div class="small text-muted mb-1">{{ job.company }}</div>
-                                    <div class="small text-muted">{{ job.required_skills }}</div>
+                <div class="d-flex flex-column gap-3">
+                    {% for job in applied_jobs %}
+                    <div class="app-item-card">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ job.title }}</h6>
+                                <div class="text-muted small mb-2">
+                                    <i class="bi bi-building me-1"></i> {{ job.company }}
+                                    &bull; <span class="text-info fw-semibold">Quiz Score: {{ job.quiz_score or 'N/A' }}</span>
                                 </div>
-                                <a href="/apply/{{ job.id }}" class="btn btn-sm btn-primary-custom">
-                                    Apply
-                                </a>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for sk in (job.required_skills or '').split(',') if sk.strip() %}
+                                        <span class="badge badge-skill">{{ sk.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="text-end d-flex flex-column align-items-end gap-2">
+                                {% if job.status in ['Shortlisted', 'Selected'] %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-bold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ job.status }}
+                                    </span>
+                                {% elif job.status == 'Interview Scheduled' %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-bold">
+                                        <i class="bi bi-calendar-event me-1"></i> {{ job.status }}
+                                    </span>
+                                {% elif job.status == 'Rejected' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 rounded-pill fw-bold">
+                                        {{ job.status }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1.5 rounded-pill fw-semibold">
+                                        <i class="bi bi-hourglass-split me-1"></i> {{ job.status or 'Under Review' }}
+                                    </span>
+                                {% endif %}
+
+                                <div class="d-flex flex-wrap justify-content-end gap-2">
+                                    {% if job.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
+                                    <a href="{{ url_for('shortlist_letter', app_id=job.app_id) }}" target="_blank" class="btn btn-sm shortlist-glow-btn rounded-3 px-3 fw-bold">
+                                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Official {{ job.status }} Letter
+                                    </a>
+                                    {% endif %}
+
+                                    <a href="{{ url_for('interview_prep', job_id=job.id) }}" class="btn btn-sm btn-outline-warning rounded-3 px-2.5 fw-semibold">
+                                        <i class="bi bi-lightning-charge"></i> Prep
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <p class="text-muted small mb-0">No bookmarked jobs. Click the bookmark icon on any job card to save it here.</p>
+                <div class="text-center py-4 border rounded-4" style="border-color: var(--border-color) !important;">
+                    <i class="bi bi-briefcase fs-2 text-muted d-block mb-2"></i>
+                    <p class="text-muted small mb-2">You haven't applied to any campus drives yet.</p>
+                    <a href="{{ url_for('jobs') }}" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">Browse Campus Drives</a>
+                </div>
                 {% endif %}
             </div>
+
+            <!-- Bookmarked / Saved Drives -->
+            <div class="dash-card">
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-bookmark-heart text-info me-1"></i> Bookmarked Drives ({{ saved_jobs|length }})
+                </h5>
+                <p class="text-muted small mb-3">Drives you saved for quick screening quiz &amp; application later</p>
+
+                {% if saved_jobs %}
+                <div class="d-flex flex-column gap-3">
+                    {% for job in saved_jobs %}
+                    <div class="app-item-card d-flex flex-wrap justify-content-between align-items-center gap-2" id="saved-card-{{ job.id }}">
+                        <div>
+                            <div class="fw-bold">{{ job.title }}</div>
+                            <div class="text-muted small">{{ job.company }} &bull; Stack: {{ job.required_skills }}</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-sm btn-success rounded-3 px-3 fw-semibold">
+                                Apply &bull; Quiz &rarr;
+                            </a>
+                            <button type="button" onclick="removeSavedJob({{ job.id }})" class="btn btn-sm btn-outline-danger rounded-3" title="Remove Bookmark">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-muted small text-center py-3">
+                    No bookmarked drives right now. Click the bookmark icon on any drive card to save it here.
+                </div>
+                {% endif %}
+            </div>
+
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    function selectAvatar(url) {
-        document.getElementById('avatarInput').value = url;
+    function removeSavedJob(jobId) {
+        fetch(`/toggle_save/${jobId}`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    const card = document.getElementById(`saved-card-${jobId}`);
+                    if (card) card.remove();
+                }
+            });
     }
 </script>
 {% endblock %}

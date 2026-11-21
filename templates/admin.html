@@ -156,7 +156,7 @@
                 </div>
                 <h2 class="fw-bold mb-1">T&amp;P Master Control Panel</h2>
                 <p class="text-muted small mb-0">
-                    Real-time student registry, 1-click application shortlisting, screening quiz audit &amp; recruiter CSV exports
+                    Real-time student registry, 1-click application shortlisting, official PDF letters &amp; recruiter CSV exports
                 </p>
             </div>
 
@@ -260,7 +260,7 @@
     <!-- Tab Panes -->
     <div class="tab-content">
 
-        <!-- 1. APPLICATIONS TAB (With 1-Click Shortlist Dropdown) -->
+        <!-- 1. APPLICATIONS TAB (With 1-Click Shortlist Dropdown & Official Letter) -->
         <div class="tab-pane fade show active" id="apps-pane" role="tabpanel">
             <div class="admin-table-card">
                 <div class="table-responsive">
@@ -272,7 +272,7 @@
                                 <th>Company &amp; Role</th>
                                 <th>Quiz Score</th>
                                 <th>Current Status</th>
-                                <th>1-Click Shortlist Action</th>
+                                <th>1-Click Shortlist &amp; Letter</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -304,18 +304,26 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form method="POST" action="{{ url_for('admin_update_status', app_id=a.id) }}" class="d-flex align-items-center gap-2">
-                                        <select name="status" class="form-select form-select-sm rounded-3" style="max-width: 175px; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
-                                            <option value="Under Review" {% if a.status == 'Under Review' %}selected{% endif %}>Under Review</option>
-                                            <option value="Shortlisted" {% if a.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
-                                            <option value="Interview Scheduled" {% if a.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
-                                            <option value="Selected" {% if a.status == 'Selected' %}selected{% endif %}>Selected</option>
-                                            <option value="Rejected" {% if a.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
-                                            Save
-                                        </button>
-                                    </form>
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <form method="POST" action="{{ url_for('admin_update_status', app_id=a.id) }}" class="d-flex align-items-center gap-2">
+                                            <select name="status" class="form-select form-select-sm rounded-3" style="max-width: 170px; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+                                                <option value="Under Review" {% if a.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                                <option value="Shortlisted" {% if a.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                                <option value="Interview Scheduled" {% if a.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
+                                                <option value="Selected" {% if a.status == 'Selected' %}selected{% endif %}>Selected</option>
+                                                <option value="Rejected" {% if a.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
+                                                Save
+                                            </button>
+                                        </form>
+
+                                        {% if a.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
+                                        <a href="{{ url_for('shortlist_letter', app_id=a.id) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-3 px-2.5 fw-semibold" title="View Official Shortlist Letter PDF">
+                                            <i class="bi bi-file-earmark-check"></i> Letter
+                                        </a>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% else %}

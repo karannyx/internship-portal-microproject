@@ -3,7 +3,9 @@ import requests
 import time
 import csv
 import os
+import hashlib
 import smtplib
+from datetime import datetime
 from io import StringIO
 from collections import Counter
 from email.mime.text import MIMEText
@@ -193,7 +195,7 @@ Role: {job_title}
 Organization: {company}
 Updated Status: {status}
 
-{'Congratulations! Please check your portal dashboard for round instructions.' if status in ['Shortlisted', 'Interview Scheduled', 'Selected'] else 'Login to Skill2Career to review role analytics and recommendations.'}
+{'Congratulations! Your official Shortlist / Selection Letter is now available on your dashboard.' if status in ['Shortlisted', 'Interview Scheduled', 'Selected'] else 'Login to Skill2Career to review role analytics and recommendations.'}
 
 Portal Access: https://skill2career-portal.onrender.com/dashboard
 
@@ -409,6 +411,52 @@ def submit_quiz(job_id):
     conn.close()
 
     return redirect(url_for('dashboard'))
+
+
+# --- OFFICIAL SHORTLIST / SELECTION LETTER (PDF + VERIFICATION CODE) ---
+
+@app.route('/shortlist_letter/<int:app_id>')
+def shortlist_letter(app_id):
+    if 'student_email' not in session and not session.get('is_admin'):
+        return redirect(url_for('login'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT applications.id as app_id, applications.student_email, applications.status, applications.quiz_score,
+               students.id as student_id, students.name as student_name, students.skills,
+               internships.title as job_title, internships.company, internships.required_skills, internships.deadline,
+               student_resumes.branch, student_resumes.cgpa, student_resumes.degree, student_resumes.college, student_resumes.grad_year
+        FROM applications
+        JOIN students ON applications.student_email = students.email
+        JOIN internships ON applications.job_id = internships.id
+        LEFT JOIN student_resumes ON students.email = student_resumes.student_email
+        WHERE applications.id = ?
+    ''', (app_id,))
+    record = cursor.fetchone()
+    conn.close()
+
+    if not record:
+        return redirect(url_for('dashboard'))
+
+    # Allow only the candidate themselves or an unlocked T&P Admin
+    if not session.get('is_admin') and session.get('student_email') != record['student_email']:
+        return redirect(url_for('dashboard'))
+
+    if record['status'] not in ['Shortlisted', 'Interview Scheduled', 'Selected']:
+        return redirect(url_for('dashboard'))
+
+    raw_sig = f"{record['app_id']}:{record['student_email']}:{record['company']}:MITS2026"
+    checksum = hashlib.sha256(raw_sig.encode()).hexdigest()[:6].upper()
+    ref_no = f"MITS/TNP/2026/{record['app_id']:04d}-{checksum}"
+    issue_date = datetime.now().strftime("%B %d, %Y")
+
+    return render_template(
+        'shortlist_letter.html',
+        rec=record,
+        ref_no=ref_no,
+        issue_date=issue_date
+    )
 
 
 # --- RECRUITER 1-CLICK EXCEL / CSV EXPORT ---
@@ -632,7 +680,8 @@ def dashboard():
 
     try:
         cursor.execute('''
-            SELECT internships.id, internships.title, internships.company, internships.required_skills, applications.status, applications.quiz_score
+            SELECT applications.id as app_id, internships.id, internships.title, internships.company,
+                   internships.required_skills, applications.status, applications.quiz_score
             FROM internships
             JOIN applications ON internships.id = applications.job_id
             WHERE applications.student_email = ?
