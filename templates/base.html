@@ -170,6 +170,97 @@
             border-color: rgba(16, 185, 129, 0.4);
         }
 
+        /* High-Contrast Action Buttons on Campus Drives (/jobs) */
+        .page-campus-drives a[href*="/add_job"] {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(196, 181, 253, 0.45) !important;
+            padding: 0.56rem 1.15rem !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none !important;
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.38);
+            transition: all 0.2s ease;
+        }
+
+        .page-campus-drives a[href*="/add_job"]:hover {
+            background: linear-gradient(135deg, #9d6ffa, #7c3aed) !important;
+            transform: translateY(-2px);
+        }
+
+        .page-campus-drives a[href*="/interview_prep/"] {
+            background: rgba(245, 158, 11, 0.14) !important;
+            color: #fbbf24 !important;
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            padding: 0.36rem 0.78rem !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none !important;
+            transition: all 0.18s ease;
+        }
+
+        .page-campus-drives a[href*="/interview_prep/"]:hover {
+            background: rgba(245, 158, 11, 0.24) !important;
+            transform: translateY(-1px);
+        }
+
+        .page-campus-drives a[href*="/view_applicants/"] {
+            background: rgba(56, 189, 248, 0.14) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.35) !important;
+            padding: 0.36rem 0.78rem !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none !important;
+            transition: all 0.18s ease;
+        }
+
+        .page-campus-drives a[href*="/view_applicants/"]:hover {
+            background: rgba(56, 189, 248, 0.24) !important;
+            transform: translateY(-1px);
+        }
+
+        .page-campus-drives a[href*="/apply/"] {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(52, 211, 153, 0.5) !important;
+            padding: 0.42rem 0.95rem !important;
+            border-radius: 10px !important;
+            font-weight: 700 !important;
+            font-size: 0.84rem !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+            transition: all 0.18s ease;
+        }
+
+        .page-campus-drives a[href*="/apply/"]:hover {
+            background: linear-gradient(135deg, #34d399, #10b981) !important;
+            transform: translateY(-1px);
+        }
+
+        [data-bs-theme="light"] .page-campus-drives a[href*="/interview_prep/"] {
+            color: #b45309 !important;
+        }
+
+        [data-bs-theme="light"] .page-campus-drives a[href*="/view_applicants/"] {
+            color: #0369a1 !important;
+        }
+
         /* Shared Badge & Button Utilities */
         .badge-skill {
             background: var(--badge-bg) !important;
@@ -216,6 +307,11 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <script>
+        if (window.location.pathname === "/jobs") {
+            document.body.classList.add("page-campus-drives");
+        }
+    </script>
 
     <!-- Top Navigation Bar -->
     <nav class="navbar navbar-expand-xl s2c-navbar sticky-top">
