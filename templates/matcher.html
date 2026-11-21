@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}Skill Compatibility Matcher | Skill2Career{% endblock %}
+
+{% block content %}
+<style>
+    .matcher-wrapper {
+        max-width: 880px;
+        margin: 0 auto;
+    }
+    .matcher-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 22px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+    .skill-textarea {
+        background: var(--body-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-heading) !important;
+        border-radius: 14px !important;
+        padding: 0.9rem 1rem;
+        font-size: 0.92rem;
+        resize: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .skill-textarea:focus {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+    }
+    .quick-pill {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-heading);
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.32rem 0.72rem;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    .quick-pill:hover {
+        border-color: #8b5cf6;
+        background: var(--badge-bg);
+        color: var(--badge-text);
+        transform: translateY(-1px);
+    }
+    .btn-calculate {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        border: none;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 22px rgba(124, 58, 237, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-calculate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.48);
+        color: #ffffff;
+    }
+    .result-panel {
+        display: none;
+        margin-top: 1.75rem;
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 1.6rem;
+        animation: fadeUp 0.28s ease;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .bridge-skill-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.83rem;
+        font-weight: 600;
+        text-decoration: none;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.38);
+        color: #f87171;
+        transition: all 0.2s ease;
+    }
+    .bridge-skill-link:hover {
+        background: rgba(124, 58, 237, 0.2);
+        border-color: #8b5cf6;
+        color: #c4b5fd;
+        transform: translateY(-2px);
+    }
+    .bridge-learn-tag {
+        background: rgba(139, 92, 246, 0.25);
+        color: #ddd6fe;
+        padding: 0.12rem 0.48rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container py-4 matcher-wrapper">
+    <!-- Top Header -->
+    <div class="text-center mb-4">
+        <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--card-bg); color: var(--badge-text); border-color: var(--border-color) !important;">
+            <i class="bi bi-cpu me-1"></i> Mathematical Compatibility Engine
+        </span>
+        <h1 class="display-6 fw-bold mb-2" style="color: var(--text-heading);">
+            Interactive Skill Matcher
+        </h1>
+        <p class="text-muted mx-auto mb-0" style="max-width: 620px; font-size: 0.95rem;">
+            Input your technical proficiencies alongside internship prerequisites to calculate set-intersection compatibility and bridge competency gaps in one click.
+        </p>
+    </div>
+
+    <!-- Main Matcher Card -->
+    <div class="matcher-card">
+        <div class="row g-4">
+            <!-- Left Input: My Technical Stack -->
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="userSkillsInput" class="fw-bold small" style="color: var(--text-heading);">
+                        <i class="bi bi-person-badge text-primary me-1"></i> My Technical Stack
+                    </label>
+                    <span class="small text-muted">Comma-separated</span>
+                </div>
+                <textarea id="userSkillsInput" rows="4" class="form-control skill-textarea"
+                          placeholder="e.g. Python, SQL, C, HTML5, Flask">{{ (student['skills'] if student and student['skills'] else '') }}</textarea>
+
+                <div class="d-flex flex-wrap align-items-center gap-1.5 mt-2.5">
+                    <span class="small text-muted me-1">Quick Add:</span>
+                    <button type="button" class="quick-pill" onclick="appendUserSkill('Python')">+ Python</button>
+                    <button type="button" class="quick-pill" onclick="appendUserSkill('SQL')">+ SQL</button>
+                    <button type="button" class="quick-pill" onclick="appendUserSkill('C')">+ C</button>
+                    <button type="button" class="quick-pill" onclick="appendUserSkill('HTML')">+ HTML</button>
+                    <button type="button" class="quick-pill" onclick="appendUserSkill('React')">+ React</button>
+                </div>
+            </div>
+
+            <!-- Right Input: Required Job Skills -->
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="jobSkillsInput" class="fw-bold small" style="color: var(--text-heading);">
+                        <i class="bi bi-briefcase-fill text-primary me-1"></i> Required Job Skills
+                    </label>
+                    <span class="small text-muted">Comma-separated</span>
+                </div>
+                <textarea id="jobSkillsInput" rows="4" class="form-control skill-textarea"
+                          placeholder="e.g. Python, SQL, C, Docker"></textarea>
+
+                <div class="d-flex flex-wrap align-items-center gap-1.5 mt-2.5">
+                    <span class="small text-muted me-1">Sample Roles:</span>
+                    <button type="button" class="quick-pill" onclick="setSampleRole('Python, SQL, HTML, C')">India Post</button>
+                    <button type="button" class="quick-pill" onclick="setSampleRole('Python, SQL, C, DSA')">TCS Digital</button>
+                    <button type="button" class="quick-pill" onclick="setSampleRole('HTML, CSS, JavaScript, React')">Zoho Frontend</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculate CTA -->
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-calculate" onclick="calculateCompatibility()">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Calculate Skill Compatibility
+            </button>
+        </div>
+
+        <!-- Compatibility & Skill-Gap Bridge Results -->
+        <div id="matcherResultPanel" class="result-panel">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                <div>
+                    <span class="small text-uppercase fw-bold text-muted" style="letter-spacing: 0.6px;">Compatibility Score</span>
+                    <div class="d-flex align-items-baseline gap-2 mt-1">
+                        <h2 id="matchScoreText" class="fw-bold mb-0" style="color: var(--text-heading);">0%</h2>
+                        <span id="matchVerdictBadge" class="badge rounded-pill px-3 py-1 small"></span>
+                    </div>
+                </div>
+                <div style="min-width: 220px; flex-grow: 1; max-width: 340px;">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Set-Intersection Coverage</span>
+                        <span id="matchFractionText">0 / 0 skills</span>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 999px; background: var(--card-bg);">
+                        <div id="matchProgressBar" class="progress-bar" role="progressbar" style="width: 0%; border-radius: 999px; transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Matched Skills -->
+                <div class="col-md-6">
+                    <h6 class="small fw-bold text-success mb-2">
+                        <i class="bi bi-check-circle-fill me-1"></i> Verified Matching Skills
+                    </h6>
+                    <div id="matchedSkillsContainer" class="d-flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Missing Skills -> Direct Course Bridge -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="small fw-bold text-danger mb-0">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Skill Gaps (Click to Bridge)
+                        </h6>
+                        <span class="small text-muted" style="font-size: 0.74rem;">Opens YouTube Hub</span>
+                    </div>
+                    <div id="missingSkillsContainer" class="d-flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function normalizeSkillToken(raw) {
+    return raw.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function appendUserSkill(skill) {
+    const input = document.getElementById("userSkillsInput");
+    const current = input.value.split(",").map(s => s.trim()).filter(Boolean);
+    const exists = current.some(s => s.toLowerCase() === skill.toLowerCase());
+    if (!exists) {
+        current.push(skill);
+        input.value = current.join(", ");
+    }
+}
+
+function setSampleRole(skillsCsv) {
+    document.getElementById("jobSkillsInput").value = skillsCsv;
+    calculateCompatibility();
+}
+
+function calculateCompatibility() {
+    const userRaw = document.getElementById("userSkillsInput").value;
+    const jobRaw = document.getElementById("jobSkillsInput").value;
+
+    const userList = userRaw.split(",").map(s => s.trim()).filter(Boolean);
+    const jobList = jobRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+    if (jobList.length === 0) {
+        alert("Please enter at least one Required Job Skill or select a Sample Role.");
+        return;
+    }
+
+    const userNormalized = new Set(userList.map(normalizeSkillToken));
+    const matched = [];
+    const missing = [];
+    const seenJob = new Set();
+
+    jobList.forEach(skill => {
+        const norm = normalizeSkillToken(skill);
+        if (seenJob.has(norm)) return;
+        seenJob.add(norm);
+
+        const isMatch = userNormalized.has(norm) ||
+            (norm === "html" && userNormalized.has("html5")) ||
+            (norm === "html5" && userNormalized.has("html")) ||
+            (norm === "css" && userNormalized.has("css3")) ||
+            (norm === "css3" && userNormalized.has("css"));
+
+        if (isMatch) {
+            matched.push(skill);
+        } else {
+            missing.push(skill);
+        }
+    });
+
+    const total = matched.length + missing.length;
+    const pct = total > 0 ? Math.round((matched.length / total) * 100) : 0;
+
+    const panel = document.getElementById("matcherResultPanel");
+    panel.style.display = "block";
+
+    document.getElementById("matchScoreText").textContent = pct + "%";
+    document.getElementById("matchFractionText").textContent = `${matched.length} / ${total} skills`;
+
+    const bar = document.getElementById("matchProgressBar");
+    const verdict = document.getElementById("matchVerdictBadge");
+    bar.style.width = pct + "%";
+
+    if (pct >= 75) {
+        bar.className = "progress-bar bg-success";
+        verdict.className = "badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small";
+        verdict.textContent = "Strong Candidate Match";
+    } else if (pct >= 40) {
+        bar.className = "progress-bar bg-warning";
+        verdict.className = "badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 small";
+        verdict.textContent = "Moderate Match • Upskill Recommended";
+    } else {
+        bar.className = "progress-bar bg-danger";
+        verdict.className = "badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 small";
+        verdict.textContent = "High Skill Gap • Bridge Below";
+    }
+
+    const matchedContainer = document.getElementById("matchedSkillsContainer");
+    matchedContainer.innerHTML = matched.length
+        ? matched.map(s => `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check2 me-1"></i>${s}</span>`).join("")
+        : `<span class="small text-muted">No matching skills yet.</span>`;
+
+    const missingContainer = document.getElementById("missingSkillsContainer");
+    missingContainer.innerHTML = missing.length
+        ? missing.map(s => `
+            <a href="/courses?skill=${encodeURIComponent(s)}" class="bridge-skill-link" title="Open Free YouTube Courses for ${s}">
+                <i class="bi bi-journal-code"></i> ${s}
+                <span class="bridge-learn-tag">Learn &rarr;</span>
+            </a>`).join("")
+        : `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-stars me-1"></i>Zero Skill Gaps! Ready to Apply</span>`;
+}
+</script>
+{% endblock %}

@@ -795,46 +795,15 @@ def developers():
 
 @app.route('/matcher', methods=['GET', 'POST'])
 def matcher():
-    score = None
-    matched_skills = []
-    missing_skills = []
-    student_skills_raw = ""
-    job_skills_raw = ""
-
-    if 'student_email' in session and request.method == 'GET':
+    student = None
+    if 'student_email' in session:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('SELECT skills FROM students WHERE email = ?', (session['student_email'],))
-        row = cursor.fetchone()
+        cursor.execute('SELECT * FROM students WHERE email = ?', (session['student_email'],))
+        student = cursor.fetchone()
         conn.close()
-        if row and row['skills']:
-            student_skills_raw = row['skills']
 
-    if request.method == 'POST':
-        student_skills_raw = request.form.get('student_skills', '').strip()
-        job_skills_raw = request.form.get('job_skills', '').strip()
-
-        s_list = [s.strip() for s in student_skills_raw.split(',') if s.strip()]
-        j_list = [s.strip() for s in job_skills_raw.split(',') if s.strip()]
-
-        s_lower = {s.lower(): s for s in s_list}
-        j_lower = {j.lower(): j for j in j_list}
-
-        if j_list:
-            matched_keys = set(s_lower.keys()).intersection(set(j_lower.keys()))
-            missing_keys = set(j_lower.keys()) - set(s_lower.keys())
-
-            matched_skills = [j_lower[k] for k in matched_keys]
-            missing_skills = [j_lower[k] for k in missing_keys]
-            score = round((len(matched_keys) / len(j_list)) * 100)
-        else:
-            score = 0
-
-    return render_template('index.html', score=score,
-                           matched_skills=matched_skills,
-                           missing_skills=missing_skills,
-                           student_skills_raw=student_skills_raw,
-                           job_skills_raw=job_skills_raw)
+    return render_template('matcher.html', student=student)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():

@@ -3,344 +3,543 @@
 
 {% block content %}
 <style>
-    .courses-hero-banner {
+    .courses-hero {
         position: relative;
         background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 22px;
-        padding: 2rem;
+        padding: 2.1rem;
         overflow: hidden;
         box-shadow: var(--card-shadow);
     }
-    .courses-hero-banner::before {
+    .courses-hero::before {
         content: "";
         position: absolute;
-        top: -55%;
-        right: -8%;
+        top: -50%;
+        right: -5%;
         width: 360px;
         height: 360px;
-        background: radial-gradient(circle, rgba(239, 68, 68, 0.16) 0%, rgba(124, 58, 237, 0.14) 45%, transparent 72%);
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, transparent 72%);
         pointer-events: none;
     }
-
-    .command-deck {
+    .hero-stat-box {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 0.85rem 1.25rem;
+        text-align: center;
+        min-width: 118px;
+    }
+    .filter-toolbar {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 18px;
-        padding: 1.15rem;
-        box-shadow: var(--card-shadow);
+        padding: 1.25rem;
     }
-
-    .lang-tabs {
-        background: var(--body-bg);
+    .course-search-input {
+        background: var(--body-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-heading) !important;
+        border-radius: 12px !important;
+        padding: 0.65rem 1rem 0.65rem 2.5rem;
+        font-size: 0.9rem;
+    }
+    .lang-pill, .stack-pill {
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 4px;
-        display: inline-flex;
-        gap: 4px;
-    }
-    .lang-tab-btn {
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.8rem;
-        padding: 0.42rem 0.9rem;
-        border-radius: 9px;
-        transition: all 0.2s ease;
-    }
-    .lang-tab-btn:hover {
+        background: var(--body-bg);
         color: var(--text-heading);
-    }
-    .lang-tab-btn.active {
-        background: var(--primary);
-        color: #ffffff;
-        box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
-    }
-
-    .tech-chip {
-        border: 1px solid var(--border-color);
-        background: var(--body-bg);
-        color: var(--text-body);
-        font-size: 0.77rem;
+        font-size: 0.8rem;
         font-weight: 600;
-        padding: 0.32rem 0.8rem;
-        border-radius: 999px;
+        padding: 0.42rem 0.9rem;
+        border-radius: 10px;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all 0.18s ease;
     }
-    .tech-chip:hover, .tech-chip.active {
-        border-color: var(--primary);
-        background: var(--badge-bg);
+    .lang-pill.active, .stack-pill.active {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        border-color: #8b5cf6;
+        color: #ffffff;
+    }
+    .lang-pill:hover:not(.active), .stack-pill:hover:not(.active) {
+        border-color: #8b5cf6;
         color: var(--badge-text);
     }
-
     .course-card {
         background: var(--card-bg) !important;
         border: 1px solid var(--border-color) !important;
-        border-radius: 20px;
-        overflow: hidden;
-        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+        border-radius: 18px;
+        padding: 1.45rem;
+        transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
     }
     .course-card:hover {
         transform: translateY(-5px);
         border-color: rgba(139, 92, 246, 0.65) !important;
-        box-shadow: 0 18px 36px -12px rgba(124, 58, 237, 0.26);
-    }
-    .course-top-strip {
-        height: 4px;
-        background: linear-gradient(90deg, #ef4444, #8b5cf6, #6366f1);
+        box-shadow: 0 16px 34px -12px rgba(124, 58, 237, 0.28);
     }
     .yt-icon-box {
-        width: 46px;
-        height: 46px;
-        border-radius: 13px;
-        background: rgba(239, 68, 68, 0.12);
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(239, 68, 68, 0.14);
         border: 1px solid rgba(239, 68, 68, 0.3);
         color: #ef4444;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.35rem;
+        font-size: 1.25rem;
         flex-shrink: 0;
     }
-    .meta-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.75rem;
-        color: var(--text-muted);
+    .meta-tag {
         background: var(--body-bg);
         border: 1px solid var(--border-color);
-        padding: 0.25rem 0.62rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.28rem 0.65rem;
         border-radius: 8px;
     }
-    .btn-watch-yt {
-        background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
-        color: #ffffff !important;
-        border: none;
-        border-radius: 11px;
-        padding: 0.48rem 1.05rem;
-        font-size: 0.83rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
-        transition: all 0.2s ease;
-    }
-    .btn-watch-yt:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
-        color: #ffffff !important;
+    .skill-bridge-banner {
+        display: none;
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(14, 165, 233, 0.12));
+        border: 1px solid rgba(139, 92, 246, 0.6);
+        border-radius: 16px;
+        padding: 0.95rem 1.35rem;
+        margin-bottom: 1.25rem;
     }
 </style>
 
-<div class="container py-3">
-    <!-- Hero Header -->
-    <div class="courses-hero-banner mb-4">
+<div class="container py-3" style="max-width: 1140px;">
+    <!-- Skill-Gap Bridge Active Banner -->
+    <div id="skillBridgeBanner" class="skill-bridge-banner align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary rounded-pill px-2.5 py-1">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Skill-Gap Bridge Active
+            </span>
+            <span class="small fw-semibold" style="color: var(--text-heading);">
+                Showing curated YouTube courses to master <strong id="bridgeSkillName" class="text-primary"></strong>
+            </span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="resetBridgeFilter()">
+            <i class="bi bi-x-circle me-1"></i> Show All (18)
+        </button>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="courses-hero mb-4">
         <div class="row align-items-center g-3">
             <div class="col-lg-8">
-                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill border mb-3" style="background: var(--body-bg); border-color: var(--border-color) !important;">
-                    <i class="bi bi-youtube text-danger"></i>
-                    <span class="small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.06em; color: var(--text-heading);">
-                        Curated YouTube Learning Hub &bull; 100% Free
-                    </span>
+                <div class="d-inline-flex align-items-center gap-2 small fw-bold text-uppercase mb-2" style="color: #f87171; letter-spacing: 0.6px;">
+                    <i class="bi bi-youtube fs-5"></i> CURATED YOUTUBE LEARNING HUB &bull; 100% FREE
                 </div>
                 <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
                     Master Every Programming Language on YouTube
                 </h1>
-                <p class="text-muted mb-0" style="max-width: 640px; font-size: 0.94rem;">
+                <p class="text-muted mb-0" style="font-size: 0.93rem;">
                     Hand-picked full playlists and one-shot masterclasses across C, C++, Python, Java, JavaScript, React, SQL, and DSA in Hindi, Hinglish, and English.
                 </p>
             </div>
-            <div class="col-lg-4 text-lg-end">
-                <div class="d-inline-flex gap-2">
-                    <div class="px-3 py-2 rounded-3 border text-center" style="background: var(--body-bg); border-color: var(--border-color) !important;">
-                        <div class="h4 fw-bold mb-0" style="color: var(--primary);">{{ courses|length }}</div>
-                        <div class="small text-muted" style="font-size: 0.72rem;">Full Courses</div>
+            <div class="col-lg-4">
+                <div class="d-flex justify-content-lg-end gap-3">
+                    <div class="hero-stat-box">
+                        <div class="h4 fw-bold mb-0 text-primary">18</div>
+                        <div class="small text-muted">Full Courses</div>
                     </div>
-                    <div class="px-3 py-2 rounded-3 border text-center" style="background: var(--body-bg); border-color: var(--border-color) !important;">
-                        <div class="h4 fw-bold mb-0 text-danger">9</div>
-                        <div class="small text-muted" style="font-size: 0.72rem;">Languages & Stacks</div>
+                    <div class="hero-stat-box">
+                        <div class="h4 fw-bold mb-0 text-danger">10</div>
+                        <div class="small text-muted">Languages & Stacks</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Search & Multi-Language Filter Deck -->
-    <div class="command-deck mb-4">
-        <div class="row g-3 align-items-center">
-            <div class="col-lg-7">
-                <div class="input-group">
-                    <span class="input-group-text border-end-0" style="background: var(--body-bg); border-color: var(--border-color);">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-                    <input type="text" id="courseSearchInput" class="form-control border-start-0" style="background: var(--body-bg) !important;" placeholder="Search creator (Striver, Chai aur Code, Apna College), topic, or language...">
-                </div>
+    <!-- Search & Filters Toolbar -->
+    <div class="filter-toolbar mb-4">
+        <div class="row g-3 align-items-center mb-3">
+            <div class="col-md-7 position-relative">
+                <i class="bi bi-search text-muted position-absolute" style="left: 1.55rem; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" id="courseSearchInput" class="form-control course-search-input"
+                       placeholder="Search creator (Striver, Chai aur Code, Apna College), topic, or language..."
+                       oninput="applyCourseFilters()">
             </div>
-            <div class="col-lg-5 text-lg-end">
-                <div class="lang-tabs">
-                    <button type="button" class="lang-tab-btn active" onclick="filterAudioLang('all', this)">All Languages</button>
-                    <button type="button" class="lang-tab-btn" onclick="filterAudioLang('hindi', this)">Hindi / Hinglish</button>
-                    <button type="button" class="lang-tab-btn" onclick="filterAudioLang('english', this)">English</button>
-                </div>
+            <div class="col-md-5 d-flex flex-wrap justify-content-md-end gap-2">
+                <button type="button" class="lang-pill active" data-lang="all" onclick="selectLanguage(this)">All Languages</button>
+                <button type="button" class="lang-pill" data-lang="hindi" onclick="selectLanguage(this)">Hindi / Hinglish</button>
+                <button type="button" class="lang-pill" data-lang="english" onclick="selectLanguage(this)">English</button>
             </div>
         </div>
 
-        <!-- Tech Stack Chips -->
-        <div class="d-flex align-items-center flex-wrap gap-2 mt-3 pt-3 border-top" style="border-color: var(--border-color) !important;">
-            <span class="small text-muted fw-semibold me-1" style="font-size: 0.75rem;">
-                <i class="bi bi-code-square me-1"></i> Language / Stack:
-            </span>
-            <button type="button" class="tech-chip active" onclick="filterTechTag('all', this)">All ({{ courses|length }})</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('C', this)">C</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('C++', this)">C++</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('Python', this)">Python</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('Java', this)">Java</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('JavaScript', this)">JavaScript</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('HTML/CSS', this)">HTML / CSS</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('React', this)">React</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('DSA', this)">DSA</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('SQL', this)">SQL</button>
-            <button type="button" class="tech-chip" onclick="filterTechTag('Git', this)">Git & GitHub</button>
-            <span class="ms-auto small text-muted" id="coursesCountLabel" style="font-size: 0.76rem;">
-                Showing {{ courses|length }} courses
-            </span>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top" style="border-color: var(--border-color) !important;">
+            <div class="d-flex flex-wrap align-items-center gap-1.5" id="stackFilterGroup">
+                <span class="small text-muted me-1"><i class="bi bi-funnel me-1"></i>Language / Stack:</span>
+                <button type="button" class="stack-pill active" data-stack="all" onclick="selectStack(this)">All (18)</button>
+                <button type="button" class="stack-pill" data-stack="C" onclick="selectStack(this)">C</button>
+                <button type="button" class="stack-pill" data-stack="C++" onclick="selectStack(this)">C++</button>
+                <button type="button" class="stack-pill" data-stack="Python" onclick="selectStack(this)">Python</button>
+                <button type="button" class="stack-pill" data-stack="Java" onclick="selectStack(this)">Java</button>
+                <button type="button" class="stack-pill" data-stack="JavaScript" onclick="selectStack(this)">JavaScript</button>
+                <button type="button" class="stack-pill" data-stack="HTML/CSS" onclick="selectStack(this)">HTML/CSS</button>
+                <button type="button" class="stack-pill" data-stack="React" onclick="selectStack(this)">React</button>
+                <button type="button" class="stack-pill" data-stack="DSA" onclick="selectStack(this)">DSA</button>
+                <button type="button" class="stack-pill" data-stack="SQL" onclick="selectStack(this)">SQL</button>
+                <button type="button" class="stack-pill" data-stack="Git & GitHub" onclick="selectStack(this)">Git & GitHub</button>
+            </div>
+            <span id="visibleCoursesCount" class="small text-muted fw-semibold">Showing 18 courses</span>
         </div>
     </div>
 
     <!-- Courses Grid -->
-    <div class="row g-4" id="coursesGrid">
-        {% for c in courses %}
-        <div class="col-lg-6 course-item"
-             data-tag="{{ c.tag }}"
-             data-lang="{{ 'hindi' if 'hindi' in c.language|lower or 'hinglish' in c.language|lower else 'english' }}"
-             data-search="{{ (c.title ~ ' ' ~ c.provider ~ ' ' ~ c.tag ~ ' ' ~ c.language ~ ' ' ~ c.desc)|lower }}">
-            <div class="card course-card h-100 d-flex flex-column justify-content-between">
-                <div class="course-top-strip"></div>
+    <div class="row g-4" id="coursesGrid"></div>
+</div>
 
-                <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
+<script>
+const COURSES_DATA = [
+    {
+        title: "Complete C Language & Pointers Masterclass (One Shot)",
+        creator: "CodeWithHarry",
+        stack: "C",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "15 Hours Full Video",
+        level: "Beginner to Advanced",
+        desc: "Master C syntax, memory allocation, pointers, arrays, file I/O, and structures with hands-on problem sets.",
+        url: "https://www.youtube.com/watch?v=aZb0iu4uGwA"
+    },
+    {
+        title: "C Programming Tutorial for Beginners (Full Course)",
+        creator: "Apna College (Shradha Khapra)",
+        stack: "C",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "10 Hours One-Shot",
+        level: "Beginner",
+        desc: "College-exam and placement-focused C programming course covering loops, recursion, pointers, and dynamic memory.",
+        url: "https://www.youtube.com/watch?v=irqbmMNs2Bo"
+    },
+    {
+        title: "C++ Full Course & STL for Placements",
+        creator: "College Wallah / PW",
+        stack: "C++",
+        langGroup: "hindi",
+        langLabel: "Hinglish",
+        duration: "12 Hours Masterclass",
+        level: "Beginner to Intermediate",
+        desc: "Object-oriented programming in C++, classes, inheritance, polymorphism, and Standard Template Library (STL).",
+        url: "https://www.youtube.com/watch?v=e7sAf4SbS_g"
+    },
+    {
+        title: "C++ Programming Full Course (Modern C++)",
+        creator: "freeCodeCamp.org",
+        stack: "C++",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "31 Hours Full Course",
+        level: "Beginner to Pro",
+        desc: "Deep dive into C++20 fundamentals, references, templates, smart pointers, and object-oriented system design.",
+        url: "https://www.youtube.com/watch?v=8jLOx1hD3_o"
+    },
+    {
+        title: "Chai aur Python — Complete Python Mastery",
+        creator: "Chai aur Code (Hitesh Choudhary)",
+        stack: "Python",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "Full Playlist (45+ Videos)",
+        level: "Beginner to Advanced",
+        desc: "Production-grade Python covering data types, decorators, OOP, APIs, virtual environments, and backend fundamentals.",
+        url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoBsMugTFALhdLlZ5VOqCg2s"
+    },
+    {
+        title: "Python Full Course for Beginners & Backend",
+        creator: "Programming with Mosh",
+        stack: "Python",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "6 Hours One-Shot",
+        level: "Beginner",
+        desc: "Clean, fast-paced introduction to Python scripting, data structures, modules, and automation workflows.",
+        url: "https://www.youtube.com/watch?v=_uQrJ0TkZlc"
+    },
+    {
+        title: "Java + DSA + Interview Preparation Course",
+        creator: "Kunal Kushwaha",
+        stack: "Java",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "Full Bootcamp Playlist",
+        level: "Beginner to Advanced",
+        desc: "Complete Java architecture, memory management, OOP principles, collections framework, and problem solving.",
+        url: "https://www.youtube.com/playlist?list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ"
+    },
+    {
+        title: "Java Programming Full Course in Hindi",
+        creator: "Apna College",
+        stack: "Java",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "Full Playlist",
+        level: "Beginner",
+        desc: "Step-by-step core Java, exception handling, multithreading, and object-oriented programming for campus drives.",
+        url: "https://www.youtube.com/playlist?list=PLfqMhTWNBTe3LtFWcvwpqTkUSlB32kJop"
+    },
+    {
+        title: "Chai aur JavaScript — Complete JS Series",
+        creator: "Chai aur Code (Hitesh Choudhary)",
+        stack: "JavaScript",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "2-Part Mega Playlist",
+        level: "Beginner to Advanced",
+        desc: "Master DOM manipulation, closures, promises, async/await, event loop, and real browser projects.",
+        url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoBuX3f4EOACle2y-tRC5Q37"
+    },
+    {
+        title: "JavaScript Full Course for Web Developers",
+        creator: "SuperSimpleDev",
+        stack: "JavaScript",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "22 Hours Full Course",
+        level: "Beginner to Intermediate",
+        desc: "Build interactive web apps from scratch with modern ES6+ JavaScript, modules, fetch API, and testing.",
+        url: "https://www.youtube.com/watch?v=EerdGm-ehJQ"
+    },
+    {
+        title: "HTML & CSS Full Course — Beginner to Pro",
+        creator: "SuperSimpleDev",
+        stack: "HTML/CSS",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "6.5 Hours One-Shot",
+        level: "Beginner",
+        desc: "Semantic HTML5, Flexbox, CSS Grid, responsive layouts, and cloning modern production interfaces.",
+        url: "https://www.youtube.com/watch?v=G3e-cpL7ofc"
+    },
+    {
+        title: "Sigma Web Development — HTML5 & CSS3 Mastery",
+        creator: "CodeWithHarry",
+        stack: "HTML/CSS",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "Curated Playlist",
+        level: "Beginner",
+        desc: "Responsive web design, CSS variables, animations, Bootstrap integration, and portfolio deployment.",
+        url: "https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w"
+    },
+    {
+        title: "Chai aur React — Full React JS Playlist",
+        creator: "Chai aur Code (Hitesh Choudhary)",
+        stack: "React",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "34 Videos Playlist",
+        level: "Intermediate",
+        desc: "Hooks, Context API, Redux Toolkit, React Router, and full-stack frontend architecture.",
+        url: "https://www.youtube.com/playlist?list=PLu71SKxNbfoDqgPchmvIsL4hTnJIrtige"
+    },
+    {
+        title: "React JS Full Course (Components, Hooks & Projects)",
+        creator: "Bro Code",
+        stack: "React",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "4.5 Hours One-Shot",
+        level: "Beginner to Intermediate",
+        desc: "Practical walkthrough of JSX, state management, useEffect, custom hooks, and API integration.",
+        url: "https://www.youtube.com/watch?v=CgkZ7MvWUAA"
+    },
+    {
+        title: "Striver's A2Z DSA Course — Complete Placement Sheet",
+        creator: "take U forward (Striver)",
+        stack: "DSA",
+        langGroup: "english",
+        langLabel: "Hinglish / English",
+        duration: "Complete A2Z Playlist",
+        level: "Beginner to Hard",
+        desc: "Arrays, Binary Search, Recursion, Trees, Graphs, and Dynamic Programming for top product interviews.",
+        url: "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz"
+    },
+    {
+        title: "Complete SQL & Database Management Course",
+        creator: "Apna College",
+        stack: "SQL",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "3.5 Hours One-Shot",
+        level: "Beginner to Intermediate",
+        desc: "Relational schemas, SELECT queries, JOINs, subqueries, constraints, indexing, and DBMS interview prep.",
+        url: "https://www.youtube.com/watch?v=hlGoQC332VM"
+    },
+    {
+        title: "SQL Full Course for Data & Backend Roles",
+        creator: "freeCodeCamp.org",
+        stack: "SQL",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "4.2 Hours Full Course",
+        level: "Beginner",
+        desc: "Hands-on relational database design, aggregation queries, primary/foreign keys, and schema normalization.",
+        url: "https://www.youtube.com/watch?v=HXV3zeQKqGY"
+    },
+    {
+        title: "Complete Git and GitHub Tutorial for Beginners",
+        creator: "Apna College",
+        stack: "Git & GitHub",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "1.5 Hours One-Shot",
+        level: "Beginner",
+        desc: "Repositories, commits, branching, merge conflicts, pull requests, and deploying live projects.",
+        url: "https://www.youtube.com/watch?v=Ez8F0nW6S-w"
+    }
+];
+
+let activeLang = "all";
+let activeStack = "all";
+
+function renderCourses(list) {
+    const grid = document.getElementById("coursesGrid");
+    document.getElementById("visibleCoursesCount").textContent = `Showing ${list.length} course${list.length === 1 ? "" : "s"}`;
+
+    if (list.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12">
+                <div class="card course-card text-center py-5">
+                    <i class="bi bi-search fs-1 text-muted mb-2"></i>
+                    <h5 class="fw-bold" style="color: var(--text-heading);">No matching courses found</h5>
+                    <p class="small text-muted mb-3">Try clearing your search filter or browsing all 18 curated courses.</p>
                     <div>
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="yt-icon-box">
-                                    <i class="bi bi-play-btn-fill"></i>
-                                </div>
-                                <div>
-                                    <h5 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.05rem; line-height: 1.3;">
-                                        {{ c.title }}
-                                    </h5>
-                                    <div class="small fw-semibold text-muted">
-                                        <i class="bi bi-person-video3 me-1 text-primary"></i> {{ c.provider }}
-                                    </div>
+                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="resetBridgeFilter()">Show All Courses</button>
+                    </div>
+                </div>
+            </div>`;
+        return;
+    }
+
+    grid.innerHTML = list.map(c => `
+        <div class="col-lg-6">
+            <div class="card course-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="yt-icon-box">
+                                <i class="bi bi-play-btn-fill"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.03rem;">${c.title}</h5>
+                                <div class="small fw-semibold text-primary">
+                                    <i class="bi bi-patch-check-fill me-1"></i> ${c.creator}
                                 </div>
                             </div>
-
-                            <span class="badge badge-skill flex-shrink-0">{{ c.tag }}</span>
                         </div>
-
-                        <p class="small text-muted mb-3" style="line-height: 1.55;">
-                            {{ c.desc }}
-                        </p>
-
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <span class="meta-pill">
-                                <i class="bi bi-translate text-primary"></i> {{ c.language }}
-                            </span>
-                            <span class="meta-pill">
-                                <i class="bi bi-clock text-primary"></i> {{ c.duration }}
-                            </span>
-                            <span class="meta-pill">
-                                <i class="bi bi-bar-chart text-primary"></i> {{ c.level }}
-                            </span>
-                        </div>
+                        <span class="badge badge-skill flex-shrink-0">${c.stack}</span>
                     </div>
 
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center gap-2" style="border-color: var(--border-color) !important;">
-                        <span class="small text-muted" style="font-size: 0.78rem;">
-                            <i class="bi bi-collection-play text-danger me-1"></i> {{ c.type }}
-                        </span>
-                        <a href="{{ c.url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="btn-watch-yt">
-                            Watch Course <i class="bi bi-box-arrow-up-right"></i>
+                    <p class="small text-muted my-3" style="line-height: 1.55;">${c.desc}</p>
+                </div>
+
+                <div>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="meta-tag"><i class="bi bi-translate me-1 text-info"></i>${c.langLabel}</span>
+                        <span class="meta-tag"><i class="bi bi-clock me-1 text-warning"></i>${c.duration}</span>
+                        <span class="meta-tag"><i class="bi bi-bar-chart-fill me-1 text-success"></i>${c.level}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--border-color) !important;">
+                        <span class="small text-muted"><i class="bi bi-youtube text-danger me-1"></i>YouTube Lecture</span>
+                        <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                            Watch Course <i class="bi bi-box-arrow-up-right ms-1"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
-    </div>
+    `).join("");
+}
 
-    <!-- Empty Filter State -->
-    <div id="emptyCoursesState" class="card p-5 text-center mt-3" style="border-radius: 20px; display: none;">
-        <h5 class="fw-bold" style="color: var(--text-heading);">No Courses Match This Filter</h5>
-        <p class="text-muted small mb-3">Try switching back to "All Languages" or clearing your search box.</p>
-        <div>
-            <button type="button" class="btn btn-primary-custom px-4" onclick="resetCourseFilters()">Reset Filters</button>
-        </div>
-    </div>
-</div>
+function selectLanguage(btn) {
+    document.querySelectorAll(".lang-pill").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    activeLang = btn.dataset.lang;
+    applyCourseFilters();
+}
 
-<script>
-    let selectedTech = 'all';
-    let selectedLang = 'all';
-    const courseSearch = document.getElementById('courseSearchInput');
-    const courseItems = document.querySelectorAll('.course-item');
-    const countLabel = document.getElementById('coursesCountLabel');
-    const emptyBox = document.getElementById('emptyCoursesState');
+function selectStack(btn) {
+    document.querySelectorAll(".stack-pill").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    activeStack = btn.dataset.stack;
+    applyCourseFilters();
+}
 
-    function applyCourseFilters() {
-        const q = courseSearch.value.toLowerCase().trim();
-        let visible = 0;
+function applyCourseFilters() {
+    const query = document.getElementById("courseSearchInput").value.trim().toLowerCase();
 
-        courseItems.forEach(item => {
-            const tag = item.getAttribute('data-tag');
-            const lang = item.getAttribute('data-lang');
-            const text = item.getAttribute('data-search');
+    const filtered = COURSES_DATA.filter(c => {
+        const matchesLang = activeLang === "all" || c.langGroup === activeLang;
+        const matchesStack = activeStack === "all" || c.stack.toLowerCase() === activeStack.toLowerCase();
+        const matchesQuery = !query ||
+            c.title.toLowerCase().includes(query) ||
+            c.creator.toLowerCase().includes(query) ||
+            c.stack.toLowerCase().includes(query) ||
+            c.desc.toLowerCase().includes(query);
+        return matchesLang && matchesStack && matchesQuery;
+    });
 
-            const okTech = (selectedTech === 'all' || tag === selectedTech);
-            const okLang = (selectedLang === 'all' || lang === selectedLang);
-            const okSearch = text.includes(q);
+    renderCourses(filtered);
+}
 
-            if (okTech && okLang && okSearch) {
-                item.style.display = 'block';
-                visible++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
+function resetBridgeFilter() {
+    document.getElementById("courseSearchInput").value = "";
+    activeLang = "all";
+    activeStack = "all";
+    document.querySelectorAll(".lang-pill").forEach(p => p.classList.toggle("active", p.dataset.lang === "all"));
+    document.querySelectorAll(".stack-pill").forEach(p => p.classList.toggle("active", p.dataset.stack === "all"));
+    document.getElementById("skillBridgeBanner").style.display = "none";
+    window.history.replaceState({}, "", "/courses");
+    applyCourseFilters();
+}
 
-        countLabel.textContent = `Showing ${visible} ${visible === 1 ? 'course' : 'courses'}`;
-        emptyBox.style.display = visible === 0 ? 'block' : 'none';
-    }
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const incomingSkill = params.get("skill") || params.get("tag");
 
-    function filterTechTag(tag, btn) {
-        selectedTech = tag;
-        document.querySelectorAll('.tech-chip').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
+    if (incomingSkill) {
+        const clean = incomingSkill.trim();
+        const lower = clean.toLowerCase();
+
+        const aliasMap = {
+            "html": "HTML/CSS",
+            "html5": "HTML/CSS",
+            "css": "HTML/CSS",
+            "css3": "HTML/CSS",
+            "js": "JavaScript",
+            "git": "Git & GitHub",
+            "github": "Git & GitHub",
+            "cpp": "C++",
+            "data structures": "DSA",
+            "algorithms": "DSA",
+            "mysql": "SQL",
+            "sqlite": "SQL",
+            "postgresql": "SQL",
+            "flask": "Python"
+        };
+
+        const mappedStack = aliasMap[lower] || clean;
+        const stackBtn = Array.from(document.querySelectorAll(".stack-pill"))
+            .find(b => b.dataset.stack.toLowerCase() === mappedStack.toLowerCase());
+
+        if (stackBtn) {
+            selectStack(stackBtn);
+        } else {
+            document.getElementById("courseSearchInput").value = clean;
+            applyCourseFilters();
+        }
+
+        const banner = document.getElementById("skillBridgeBanner");
+        document.getElementById("bridgeSkillName").textContent = clean;
+        banner.style.display = "flex";
+    } else {
         applyCourseFilters();
     }
-
-    function filterAudioLang(lang, btn) {
-        selectedLang = lang;
-        document.querySelectorAll('.lang-tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        applyCourseFilters();
-    }
-
-    function resetCourseFilters() {
-        selectedTech = 'all';
-        selectedLang = 'all';
-        courseSearch.value = '';
-        document.querySelectorAll('.tech-chip').forEach((c, idx) => c.classList.toggle('active', idx === 0));
-        document.querySelectorAll('.lang-tab-btn').forEach((b, idx) => b.classList.toggle('active', idx === 0));
-        applyCourseFilters();
-    }
-
-    if (courseSearch) {
-        courseSearch.addEventListener('input', applyCourseFilters);
-    }
+});
 </script>
 {% endblock %}
