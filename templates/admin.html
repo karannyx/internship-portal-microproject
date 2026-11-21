@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block title %}T&P Master Admin Panel | Skill2Career{% endblock %}
+
+{% block content %}
+<style>
+    .admin-lock-card {
+        max-width: 440px;
+        margin: 3.5rem auto;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        padding: 2.2rem;
+        box-shadow: var(--card-shadow);
+    }
+    .admin-stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 1.35rem;
+        box-shadow: var(--card-shadow);
+    }
+    .admin-panel-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+    }
+    .admin-table {
+        color: var(--text-heading);
+        font-size: 0.88rem;
+    }
+    .admin-table thead th {
+        background: var(--body-bg);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.85rem 1rem;
+    }
+    .admin-table tbody td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.9rem 1rem;
+        vertical-align: middle;
+    }
+    .nav-pills .nav-link {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.86rem;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+    }
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: #ffffff;
+    }
+</style>
+
+{% if not is_admin %}
+<!-- Coordinator Passkey Gate -->
+<div class="container">
+    <div class="admin-lock-card text-center">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center"
+             style="width: 56px; height: 56px; border-radius: 16px; background: var(--badge-bg); color: var(--badge-text); font-size: 1.5rem;">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h3 class="fw-bold mb-1" style="color: var(--text-heading);">T&amp;P Coordinator Access</h3>
+        <p class="small text-muted mb-4">
+            Enter your MITS Training &amp; Placement coordinator passkey to inspect live cloud records and export CSV reports.
+        </p>
+
+        {% if error %}
+        <div class="alert alert-danger py-2 small rounded-3 mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('admin_panel') }}">
+            <div class="mb-3 text-start">
+                <label class="form-label small fw-bold" style="color: var(--text-heading);">Coordinator Passkey</label>
+                <input type="password" name="admin_pin" class="form-control rounded-3 py-2"
+                       placeholder="Enter passkey (e.g. admin2026)" required autofocus
+                       style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold">
+                <i class="bi bi-unlock-fill me-1"></i> Unlock Live Database
+            </button>
+        </form>
+    </div>
+</div>
+
+{% else %}
+<!-- Unlocked T&P Master Control Panel -->
+<div class="container py-3" style="max-width: 1240px;">
+    <!-- Top Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small mb-2">
+                <i class="bi bi-database-check me-1"></i> Live Cloud SQLite Connected
+            </span>
+            <h1 class="h3 fw-bold mb-1" style="color: var(--text-heading);">T&amp;P Master Control Panel</h1>
+            <p class="small text-muted mb-0">Real-time view of all registered students, campus drive applications, quiz scores, and ATS portfolios.</p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('admin_export_csv', export_type='students') }}" class="btn btn-sm btn-outline-primary rounded-3 px-3 fw-semibold">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Students CSV
+            </a>
+            <a href="{{ url_for('admin_export_csv', export_type='applications') }}" class="btn btn-sm btn-outline-success rounded-3 px-3 fw-semibold">
+                <i class="bi bi-download me-1"></i> Export Applications CSV
+            </a>
+            <a href="{{ url_for('add_job') }}" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Post New Drive
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-danger rounded-3 px-3 fw-semibold">
+                <i class="bi bi-lock-fill me-1"></i> Lock
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Telemetry Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="admin-stat-card">
+                <div class="small text-muted fw-bold text-uppercase">Registered Students</div>
+                <div class="h2 fw-bold mt-1 mb-0 text-primary">{{ students|length }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="admin-stat-card">
+                <div class="small text-muted fw-bold text-uppercase">Total Applications</div>
+                <div class="h2 fw-bold mt-1 mb-0 text-success">{{ applications|length }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="admin-stat-card">
+                <div class="small text-muted fw-bold text-uppercase">Active Drives</div>
+                <div class="h2 fw-bold mt-1 mb-0 text-info">{{ drives|length }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="admin-stat-card">
+                <div class="small text-muted fw-bold text-uppercase">ATS Resumes Built</div>
+                <div class="h2 fw-bold mt-1 mb-0 text-warning">{{ resumes|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs + Live Search -->
+    <div class="admin-panel-box">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <ul class="nav nav-pills gap-1" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-students" type="button">
+                        <i class="bi bi-people-fill me-1"></i> Students ({{ students|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-applications" type="button">
+                        <i class="bi bi-send-check-fill me-1"></i> Applications ({{ applications|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-drives" type="button">
+                        <i class="bi bi-building me-1"></i> Campus Drives ({{ drives|length }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-resumes" type="button">
+                        <i class="bi bi-file-earmark-person me-1"></i> ATS Resumes ({{ resumes|length }})
+                    </button>
+                </li>
+            </ul>
+
+            <div style="min-width: 260px;">
+                <input type="text" id="adminTableSearch" class="form-control form-control-sm rounded-3 py-2 px-3"
+                       placeholder="Search name, email, skill, company..."
+                       oninput="filterAdminTables()"
+                       style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <!-- TAB 1: STUDENTS -->
+            <div class="tab-pane fade show active" id="tab-students">
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Verified Skills</th>
+                                <th>Academic Info</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                            <tr class="searchable-row">
+                                <td class="text-muted fw-bold">#{{ s['id'] }}</td>
+                                <td class="fw-bold">{{ s['name'] }}</td>
+                                <td class="text-muted">{{ s['email'] }}</td>
+                                <td>
+                                    {% if s['skills'] %}
+                                        {% for sk in s['skills'].split(',') %}
+                                            {% if sk.strip() %}
+                                                <span class="badge badge-skill me-1 mb-1">{{ sk.strip() }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="small text-muted">No skills added</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {% if s['branch'] or s['cgpa'] %}
+                                        {{ s['branch'] or 'CSE' }} &bull; CGPA: <strong>{{ s['cgpa'] or 'N/A' }}</strong>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">Profile Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ url_for('public_portfolio', student_id=s['id']) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-2" title="View Public Portfolio">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                        <form method="POST" action="{{ url_for('admin_delete_student', student_id=s['id']) }}" onsubmit="return confirm('Delete {{ s['name'] }} from database?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2" title="Remove Record">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No students registered in SQLite yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: APPLICATIONS -->
+            <div class="tab-pane fade" id="tab-applications">
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>App ID</th>
+                                <th>Candidate</th>
+                                <th>Company &amp; Role</th>
+                                <th>Quiz Score</th>
+                                <th>Current Status</th>
+                                <th class="text-end">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in applications %}
+                            <tr class="searchable-row">
+                                <td class="text-muted fw-bold">#{{ a['id'] }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ a['student_name'] or 'Student' }}</div>
+                                    <div class="small text-muted">{{ a['student_email'] }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ a['job_title'] }}</div>
+                                    <div class="small text-primary">{{ a['company'] }}</div>
+                                </td>
+                                <td><span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1">{{ a['quiz_score'] }}</span></td>
+                                <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">{{ a['status'] }}</span></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('view_applicants', job_id=a['job_id']) }}" class="btn btn-sm btn-outline-primary rounded-2">
+                                        Update Status
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No applications submitted yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: CAMPUS DRIVES -->
+            <div class="tab-pane fade" id="tab-drives">
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Drive ID</th>
+                                <th>Company</th>
+                                <th>Role Title</th>
+                                <th>Required Stack</th>
+                                <th>Deadline</th>
+                                <th>Applicants</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in drives %}
+                            <tr class="searchable-row">
+                                <td class="text-muted fw-bold">#{{ d['id'] }}</td>
+                                <td class="fw-bold text-primary">{{ d['company'] }}</td>
+                                <td class="fw-bold">{{ d['title'] }}</td>
+                                <td class="small">{{ d['required_skills'] }}</td>
+                                <td class="small text-muted">{{ d['deadline'] }}</td>
+                                <td><span class="badge bg-success-subtle text-success rounded-pill px-3">{{ d['app_count'] }} Applied</span></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('view_applicants', job_id=d['id']) }}" class="btn btn-sm btn-outline-primary rounded-2 me-1">View</a>
+                                    <a href="{{ url_for('export_applicants', job_id=d['id']) }}" class="btn btn-sm btn-outline-success rounded-2">CSV</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: ATS RESUMES -->
+            <div class="tab-pane fade" id="tab-resumes">
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>College &amp; Branch</th>
+                                <th>CGPA / Grad</th>
+                                <th>Flagship Project</th>
+                                <th class="text-end">Portfolio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in resumes %}
+                            <tr class="searchable-row">
+                                <td>
+                                    <div class="fw-bold">{{ r['student_name'] or r['student_email'] }}</div>
+                                    <div class="small text-muted">{{ r['phone'] or '' }} &bull; {{ r['location'] or '' }}</div>
+                                </td>
+                                <td class="small">
+                                    <div class="fw-semibold">{{ r['college'] or 'MITS Gwalior' }}</div>
+                                    <div class="text-muted">{{ r['degree'] or 'B.Tech' }} - {{ r['branch'] or 'CSE' }}</div>
+                                </td>
+                                <td class="small"><strong>{{ r['cgpa'] or 'N/A' }}</strong> ({{ r['grad_year'] or '2029' }})</td>
+                                <td class="small">
+                                    <div class="fw-semibold">{{ r['project1_title'] or 'Not added' }}</div>
+                                    <div class="text-muted">{{ r['project1_tech'] or '' }}</div>
+                                </td>
+                                <td class="text-end">
+                                    {% if r['student_id'] %}
+                                    <a href="{{ url_for('public_portfolio', student_id=r['student_id']) }}" target="_blank" class="btn btn-sm btn-primary rounded-2">
+                                        Open Portfolio
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No ATS resumes generated yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterAdminTables() {
+    const q = document.getElementById("adminTableSearch").value.trim().toLowerCase();
+    document.querySelectorAll(".searchable-row").forEach(row => {
+        row.style.display = !q || row.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+}
+</script>
+{% endif %}
+{% endblock %}
