@@ -15,6 +15,7 @@ app.secret_key = 'skill2career_production_secret_key_2026'
 DB_NAME = 'database.db'
 
 ADMIN_PASSKEY = "admin2026"
+ADMIN_TIMEOUT_SECONDS = 300  # 5 minutes inactivity auto-lock
 
 # Email Configuration (Set via Render Environment Variables if available)
 SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
@@ -24,6 +25,21 @@ SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")  # App Password
 
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300
+
+
+@app.before_request
+def auto_lock_admin_session():
+    """Automatically locks T&P Admin session after 5 minutes of inactivity."""
+    if session.get('is_admin'):
+        now = time.time()
+        last_active = session.get('admin_last_active', now)
+        if now - last_active > ADMIN_TIMEOUT_SECONDS:
+            session.pop('is_admin', None)
+            session.pop('admin_last_active', None)
+            if request.endpoint and request.endpoint.startswith('admin_'):
+                return redirect(url_for('admin_panel'))
+        else:
+            session['admin_last_active'] = now
 
 
 def get_db():
@@ -177,7 +193,7 @@ Role: {job_title}
 Organization: {company}
 Updated Status: {status}
 
-{'Congratulations! Please check your portal dashboard for round instructions.' if status in ['Shortlisted', 'Interview Scheduled'] else 'Login to Skill2Career to review role analytics and recommendations.'}
+{'Congratulations! Please check your portal dashboard for round instructions.' if status in ['Shortlisted', 'Interview Scheduled', 'Selected'] else 'Login to Skill2Career to review role analytics and recommendations.'}
 
 Portal Access: https://skill2career-portal.onrender.com/dashboard
 
@@ -960,6 +976,7 @@ def admin_panel():
             pin = request.form.get('admin_pin', '').strip()
             if pin == ADMIN_PASSKEY:
                 session['is_admin'] = True
+                session['admin_last_active'] = time.time()
                 return redirect(url_for('admin_panel'))
             else:
                 error = "Invalid Coordinator Passkey. Access Denied."
@@ -1024,9 +1041,37 @@ def admin_panel():
         return f"<pre style='padding:20px;background:#111;color:#f87171;font-family:monospace;'>ADMIN ERROR:\n{traceback.format_exc()}</pre>", 500
 
 
+@app.route('/admin/update_status/<int:app_id>', methods=['POST'])
+def admin_update_status(app_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
+    new_status = request.form.get('status', 'Under Review')
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE applications SET status = ? WHERE id = ?', (new_status, app_id))
+    conn.commit()
+
+    cursor.execute('''
+        SELECT students.name, students.email, internships.title, internships.company
+        FROM applications
+        JOIN students ON applications.student_email = students.email
+        JOIN internships ON applications.job_id = internships.id
+        WHERE applications.id = ?
+    ''', (app_id,))
+    rec = cursor.fetchone()
+    conn.close()
+
+    if rec:
+        dispatch_notification_email(rec['email'], rec['name'], rec['title'], rec['company'], new_status)
+
+    return redirect(url_for('admin_panel'))
+
+
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('is_admin', None)
+    session.pop('admin_last_active', None)
     return redirect(url_for('admin_panel'))
 
 
