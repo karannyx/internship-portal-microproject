@@ -115,6 +115,67 @@
             border-radius: 8px;
         }
 
+        /* High-Contrast Fix for Post New Drive, Apply Quiz & Card Action Links */
+        a[href*="/add_job"] {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(196, 181, 253, 0.35) !important;
+            padding: 0.58rem 1.15rem !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            font-size: 0.88rem !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        a[href*="/add_job"]:hover {
+            background: linear-gradient(135deg, #9333ea, #7c3aed) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(124, 58, 237, 0.55) !important;
+        }
+
+        a[href*="/apply/"]:not(.btn) {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: #ffffff !important;
+            padding: 0.44rem 0.95rem !important;
+            border-radius: 10px !important;
+            font-weight: 700 !important;
+            font-size: 0.84rem !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.35rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        a[href*="/apply/"]:not(.btn):hover {
+            background: linear-gradient(135deg, #34d399, #10b981) !important;
+            color: #ffffff !important;
+            transform: translateY(-1px);
+        }
+
+        a[href*="/interview_prep/"]:not(.btn),
+        a[href*="/view_applicants/"]:not(.btn) {
+            color: var(--text-body) !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            transition: color 0.18s ease !important;
+        }
+
+        a[href*="/interview_prep/"]:not(.btn):hover {
+            color: #fbbf24 !important;
+        }
+
+        a[href*="/view_applicants/"]:not(.btn):hover {
+            color: #38bdf8 !important;
+        }
+
         /* Organized Single-Row Navbar */
         .s2c-navbar {
             background: var(--nav-bg);
