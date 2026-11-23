@@ -115,20 +115,20 @@
             border-radius: 8px;
         }
 
-        /* High-Contrast Fix for Post New Drive, Apply Quiz & Card Action Links */
+        /* High-Contrast Buttons for Post New Drive, Prep, Applicants & Apply Quiz */
         a[href*="/add_job"] {
             background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
             color: #ffffff !important;
-            border: 1px solid rgba(196, 181, 253, 0.35) !important;
-            padding: 0.58rem 1.15rem !important;
-            border-radius: 12px !important;
+            border: 1px solid rgba(196, 181, 253, 0.4) !important;
+            padding: 0.56rem 1.1rem !important;
+            border-radius: 11px !important;
             font-weight: 700 !important;
-            font-size: 0.88rem !important;
+            font-size: 0.86rem !important;
             text-decoration: none !important;
             display: inline-flex !important;
             align-items: center;
             gap: 0.45rem;
-            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4) !important;
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.42) !important;
             transition: all 0.2s ease !important;
         }
 
@@ -136,13 +136,55 @@
             background: linear-gradient(135deg, #9333ea, #7c3aed) !important;
             color: #ffffff !important;
             transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(124, 58, 237, 0.55) !important;
         }
 
-        a[href*="/apply/"]:not(.btn) {
+        a[href*="/interview_prep/"] {
+            background: rgba(245, 158, 11, 0.14) !important;
+            color: #fbbf24 !important;
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            padding: 0.38rem 0.78rem !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.18s ease !important;
+        }
+
+        a[href*="/interview_prep/"]:hover {
+            background: rgba(245, 158, 11, 0.25) !important;
+            color: #fde68a !important;
+            transform: translateY(-1px);
+        }
+
+        a[href*="/view_applicants/"] {
+            background: rgba(56, 189, 248, 0.14) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.35) !important;
+            padding: 0.38rem 0.78rem !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.18s ease !important;
+        }
+
+        a[href*="/view_applicants/"]:hover {
+            background: rgba(56, 189, 248, 0.25) !important;
+            color: #bae6fd !important;
+            transform: translateY(-1px);
+        }
+
+        a[href*="/apply/"] {
             background: linear-gradient(135deg, #10b981, #059669) !important;
             color: #ffffff !important;
-            padding: 0.44rem 0.95rem !important;
+            border: 1px solid rgba(52, 211, 153, 0.4) !important;
+            padding: 0.42rem 0.95rem !important;
             border-radius: 10px !important;
             font-weight: 700 !important;
             font-size: 0.84rem !important;
@@ -151,29 +193,23 @@
             align-items: center;
             gap: 0.35rem;
             box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32) !important;
-            transition: all 0.2s ease !important;
+            transition: all 0.18s ease !important;
         }
 
-        a[href*="/apply/"]:not(.btn):hover {
+        a[href*="/apply/"]:hover {
             background: linear-gradient(135deg, #34d399, #10b981) !important;
             color: #ffffff !important;
             transform: translateY(-1px);
         }
 
-        a[href*="/interview_prep/"]:not(.btn),
-        a[href*="/view_applicants/"]:not(.btn) {
-            color: var(--text-body) !important;
-            font-weight: 600 !important;
-            text-decoration: none !important;
-            transition: color 0.18s ease !important;
+        [data-theme="light"] a[href*="/interview_prep/"],
+        body.light-mode a[href*="/interview_prep/"] {
+            color: #b45309 !important;
         }
 
-        a[href*="/interview_prep/"]:not(.btn):hover {
-            color: #fbbf24 !important;
-        }
-
-        a[href*="/view_applicants/"]:not(.btn):hover {
-            color: #38bdf8 !important;
+        [data-theme="light"] a[href*="/view_applicants/"],
+        body.light-mode a[href*="/view_applicants/"] {
+            color: #0369a1 !important;
         }
 
         /* Organized Single-Row Navbar */
