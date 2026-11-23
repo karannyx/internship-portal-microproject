@@ -1,388 +1,342 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Skill2Career | Student Career & Internship Portal{% endblock %}</title>
+    <title>{% block title %}Skill2Career | Student Internship & Placement Portal{% endblock %}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap 5.3 CSS & Bootstrap Icons -->
+    <!-- Bootstrap 5.3 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
         :root,
-        [data-bs-theme="dark"] {
-            --body-bg: #0b0a14;
-            --card-bg: #131122;
-            --border-color: rgba(139, 92, 246, 0.22);
-            --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.45);
+        [data-theme="dark"] {
+            --body-bg: #090d16;
+            --card-bg: #111625;
+            --nav-bg: rgba(11, 15, 25, 0.92);
+            --border-color: rgba(148, 163, 184, 0.16);
             --text-heading: #f8fafc;
             --text-muted: #94a3b8;
-            --badge-bg: rgba(124, 58, 237, 0.18);
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --card-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+            --badge-bg: rgba(124, 58, 237, 0.16);
             --badge-text: #c4b5fd;
-            --primary: #8b5cf6;
-            --nav-bg: rgba(11, 10, 20, 0.88);
         }
 
-        [data-bs-theme="light"] {
-            --body-bg: #f5f6fa;
+        [data-theme="light"],
+        body.light-mode {
+            --body-bg: #f4f6fb;
             --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --card-shadow: 0 10px 28px -8px rgba(15, 23, 42, 0.08);
+            --nav-bg: rgba(255, 255, 255, 0.94);
+            --border-color: rgba(15, 23, 42, 0.11);
             --text-heading: #0f172a;
-            --text-muted: #64748b;
-            --badge-bg: rgba(124, 58, 237, 0.1);
-            --badge-text: #6d28d9;
-            --primary: #7c3aed;
-            --nav-bg: rgba(255, 255, 255, 0.92);
+            --text-muted: #475569;
+            --primary: #6d28d9;
+            --primary-hover: #5b21b6;
+            --card-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+            --badge-bg: rgba(109, 40, 217, 0.1);
+            --badge-text: #5b21b6;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--body-bg);
             color: var(--text-heading);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.25s ease, color 0.25s ease;
-        }
-
-        main {
-            flex: 1;
-        }
-
-        /* Enlarged Navbar */
-        .s2c-navbar {
-            background: var(--nav-bg);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.88rem 0;
-        }
-
-        .brand-logo-box {
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-            color: #ffffff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.15rem;
-            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
-        }
-
-        .s2c-brand-text {
-            font-size: 1.32rem;
-            letter-spacing: -0.3px;
-        }
-
-        .s2c-nav-link {
-            color: var(--text-muted) !important;
-            font-size: 0.96rem;
-            font-weight: 600;
-            padding: 0.54rem 0.95rem !important;
-            border-radius: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            transition: all 0.18s ease;
-        }
-
-        .s2c-nav-link i {
-            font-size: 1.02rem;
-        }
-
-        .s2c-nav-link:hover,
-        .s2c-nav-link.active {
-            color: var(--text-heading) !important;
-            background: var(--badge-bg);
-        }
-
-        .live-pill-tag {
-            font-size: 0.68rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            padding: 0.16rem 0.48rem;
-            border-radius: 6px;
-            background: rgba(139, 92, 246, 0.22);
-            color: #c4b5fd;
-            border: 1px solid rgba(139, 92, 246, 0.4);
-        }
-
-        .theme-toggle-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 11px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: #f59e0b;
-            font-size: 1.05rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .theme-toggle-btn:hover {
-            border-color: var(--primary);
-            transform: translateY(-1px);
-        }
-
-        .s2c-nav-btn {
-            font-size: 0.92rem;
-            padding: 0.48rem 0.95rem;
-            border-radius: 11px;
-            font-weight: 600;
-        }
-
-        .tnp-admin-btn {
-            font-size: 0.88rem;
-            padding: 0.48rem 0.9rem;
-            border-radius: 11px;
-            font-weight: 600;
-            background: var(--badge-bg);
-            color: var(--badge-text);
-            border: 1px solid var(--border-color);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.18s ease;
-        }
-
-        .tnp-admin-btn:hover {
-            border-color: var(--primary);
-            color: var(--text-heading);
-            transform: translateY(-1px);
-        }
-
-        .tnp-admin-btn.unlocked {
-            background: rgba(16, 185, 129, 0.16);
-            color: #34d399;
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-
-        /* High-Contrast Action Buttons on Campus Drives (/jobs) */
-        .page-campus-drives a[href*="/add_job"] {
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(196, 181, 253, 0.45) !important;
-            padding: 0.56rem 1.15rem !important;
-            border-radius: 12px !important;
-            font-weight: 700 !important;
-            font-size: 0.9rem !important;
-            display: inline-flex !important;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none !important;
-            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.38);
-            transition: all 0.2s ease;
-        }
-
-        .page-campus-drives a[href*="/add_job"]:hover {
-            background: linear-gradient(135deg, #9d6ffa, #7c3aed) !important;
-            transform: translateY(-2px);
-        }
-
-        .page-campus-drives a[href*="/interview_prep/"] {
-            background: rgba(245, 158, 11, 0.14) !important;
-            color: #fbbf24 !important;
-            border: 1px solid rgba(245, 158, 11, 0.35) !important;
-            padding: 0.36rem 0.78rem !important;
-            border-radius: 9px !important;
-            font-weight: 600 !important;
-            font-size: 0.82rem !important;
-            display: inline-flex !important;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none !important;
-            transition: all 0.18s ease;
-        }
-
-        .page-campus-drives a[href*="/interview_prep/"]:hover {
-            background: rgba(245, 158, 11, 0.24) !important;
-            transform: translateY(-1px);
-        }
-
-        .page-campus-drives a[href*="/view_applicants/"] {
-            background: rgba(56, 189, 248, 0.14) !important;
-            color: #38bdf8 !important;
-            border: 1px solid rgba(56, 189, 248, 0.35) !important;
-            padding: 0.36rem 0.78rem !important;
-            border-radius: 9px !important;
-            font-weight: 600 !important;
-            font-size: 0.82rem !important;
-            display: inline-flex !important;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none !important;
-            transition: all 0.18s ease;
-        }
-
-        .page-campus-drives a[href*="/view_applicants/"]:hover {
-            background: rgba(56, 189, 248, 0.24) !important;
-            transform: translateY(-1px);
-        }
-
-        .page-campus-drives a[href*="/apply/"] {
-            background: linear-gradient(135deg, #10b981, #059669) !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(52, 211, 153, 0.5) !important;
-            padding: 0.42rem 0.95rem !important;
-            border-radius: 10px !important;
-            font-weight: 700 !important;
-            font-size: 0.84rem !important;
-            display: inline-flex !important;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
-            transition: all 0.18s ease;
-        }
-
-        .page-campus-drives a[href*="/apply/"]:hover {
-            background: linear-gradient(135deg, #34d399, #10b981) !important;
-            transform: translateY(-1px);
-        }
-
-        [data-bs-theme="light"] .page-campus-drives a[href*="/interview_prep/"] {
-            color: #b45309 !important;
-        }
-
-        [data-bs-theme="light"] .page-campus-drives a[href*="/view_applicants/"] {
-            color: #0369a1 !important;
-        }
-
-        /* Shared Badge & Button Utilities */
-        .badge-skill {
-            background: var(--badge-bg) !important;
-            color: var(--badge-text) !important;
-            border: 1px solid var(--border-color) !important;
-            font-weight: 600;
-            font-size: 0.78rem;
-            padding: 0.36rem 0.72rem;
-            border-radius: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .text-muted {
             color: var(--text-muted) !important;
         }
 
-        /* Footer */
-        .s2c-footer {
-            border-top: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-muted);
+        .badge-skill {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            border: 1px solid rgba(139, 92, 246, 0.28);
+            font-weight: 600;
+            font-size: 0.76rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+        }
+
+        /* Organized Single-Row Navbar */
+        .s2c-navbar {
+            background: var(--nav-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.65rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .s2c-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--text-heading);
+            font-weight: 800;
+            font-size: 1.18rem;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .s2c-brand:hover {
+            color: var(--text-heading);
+        }
+
+        .s2c-brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.45);
+        }
+
+        .s2c-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .s2c-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.42rem;
+            padding: 0.46rem 0.78rem;
+            border-radius: 10px;
             font-size: 0.85rem;
-            padding: 1.2rem 0;
-            margin-top: 3rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.18s ease;
+        }
+
+        .s2c-nav-link:hover {
+            color: var(--text-heading);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .s2c-nav-link.active {
+            color: var(--text-heading);
+            background: var(--badge-bg);
+            border: 1px solid rgba(139, 92, 246, 0.32);
+        }
+
+        .live-pill-tag {
+            background: rgba(124, 58, 237, 0.22);
+            color: #c4b5fd;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            font-size: 0.64rem;
+            font-weight: 800;
+            padding: 0.12rem 0.4rem;
+            border-radius: 5px;
+            letter-spacing: 0.4px;
+        }
+
+        .s2c-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-shrink: 0;
+        }
+
+        .nav-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+            padding: 0.44rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: all 0.18s ease;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-heading);
+        }
+
+        .nav-pill-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-heading);
+            transform: translateY(-1px);
+        }
+
+        .nav-pill-admin {
+            border-color: rgba(16, 185, 129, 0.38);
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .nav-pill-admin:hover {
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        .nav-pill-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border-color: transparent;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+        }
+
+        .nav-pill-primary:hover {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            color: #ffffff !important;
+        }
+
+        .nav-pill-logout {
+            border-color: rgba(239, 68, 68, 0.35);
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.07);
+        }
+
+        .nav-pill-logout:hover {
+            border-color: #ef4444;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .theme-icon-btn {
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: #fbbf24;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.18s ease;
+        }
+
+        .theme-icon-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 1199.98px) {
+            .s2c-nav-links {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0.75rem 0;
+            }
+            .s2c-actions {
+                flex-wrap: wrap;
+                padding-bottom: 0.5rem;
+            }
         }
     </style>
-
-    <script>
-        // Apply saved theme immediately to avoid flash
-        (function () {
-            const savedTheme = localStorage.getItem("s2c_theme") || "dark";
-            document.documentElement.setAttribute("data-bs-theme", savedTheme);
-        })();
-    </script>
 
     {% block head %}{% endblock %}
 </head>
 <body>
-    <script>
-        if (window.location.pathname === "/jobs") {
-            document.body.classList.add("page-campus-drives");
-        }
-    </script>
 
-    <!-- Top Navigation Bar -->
-    <nav class="navbar navbar-expand-xl s2c-navbar sticky-top">
-        <div class="container-fluid px-3 px-lg-4" style="max-width: 1380px;">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold s2c-brand-text" href="{{ url_for('live_jobs') }}" style="color: var(--text-heading);">
-                <span class="brand-logo-box">
-                    <i class="bi bi-briefcase-fill"></i>
-                </span>
+    <nav class="navbar navbar-expand-xl s2c-navbar">
+        <div class="container-fluid px-3 px-xl-4">
+            <!-- Brand -->
+            <a class="s2c-brand" href="{{ url_for('live_jobs') }}">
+                <span class="s2c-brand-icon"><i class="bi bi-briefcase-fill"></i></span>
                 <span>Skill2Career</span>
             </a>
 
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#s2cNavbarCollapse" aria-controls="s2cNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-2" style="color: var(--text-heading);"></i>
+            <!-- Mobile / Tablet Hamburger Toggle -->
+            <button class="navbar-toggler border-secondary text-light" type="button" data-bs-toggle="collapse" data-bs-target="#s2cMainNavbar" aria-controls="s2cMainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-4" style="color: var(--text-heading);"></i>
             </button>
 
-            <div class="collapse navbar-collapse" id="s2cNavbarCollapse">
-                <ul class="navbar-nav mx-auto mb-2 mb-xl-0 gap-1">
-                    <li class="nav-item">
-                        <a class="nav-link s2c-nav-link {% if request.endpoint == 'live_jobs' %}active{% endif %}" href="{{ url_for('live_jobs') }}">
-                            <span class="live-pill-tag">LIVE</span> Online Openings
+            <!-- Collapsible Single-Row Navigation -->
+            <div class="collapse navbar-collapse justify-content-between ms-xl-3" id="s2cMainNavbar">
+                <!-- Center Navigation Links -->
+                <ul class="s2c-nav-links">
+                    <li>
+                        <a class="s2c-nav-link {% if request.endpoint == 'live_jobs' %}active{% endif %}" href="{{ url_for('live_jobs') }}">
+                            <span class="live-pill-tag">LIVE</span>
+                            <span>Online Openings</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link s2c-nav-link {% if request.endpoint == 'jobs' %}active{% endif %}" href="{{ url_for('jobs') }}">
-                            <i class="bi bi-building"></i> Campus Drives
+                    <li>
+                        <a class="s2c-nav-link {% if request.endpoint == 'jobs' %}active{% endif %}" href="{{ url_for('jobs') }}">
+                            <i class="bi bi-building"></i>
+                            <span>Campus Drives</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link s2c-nav-link {% if request.endpoint == 'courses' %}active{% endif %}" href="{{ url_for('courses') }}">
-                            <i class="bi bi-mortarboard"></i> Free Courses
+                    <li>
+                        <a class="s2c-nav-link {% if request.endpoint == 'courses' %}active{% endif %}" href="{{ url_for('courses') }}">
+                            <i class="bi bi-mortarboard"></i>
+                            <span>Free Courses</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link s2c-nav-link {% if request.endpoint == 'matcher' %}active{% endif %}" href="{{ url_for('matcher') }}">
-                            <i class="bi bi-cpu"></i> Matcher
+                    <li>
+                        <a class="s2c-nav-link {% if request.endpoint == 'matcher' %}active{% endif %}" href="{{ url_for('matcher') }}">
+                            <i class="bi bi-cpu"></i>
+                            <span>Matcher</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link s2c-nav-link {% if request.endpoint == 'developers' %}active{% endif %}" href="{{ url_for('developers') }}">
-                            <i class="bi bi-code-slash"></i> Developers
+                    <li>
+                        <a class="s2c-nav-link {% if request.endpoint == 'developers' %}active{% endif %}" href="{{ url_for('developers') }}">
+                            <i class="bi bi-code-slash"></i>
+                            <span>Developers</span>
                         </a>
                     </li>
                 </ul>
 
-                <!-- Right Controls: T&P Admin, Theme Toggle & Auth Buttons -->
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <a href="{{ url_for('admin_panel') }}" class="tnp-admin-btn {% if session.get('is_admin') %}unlocked{% endif %}" title="T&P Coordinator Master Panel">
-                        <i class="bi {% if session.get('is_admin') %}bi-shield-check{% else %}bi-shield-lock{% endif %}"></i>
+                <!-- Right Action Controls (Single Row) -->
+                <div class="s2c-actions">
+                    <a href="{{ url_for('admin_panel') }}" class="nav-pill-btn nav-pill-admin">
+                        <i class="bi bi-shield-check"></i>
                         <span>T&amp;P Admin</span>
                     </a>
 
-                    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleSiteTheme()" title="Toggle Light / Dark Theme">
-                        <i class="bi bi-sun-fill" id="themeToggleIcon"></i>
+                    <button type="button" id="themeToggleBtn" class="theme-icon-btn" onclick="toggleSiteTheme()" title="Toggle Dark / Light Theme">
+                        <i id="themeToggleIcon" class="bi bi-sun-fill"></i>
                     </button>
 
                     {% if session.get('student_email') %}
-                        <a href="{{ url_for('resume') }}" class="btn btn-outline-secondary s2c-nav-btn d-inline-flex align-items-center gap-1" style="border-color: var(--border-color); color: var(--text-heading);">
-                            <i class="bi bi-file-earmark-person"></i> ATS Resume
+                        <a href="{{ url_for('resume') }}" class="nav-pill-btn">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>ATS Resume</span>
                         </a>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary s2c-nav-btn d-inline-flex align-items-center gap-1">
-                            <i class="bi bi-person-circle"></i> Dashboard
+                        <a href="{{ url_for('dashboard') }}" class="nav-pill-btn nav-pill-primary">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Dashboard</span>
                         </a>
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger s2c-nav-btn">
-                            Logout
+                        <a href="{{ url_for('logout') }}" class="nav-pill-btn nav-pill-logout" title="Sign Out">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
                         </a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="btn s2c-nav-btn" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-heading);">
-                            Sign In
+                        <a href="{{ url_for('login') }}" class="nav-pill-btn">
+                            <span>Sign In</span>
                         </a>
-                        <a href="{{ url_for('register') }}" class="btn btn-primary s2c-nav-btn">
-                            Register
+                        <a href="{{ url_for('register') }}" class="nav-pill-btn nav-pill-primary">
+                            <span>Register</span>
                         </a>
                     {% endif %}
                 </div>
@@ -390,61 +344,38 @@
         </div>
     </nav>
 
-    <!-- Page Content -->
-    <main class="py-3">
+    <main class="flex-grow-1 py-3">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="s2c-footer text-center">
-        <div class="container">
-            Skill2Career Portal &bull; Designed &amp; Built by <strong>Karan Sahu</strong> &amp; <strong>Yuvraj Yadav</strong> (MITS Gwalior)
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS Bundle -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Theme Toggle + Skill-Gap Bridge Auto-Linker -->
     <script>
-        function updateThemeIcon(theme) {
+        function applySiteTheme(theme) {
+            document.documentElement.setAttribute("data-theme", theme);
+            if (theme === "light") {
+                document.body.classList.add("light-mode");
+            } else {
+                document.body.classList.remove("light-mode");
+            }
             const icon = document.getElementById("themeToggleIcon");
-            if (!icon) return;
-            icon.className = theme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars-fill";
+            if (icon) {
+                icon.className = theme === "light" ? "bi bi-moon-stars-fill text-primary" : "bi bi-sun-fill";
+            }
         }
 
         function toggleSiteTheme() {
-            const current = document.documentElement.getAttribute("data-bs-theme") || "dark";
+            const current = localStorage.getItem("s2c_theme") || "dark";
             const next = current === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-bs-theme", next);
             localStorage.setItem("s2c_theme", next);
-            updateThemeIcon(next);
+            applySiteTheme(next);
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const currentTheme = document.documentElement.getAttribute("data-bs-theme") || "dark";
-            updateThemeIcon(currentTheme);
-
-            // Auto-convert missing skill badges on Campus Drives & Online Openings into clickable Course Bridge links
-            const path = window.location.pathname;
-            if (path === "/jobs" || path === "/live_jobs") {
-                const missingBadges = document.querySelectorAll(".bg-danger-subtle, .text-danger.border-danger-subtle, .missing-skill");
-                missingBadges.forEach((badge) => {
-                    if (badge.tagName === "A") return;
-                    const skillName = badge.textContent.replace(/[✕×✖!]/g, "").trim();
-                    if (!skillName || skillName.length > 25) return;
-
-                    badge.style.cursor = "pointer";
-                    badge.title = `Learn ${skillName} in Free Courses →`;
-                    badge.innerHTML = `${badge.innerHTML} <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.68rem;"></i>`;
-                    badge.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.location.href = `/courses?skill=${encodeURIComponent(skillName)}`;
-                    });
-                });
-            }
-        });
+        (function initTheme() {
+            const saved = localStorage.getItem("s2c_theme") || "dark";
+            applySiteTheme(saved);
+        })();
     </script>
 
     {% block extra_js %}{% endblock %}
