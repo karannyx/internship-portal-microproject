@@ -17,12 +17,19 @@
     <style>
         :root,
         [data-theme="dark"] {
-            --body-bg: #090d16;
-            --card-bg: #111625;
+            --body-bg: #0b0f19;
+            --bg-body: #0b0f19;
+            --card-bg: #131826;
+            --bg-card: #131826;
+            --surface-bg: #182032;
+            --input-bg: #0b0f19;
             --nav-bg: rgba(11, 15, 25, 0.92);
             --border-color: rgba(148, 163, 184, 0.16);
             --text-heading: #f8fafc;
+            --text-primary: #f8fafc;
+            --text-body: #cbd5e1;
             --text-muted: #94a3b8;
+            --text-secondary: #94a3b8;
             --primary: #7c3aed;
             --primary-hover: #6d28d9;
             --card-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
@@ -33,11 +40,18 @@
         [data-theme="light"],
         body.light-mode {
             --body-bg: #f4f6fb;
+            --bg-body: #f4f6fb;
             --card-bg: #ffffff;
+            --bg-card: #ffffff;
+            --surface-bg: #f8fafc;
+            --input-bg: #f8fafc;
             --nav-bg: rgba(255, 255, 255, 0.94);
             --border-color: rgba(15, 23, 42, 0.11);
             --text-heading: #0f172a;
+            --text-primary: #0f172a;
+            --text-body: #334155;
             --text-muted: #475569;
+            --text-secondary: #475569;
             --primary: #6d28d9;
             --primary-hover: #5b21b6;
             --card-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
@@ -53,6 +67,38 @@
             display: flex;
             flex-direction: column;
             transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Global Card, Input & Button Theme Overrides */
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-heading);
+        }
+
+        .form-control,
+        .form-select,
+        .input-group-text {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+            color: var(--text-heading);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: var(--primary);
+            color: var(--text-heading);
+            box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.22);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.75;
+        }
+
+        button {
+            color: inherit;
         }
 
         .text-muted {
