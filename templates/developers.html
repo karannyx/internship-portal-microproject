@@ -105,28 +105,54 @@
     /* White Content Area Typography */
     .dev-card-body {
         background: #ffffff;
-        padding: 0 1.65rem 1.4rem;
+        padding: 0 1.65rem 1.35rem;
     }
     .dev-name {
         color: #0f172a !important;
-        font-size: 1.42rem;
+        font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -0.02em;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.85rem;
     }
-    .dev-meta {
-        color: #475569 !important;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-bottom: 0;
+
+    /* Structured Education Block (Matching Reference Layout, Without CGPA) */
+    .dev-edu-box {
+        background: #f8fafc;
+        border: 1px solid #eef2f6;
+        border-radius: 14px;
+        padding: 0.95rem 1.1rem;
+    }
+    .dev-edu-label {
         display: flex;
         align-items: center;
         gap: 0.45rem;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #4f46e5;
+        margin-bottom: 0.45rem;
     }
-    .dev-meta i {
-        color: #2563eb;
+    .dev-edu-label i {
         font-size: 1rem;
-        flex-shrink: 0;
+        color: #6366f1;
+    }
+    .dev-edu-institute {
+        color: #0f172a;
+        font-size: 0.96rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin-bottom: 0.2rem;
+    }
+    .dev-edu-degree {
+        color: #334155;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+    }
+    .dev-edu-subline {
+        color: #64748b;
+        font-size: 0.82rem;
+        font-weight: 500;
+        line-height: 1.48;
     }
 
     /* Bottom Action Footer & Light-Grey Rounded Buttons */
@@ -310,7 +336,6 @@
                                     </filter>
                                 </defs>
 
-                                <!-- Subtle Diagonal Circuit-Board Patterns (Top-Left Corner) -->
                                 <g stroke="#8b5cf6" stroke-width="1.15" stroke-opacity="0.22" fill="none">
                                     <path d="M-8,38 L30,0 M-8,54 L46,0 M-8,70 L62,0 M8,72 L42,38 L70,38"/>
                                     <circle cx="70" cy="38" r="2.2" fill="#a855f7" fill-opacity="0.32" stroke="none"/>
@@ -319,33 +344,26 @@
                                     <circle cx="88" cy="54" r="2" fill="#a855f7" fill-opacity="0.25" stroke="none"/>
                                 </g>
 
-                                <!-- Small Dotted Texture Pattern -->
                                 <g fill="#a78bfa" fill-opacity="0.2">
                                     <circle cx="242" cy="18" r="1.2"/><circle cx="254" cy="18" r="1.2"/><circle cx="266" cy="18" r="1.2"/><circle cx="278" cy="18" r="1.2"/>
                                     <circle cx="242" cy="30" r="1.2"/><circle cx="254" cy="30" r="1.2"/><circle cx="266" cy="30" r="1.2"/><circle cx="278" cy="30" r="1.2"/>
                                     <circle cx="242" cy="42" r="1.2"/><circle cx="254" cy="42" r="1.2"/><circle cx="266" cy="42" r="1.2"/><circle cx="278" cy="42" r="1.2"/>
                                 </g>
 
-                                <!-- Flowing Neon-Purple Wave Lines -->
                                 <path d="M0,98 C88,68 158,114 258,82 C345,54 422,96 520,56" fill="none" stroke="url(#waveGrad1)" stroke-width="2" filter="url(#softGlow1)"/>
                                 <path d="M0,108 C110,82 190,116 292,76 C375,44 445,86 520,38" fill="none" stroke="url(#waveGrad2)" stroke-width="1.4"/>
                                 <path d="M0,84 C115,112 215,62 328,94 C415,118 468,84 520,74" fill="none" stroke="#8b5cf6" stroke-opacity="0.16" stroke-width="1.1"/>
 
-                                <!-- Minimal Purple Programming Symbol </> -->
                                 <text x="330" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="23" font-weight="700" fill="#a855f7" fill-opacity="0.48" letter-spacing="1">&lt;/&gt;</text>
 
-                                <!-- Subtle Minimalist Laptop / Code Illustration (Right Side) -->
                                 <g transform="translate(402, 16) rotate(4)" opacity="0.34">
-                                    <!-- Laptop Screen Frame -->
                                     <rect x="6" y="4" width="84" height="54" rx="5" fill="#17102D" stroke="#a855f7" stroke-width="1.35"/>
                                     <rect x="11" y="9" width="74" height="44" rx="2.5" fill="#090914" stroke="#7c3aed" stroke-width="0.7" stroke-opacity="0.6"/>
-                                    <!-- Code Lines inside Screen -->
                                     <line x1="17" y1="17" x2="40" y2="17" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round"/>
                                     <line x1="23" y1="24" x2="62" y2="24" stroke="#8b5cf6" stroke-width="1.6" stroke-linecap="round"/>
                                     <line x1="23" y1="31" x2="54" y2="31" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
                                     <line x1="29" y1="38" x2="72" y2="38" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round"/>
                                     <line x1="17" y1="45" x2="46" y2="45" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round"/>
-                                    <!-- Laptop Keyboard Base -->
                                     <polygon points="4,61 92,61 102,75 -6,75" fill="#17102D" stroke="#a855f7" stroke-width="1.25" stroke-linejoin="round"/>
                                     <line x1="34" y1="68" x2="62" y2="68" stroke="#8b5cf6" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.7"/>
                                 </g>
@@ -361,10 +379,19 @@
                             </div>
 
                             <h4 class="dev-name">Karan Sahu</h4>
-                            <p class="dev-meta">
-                                <i class="bi bi-mortarboard-fill"></i>
-                                <span>B.Tech Computer Science &amp; Engineering &bull; MITS Gwalior</span>
-                            </p>
+
+                            <!-- Education Detail Block (Without CGPA) -->
+                            <div class="dev-edu-box">
+                                <div class="dev-edu-label">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                    <span>Education</span>
+                                </div>
+                                <div class="dev-edu-institute">Madhav Institute of Technology &amp; Science, Gwalior</div>
+                                <div class="dev-edu-degree">B.Tech in Computer Science &amp; Engineering</div>
+                                <div class="dev-edu-subline">Aug 2026 &ndash; Jun 2030</div>
+                                <div class="dev-edu-subline">Enrollment: BTCS26O1062</div>
+                                <div class="dev-edu-subline">Department of Computer Science &amp; Engineering</div>
+                            </div>
                         </div>
                     </div>
 
@@ -410,7 +437,6 @@
                                     </filter>
                                 </defs>
 
-                                <!-- Subtle Diagonal Circuit-Board Patterns (Top-Left Corner) -->
                                 <g stroke="#8b5cf6" stroke-width="1.15" stroke-opacity="0.22" fill="none">
                                     <path d="M-8,38 L30,0 M-8,54 L46,0 M-8,70 L62,0 M10,74 L44,40 L76,40"/>
                                     <circle cx="76" cy="40" r="2.2" fill="#a855f7" fill-opacity="0.32" stroke="none"/>
@@ -419,15 +445,12 @@
                                     <circle cx="92" cy="56" r="2" fill="#a855f7" fill-opacity="0.25" stroke="none"/>
                                 </g>
 
-                                <!-- Flowing Neon-Purple Wave Lines -->
                                 <path d="M0,78 C95,112 182,88 264,34 C332,-10 426,28 520,8" fill="none" stroke="url(#waveGrad3)" stroke-width="2" filter="url(#softGlow2)"/>
                                 <path d="M0,92 C108,116 205,74 295,28 C372,-12 448,38 520,24" fill="none" stroke="url(#waveGrad4)" stroke-width="1.4"/>
                                 <path d="M180,112 C285,78 395,108 520,66" fill="none" stroke="#8b5cf6" stroke-opacity="0.22" stroke-width="1.3"/>
 
-                                <!-- Minimal Purple Programming Symbol </> -->
                                 <text x="386" y="68" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="700" fill="#a855f7" fill-opacity="0.52" letter-spacing="1">&lt;/&gt;</text>
 
-                                <!-- Clean Dotted Grid Texture (Top-Right Corner) -->
                                 <g fill="#c4b5fd" fill-opacity="0.24">
                                     <circle cx="446" cy="18" r="1.5"/><circle cx="459" cy="18" r="1.5"/><circle cx="472" cy="18" r="1.5"/><circle cx="485" cy="18" r="1.5"/><circle cx="498" cy="18" r="1.5"/>
                                     <circle cx="446" cy="31" r="1.5"/><circle cx="459" cy="31" r="1.5"/><circle cx="472" cy="31" r="1.5"/><circle cx="485" cy="31" r="1.5"/><circle cx="498" cy="31" r="1.5"/>
@@ -446,10 +469,19 @@
                             </div>
 
                             <h4 class="dev-name">Yuvraj Yadav</h4>
-                            <p class="dev-meta">
-                                <i class="bi bi-mortarboard-fill"></i>
-                                <span>B.Tech Computer Science &amp; Engineering &bull; MITS Gwalior</span>
-                            </p>
+
+                            <!-- Education Detail Block (Without CGPA) -->
+                            <div class="dev-edu-box">
+                                <div class="dev-edu-label">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                    <span>Education</span>
+                                </div>
+                                <div class="dev-edu-institute">Madhav Institute of Technology &amp; Science, Gwalior</div>
+                                <div class="dev-edu-degree">B.Tech in Computer Science &amp; Engineering</div>
+                                <div class="dev-edu-subline">Aug 2026 &ndash; Jun 2030</div>
+                                <div class="dev-edu-subline">Enrollment: BTCS26O1156</div>
+                                <div class="dev-edu-subline">Department of Computer Science &amp; Engineering</div>
+                            </div>
                         </div>
                     </div>
 
