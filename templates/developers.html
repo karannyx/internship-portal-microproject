@@ -23,42 +23,44 @@
         pointer-events: none;
     }
 
-    /* Clean Light-Grey Showcase Container */
+    /* Theme-Matched Subtle Showcase Container */
     .dev-cards-showcase {
-        background: #f3f4f8;
-        border: 1px solid #e5e7eb;
+        background: var(--body-bg);
+        background: color-mix(in srgb, var(--card-bg) 42%, var(--body-bg));
+        border: 1px solid var(--border-color);
         border-radius: 24px;
         padding: 1.75rem;
     }
 
-    /* Predominantly White Developer Card */
+    /* Sleek Dark/Adaptive Developer Card */
     .dev-card {
         position: relative;
-        background: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+        box-shadow: var(--card-shadow);
         transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .dev-card:hover {
         transform: translateY(-5px);
-        border-color: rgba(124, 58, 237, 0.35) !important;
-        box-shadow: 0 22px 42px -14px rgba(37, 16, 82, 0.16), 0 6px 16px -6px rgba(15, 23, 42, 0.06);
+        border-color: rgba(139, 92, 246, 0.55) !important;
+        box-shadow: 0 22px 42px -14px rgba(124, 58, 237, 0.28), 0 6px 16px -6px rgba(15, 23, 42, 0.35);
     }
 
-    /* Dark Charcoal-Black to Deep Purple Gradient Header ONLY */
+    /* Dark Charcoal-Black to Deep Purple Gradient Header */
     .dev-cover-header {
         position: relative;
         height: 112px;
         background: linear-gradient(125deg, #090914 0%, #17102D 54%, #251052 100%);
         overflow: hidden;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.22);
     }
     .dev-cover-header::after {
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at 78% 20%, rgba(139, 92, 246, 0.16) 0%, transparent 58%);
+        background: radial-gradient(circle at 78% 20%, rgba(139, 92, 246, 0.18) 0%, transparent 58%);
         pointer-events: none;
     }
     .dev-header-svg {
@@ -83,42 +85,42 @@
         border-radius: 50%;
         object-fit: cover;
         object-position: top center;
-        border: 4px solid #ffffff;
-        background: #f8fafc;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.1);
+        border: 4px solid var(--card-bg);
+        background: var(--body-bg);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(139, 92, 246, 0.35);
     }
     .dev-monogram {
         width: 104px;
         height: 104px;
         border-radius: 50%;
-        border: 4px solid #ffffff;
-        background: linear-gradient(135deg, #17102D, #5b21b6);
+        border: 4px solid var(--card-bg);
+        background: linear-gradient(135deg, #17102D, #6d28d9);
         color: #ffffff;
         font-size: 2rem;
         font-weight: 800;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(139, 92, 246, 0.35);
     }
 
-    /* White Content Area Typography */
+    /* Card Content Area Typography */
     .dev-card-body {
-        background: #ffffff;
+        background: transparent;
         padding: 0 1.65rem 1.35rem;
     }
     .dev-name {
-        color: #0f172a !important;
+        color: var(--text-heading) !important;
         font-size: 1.45rem;
         font-weight: 800;
         letter-spacing: -0.02em;
         margin-bottom: 0.85rem;
     }
 
-    /* Structured Education Block (Matching Reference Layout, Without CGPA) */
+    /* Inset Education Block Matching Card Contrast */
     .dev-edu-box {
-        background: #f8fafc;
-        border: 1px solid #eef2f6;
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
         border-radius: 14px;
         padding: 0.95rem 1.1rem;
     }
@@ -128,38 +130,38 @@
         gap: 0.45rem;
         font-size: 0.88rem;
         font-weight: 700;
-        color: #4f46e5;
+        color: #818cf8;
         margin-bottom: 0.45rem;
     }
     .dev-edu-label i {
         font-size: 1rem;
-        color: #6366f1;
+        color: #a78bfa;
     }
     .dev-edu-institute {
-        color: #0f172a;
+        color: var(--text-heading);
         font-size: 0.96rem;
         font-weight: 700;
         line-height: 1.35;
         margin-bottom: 0.2rem;
     }
     .dev-edu-degree {
-        color: #334155;
+        color: var(--text-body);
         font-size: 0.88rem;
         font-weight: 500;
         margin-bottom: 0.3rem;
     }
     .dev-edu-subline {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 0.82rem;
         font-weight: 500;
         line-height: 1.48;
     }
 
-    /* Bottom Action Footer & Light-Grey Rounded Buttons */
+    /* Bottom Action Footer & Theme-Matched Buttons */
     .dev-card-footer {
-        background: #ffffff;
+        background: transparent;
         padding: 1rem 1.65rem 1.35rem;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid var(--border-color);
         display: flex;
         flex-wrap: wrap;
         gap: 0.65rem;
@@ -173,40 +175,34 @@
         font-size: 0.86rem;
         font-weight: 600;
         text-decoration: none;
-        background: #f3f4f6;
-        border: 1px solid #e2e8f0;
-        color: #1e293b !important;
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-heading) !important;
         transition: all 0.18s ease;
     }
     .dev-action-btn i {
         font-size: 0.95rem;
     }
     .dev-action-btn.btn-github i {
-        color: #111827;
+        color: var(--text-heading);
     }
     .dev-action-btn.btn-linkedin i {
-        color: #0f172a;
+        color: #38bdf8;
     }
     .dev-action-btn.btn-email i {
-        color: #2563eb;
+        color: #818cf8;
     }
     .dev-action-btn:hover {
-        background: #e9ecf3;
-        border-color: #cbd5e1;
-        color: #0f172a !important;
+        background: var(--badge-bg);
+        border-color: rgba(139, 92, 246, 0.55);
+        color: var(--badge-text) !important;
         transform: translateY(-2px);
     }
-    .dev-action-btn.btn-github:hover {
-        border-color: rgba(124, 58, 237, 0.45);
-    }
     .dev-action-btn.btn-linkedin:hover {
-        border-color: #0284c7;
-    }
-    .dev-action-btn.btn-linkedin:hover i {
-        color: #0284c7;
+        border-color: #38bdf8;
     }
     .dev-action-btn.btn-email:hover {
-        border-color: #2563eb;
+        border-color: #818cf8;
     }
 
     /* Mentor Acknowledgement Card */
@@ -370,7 +366,7 @@
                             </svg>
                         </div>
 
-                        <!-- White Content Area -->
+                        <!-- Card Content Area -->
                         <div class="dev-card-body">
                             <div class="dev-avatar-wrap mb-3">
                                 <img src="/static/karan.jpg" alt="Karan Sahu" class="dev-pfp"
@@ -460,7 +456,7 @@
                             </svg>
                         </div>
 
-                        <!-- White Content Area -->
+                        <!-- Card Content Area -->
                         <div class="dev-card-body">
                             <div class="dev-avatar-wrap mb-3">
                                 <img src="/static/yuvraj.jpg" alt="Yuvraj Yadav" class="dev-pfp"
