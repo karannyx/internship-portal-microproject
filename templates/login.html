@@ -1,75 +1,294 @@
 {% extends "base.html" %}
-{% block title %}Login | Skill2Career{% endblock %}
+{% block title %}Student Sign In | Skill2Career{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card card-custom p-5">
-                <h3 class="fw-bold text-center mb-1">Welcome Back</h3>
-                <p class="text-muted text-center small mb-4">Sign in using Firebase Auth</p>
+<style>
+    .auth-wrapper {
+        min-height: calc(100vh - 160px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 0;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+    .auth-top-bar {
+        height: 6px;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed, #2563eb);
+    }
+    .auth-body {
+        padding: 2rem 2rem 1.85rem;
+    }
+    .auth-logo-badge {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        margin-bottom: 0.85rem;
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+    }
+    .auth-input {
+        background: var(--body-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-heading) !important;
+        border-radius: 11px;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.93rem;
+    }
+    .auth-input:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16) !important;
+    }
+    .btn-primary-auth {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        border: none;
+        color: #ffffff;
+        font-weight: 600;
+        border-radius: 11px;
+        padding: 0.68rem 1rem;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .btn-primary-auth:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.28);
+        color: #ffffff;
+    }
+    .btn-google-auth {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-heading);
+        font-weight: 600;
+        border-radius: 11px;
+        padding: 0.65rem 1rem;
+        transition: all 0.18s ease;
+    }
+    .btn-google-auth:hover {
+        border-color: #6366f1;
+        background: var(--card-bg);
+        transform: translateY(-1px);
+    }
+</style>
 
-                <div id="errorMessage" class="alert alert-danger py-2 small d-none"></div>
-
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Email Address</label>
-                        <input type="email" id="email" class="form-control" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold small">Password</label>
-                        <input type="password" id="password" class="form-control" required>
-                    </div>
-                    <button type="submit" id="loginBtn" class="btn btn-primary-custom w-100 mb-3">Sign In</button>
-                    <div class="text-center small">
-                        Don't have an account? <a href="/register" class="text-decoration-none fw-bold">Register Here</a>
-                    </div>
-                </form>
+<div class="container auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-top-bar"></div>
+        <div class="auth-body">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div class="auth-logo-badge">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <h1 class="h4 fw-bold mb-1" style="color: var(--text-heading);">Welcome Back</h1>
+                <p class="small text-muted mb-0">Sign in to access campus drives, skill matcher &amp; ATS resume</p>
             </div>
+
+            <!-- Email / Password Sign In Form -->
+            <form id="emailLoginForm">
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label small fw-semibold" style="color: var(--text-heading);">Email Address</label>
+                    <input type="email" class="form-control auth-input" id="loginEmail" name="email"
+                           placeholder="student@university.edu" required autocomplete="email">
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="loginPassword" class="form-label small fw-semibold mb-0" style="color: var(--text-heading);">Password</label>
+                        <button type="button" id="forgotPwdBtn" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"
+                                style="color: #6366f1; font-size: 0.82rem;">
+                            Forgot password?
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" class="form-control auth-input" id="loginPassword" name="password"
+                               placeholder="Enter your password" required autocomplete="current-password">
+                        <button class="btn border" type="button" id="togglePwdBtn"
+                                style="background: var(--body-bg); border-color: var(--border-color) !important; color: var(--text-muted); border-radius: 0 11px 11px 0;">
+                            <i class="bi bi-eye" id="togglePwdIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="emailSubmitBtn" class="btn btn-primary-auth w-100 mt-3">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="d-flex align-items-center my-3">
+                <hr class="flex-grow-1" style="border-color: var(--border-color);">
+                <span class="px-2 small text-muted fw-semibold">OR</span>
+                <hr class="flex-grow-1" style="border-color: var(--border-color);">
+            </div>
+
+            <!-- Continue with Google Button -->
+            <button type="button" id="googleLoginBtn" class="btn btn-google-auth w-100 d-flex align-items-center justify-content-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Continue with Google</span>
+            </button>
+
+            <!-- Live Status / Error Alert -->
+            <div id="authStatusBox" class="alert py-2 px-3 small rounded-3 mt-3 mb-0 d-none" role="alert"></div>
+
+            <!-- Register Link -->
+            <p class="text-center small text-muted mt-4 mb-0">
+                Don't have an account?
+                <a href="/register" class="fw-semibold text-decoration-none" style="color: #6366f1;">Create Account</a>
+            </p>
         </div>
     </div>
 </div>
 
+<script>
+    document.getElementById("togglePwdBtn").addEventListener("click", () => {
+        const pwd = document.getElementById("loginPassword");
+        const icon = document.getElementById("togglePwdIcon");
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            icon.className = "bi bi-eye-slash";
+        } else {
+            pwd.type = "password";
+            icon.className = "bi bi-eye";
+        }
+    });
+</script>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import {
+        getAuth,
+        signInWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithPopup,
+        sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD9BTtt9e8xNLjgZZg3onbVmpauo9S5y5c",
-    authDomain: "skill2career-932d2.firebaseapp.com",
-    projectId: "skill2career-932d2",
-    storageBucket: "skill2career-932d2.firebasestorage.app",
-    messagingSenderId: "27369538944",
-    appId: "1:27369538944:web:9dd0d456f75bda54b86d65",
-    measurementId: "G-WE5MKVWVEV"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyD9BTtt9e8xNLjgZZg3onbVmpauo9S5y5c",
+        authDomain: "skill2career-932d2.firebaseapp.com",
+        projectId: "skill2career-932d2",
+        storageBucket: "skill2career-932d2.firebasestorage.app",
+        messagingSenderId: "27369538944",
+        appId: "1:27369538944:web:9dd0d456f75bda54b86d65",
+        measurementId: "G-WE5MKVWVEV"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
 
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('loginBtn');
-      const errBox = document.getElementById('errorMessage');
-      
-      btn.innerHTML = "Authenticating...";
-      errBox.classList.add('d-none');
+    const statusBox = document.getElementById("authStatusBox");
+    function showStatus(msg, type = "info") {
+        statusBox.textContent = msg;
+        statusBox.className = `alert alert-${type} py-2 px-3 small rounded-3 mt-3 mb-0`;
+    }
 
-      signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-              fetch('/sync_firebase', {
-                  method: 'POST',
-                  headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify({ action: 'login', email: email })
-              }).then(() => window.location.href = '/jobs');
-          })
-          .catch((error) => {
-              btn.innerHTML = "Sign In";
-              errBox.innerHTML = error.message.replace("Firebase: ", "");
-              errBox.classList.remove('d-none');
-          });
-  });
+    // 1. Email & Password Sign In
+    document.getElementById("emailLoginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const submitBtn = document.getElementById("emailSubmitBtn");
+
+        submitBtn.disabled = true;
+        showStatus("Signing in...", "secondary");
+
+        try {
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+            const res = await fetch("/sync_firebase", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "login",
+                    email: cred.user.email,
+                    name: cred.user.displayName || cred.user.email.split("@")[0]
+                })
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                window.location.href = "/dashboard";
+            } else {
+                showStatus(data.message || "Session sync failed.", "danger");
+                submitBtn.disabled = false;
+            }
+        } catch (err) {
+            showStatus(err.message.replace("Firebase: ", ""), "danger");
+            submitBtn.disabled = false;
+        }
+    });
+
+    // 2. Continue with Google
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+        const btn = document.getElementById("googleLoginBtn");
+        btn.disabled = true;
+        showStatus("Connecting with Google...", "secondary");
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            const response = await fetch("/google_login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: user.displayName || user.email.split("@")[0],
+                    email: user.email,
+                    photo_url: user.photoURL || ""
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showStatus("Login successful! Redirecting to dashboard...", "success");
+                window.location.href = data.redirect || "/dashboard";
+            } else {
+                showStatus(data.error || "Unable to complete Google login.", "danger");
+                btn.disabled = false;
+            }
+        } catch (err) {
+            if (err.code !== "auth/popup-closed-by-user") {
+                showStatus(err.message.replace("Firebase: ", ""), "danger");
+            } else {
+                statusBox.classList.add("d-none");
+            }
+            btn.disabled = false;
+        }
+    });
+
+    // 3. Forgot Password Reset Link
+    document.getElementById("forgotPwdBtn").addEventListener("click", async () => {
+        const emailField = document.getElementById("loginEmail");
+        const email = (emailField.value || "").trim();
+
+        if (!email) {
+            emailField.focus();
+            showStatus("Pehle upar apna registered email enter karein, phir 'Forgot password?' par click karein.", "warning");
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showStatus(`Password reset link ${email} par bhej diya gaya hai. Inbox aur Spam folder check karein.`, "success");
+        } catch (err) {
+            showStatus(err.message.replace("Firebase: ", ""), "danger");
+        }
+    });
 </script>
 {% endblock %}

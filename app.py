@@ -1018,7 +1018,7 @@ def logout():
 @app.route('/sync_firebase', methods=['POST'])
 def sync_firebase():
     data = request.get_json() or {}
-    email = data.get('email')
+    email = (data.get('email') or '').strip().lower()
     action = data.get('action')
 
     if not email:
@@ -1028,25 +1028,77 @@ def sync_firebase():
     cursor = conn.cursor()
 
     if action == 'register':
-        name = data.get('name', 'Student')
-        skills = data.get('skills', '')
+        name = (data.get('name') or 'Student').strip()
+        skills = (data.get('skills') or '').strip()
         try:
             cursor.execute('INSERT INTO students (name, email, skills) VALUES (?, ?, ?)', (name, email, skills))
             conn.commit()
         except sqlite3.IntegrityError:
-            cursor.execute('UPDATE students SET name = ?, skills = ? WHERE email = ?', (name, skills, email))
+            cursor.execute('UPDATE students SET name = ?, skills = ? WHERE lower(email) = ?', (name, skills, email))
             conn.commit()
         session['student_name'] = name
         session['student_email'] = email
 
-    elif action == 'login':
-        cursor.execute('SELECT name FROM students WHERE email = ?', (email,))
+    elif action in ('login', 'google'):
+        name = (data.get('name') or email.split('@')[0]).strip()
+        avatar_url = (data.get('photo_url') or data.get('avatar_url') or '').strip()
+        cursor.execute('SELECT name, avatar_url FROM students WHERE lower(email) = ?', (email,))
         student = cursor.fetchone()
-        session['student_name'] = student['name'] if student else email.split('@')[0]
+
+        if student:
+            final_name = student['name'] if student['name'] else name
+            if avatar_url and not student['avatar_url']:
+                cursor.execute('UPDATE students SET avatar_url = ? WHERE lower(email) = ?', (avatar_url, email))
+                conn.commit()
+        else:
+            cursor.execute(
+                'INSERT INTO students (name, email, skills, avatar_url) VALUES (?, ?, ?, ?)',
+                (name, email, '', avatar_url)
+            )
+            conn.commit()
+            final_name = name
+
+        session['student_name'] = final_name
         session['student_email'] = email
 
     conn.close()
-    return jsonify({"status": "success"})
+    return jsonify({"status": "success", "success": True, "redirect": url_for('dashboard')})
+
+
+@app.route('/google_login', methods=['POST'])
+def google_login():
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    name = (data.get('name') or (email.split('@')[0] if email else 'Student')).strip()
+    avatar_url = (data.get('photo_url') or data.get('avatar_url') or '').strip()
+
+    if not email:
+        return jsonify({"success": False, "error": "Google account email not received."}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT name, avatar_url FROM students WHERE lower(email) = ?', (email,))
+    student = cursor.fetchone()
+
+    if student:
+        final_name = student['name'] if student['name'] else name
+        if avatar_url and not student['avatar_url']:
+            cursor.execute('UPDATE students SET avatar_url = ? WHERE lower(email) = ?', (avatar_url, email))
+            conn.commit()
+    else:
+        cursor.execute(
+            'INSERT INTO students (name, email, skills, avatar_url) VALUES (?, ?, ?, ?)',
+            (name, email, '', avatar_url)
+        )
+        conn.commit()
+        final_name = name
+
+    conn.close()
+
+    session['student_name'] = final_name
+    session['student_email'] = email
+
+    return jsonify({"success": True, "redirect": url_for('dashboard')})
 
 
 @app.route('/add_job', methods=['GET', 'POST'])
