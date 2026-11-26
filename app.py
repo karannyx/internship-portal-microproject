@@ -30,6 +30,9 @@ SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")  # App Password
 LAST_SYNC_TIME = 0
 SYNC_INTERVAL = 300
 
+LIVE_PORTAL_CACHE = {"timestamp": 0, "jobs": []}
+LIVE_PORTAL_TTL = 300  # Cache external API jobs for 5 minutes for fast loading
+
 
 @app.before_request
 def auto_lock_admin_session():
@@ -91,11 +94,19 @@ def build_gcal_link(job_title, company, date_str, time_str, venue):
 
 
 def get_company_logo(company_name, api_logo=None):
-    """Returns official high-res company logo URL with domain matching."""
+    """Returns official high-res company/portal logo URL with domain matching."""
     if api_logo:
         return api_logo
     name = (company_name or "").lower()
     domain_map = {
+        'naukri': 'naukri.com',
+        'indeed': 'indeed.com',
+        'linkedin': 'linkedin.com',
+        'internshala': 'internshala.com',
+        'aicte': 'aicte-india.org',
+        'unstop': 'unstop.com',
+        'wellfound': 'wellfound.com',
+        'drdo': 'drdo.gov.in',
         'india post': 'indiapost.gov.in',
         'cept': 'indiapost.gov.in',
         'tcs': 'tcs.com',
@@ -722,11 +733,82 @@ def public_portfolio(student_id):
     return render_template('portfolio.html', student=student, resume=resume, skills_list=skills_list)
 
 
-# --- LIVE ONLINE OPENINGS WITH COMPANY LOGOS ---
+# --- LIVE ONLINE OPENINGS (YEAR-ROUND JOB BOARDS + MULTI-API AGGREGATOR) ---
 
 @app.route('/live_jobs')
 def live_jobs():
+    # 1. Year-Round Indian Job Portals, Internship Platforms & Direct Career Hubs (20 Verified Portals)
     indian_internships = [
+        {
+            "title": "Software Developer & IT Internships (Pan India)",
+            "company_name": "Naukri.com",
+            "candidate_required_location": "Pan India / Remote",
+            "job_type": "Job & Internship Portal",
+            "tags": ["Python", "Java", "SQL", "React"],
+            "url": "https://www.naukri.com/software-developer-internship-jobs",
+            "logo": get_company_logo("Naukri"),
+            "is_indian": True
+        },
+        {
+            "title": "Junior Software Engineer & Web Dev Roles",
+            "company_name": "Indeed India",
+            "candidate_required_location": "India / Work From Home",
+            "job_type": "Aggregator Portal",
+            "tags": ["Python", "HTML", "JavaScript", "SQL"],
+            "url": "https://in.indeed.com/jobs?q=software+developer+intern&l=India",
+            "logo": get_company_logo("Indeed"),
+            "is_indian": True
+        },
+        {
+            "title": "Verified Virtual & In-Office Tech Internships",
+            "company_name": "Internshala",
+            "candidate_required_location": "Work From Home / India",
+            "job_type": "Paid Internship Hub",
+            "tags": ["Python", "Web Dev", "React", "DSA"],
+            "url": "https://internshala.com/internships/computer-science-internship/",
+            "logo": get_company_logo("Internshala"),
+            "is_indian": True
+        },
+        {
+            "title": "Entry-Level Software Engineering & Internships",
+            "company_name": "LinkedIn Jobs India",
+            "candidate_required_location": "Bengaluru / Hyderabad / Remote",
+            "job_type": "Professional Network",
+            "tags": ["Python", "DSA", "Cloud", "React"],
+            "url": "https://www.linkedin.com/jobs/search/?keywords=Software%20Engineer%20Intern&location=India",
+            "logo": get_company_logo("LinkedIn"),
+            "is_indian": True
+        },
+        {
+            "title": "National Engineering & PSU Internship Scheme",
+            "company_name": "AICTE National Internship Portal",
+            "candidate_required_location": "All India (Govt & Industry)",
+            "job_type": "Govt Approved Portal",
+            "tags": ["Python", "C", "Cybersecurity", "AI"],
+            "url": "https://internship.aicte-india.org/",
+            "logo": get_company_logo("AICTE"),
+            "is_indian": True
+        },
+        {
+            "title": "Hiring Challenges, Hackathons & Tech Internships",
+            "company_name": "Unstop",
+            "candidate_required_location": "Pan India / Online",
+            "job_type": "Competition & Hiring",
+            "tags": ["DSA", "C++", "Python", "Full Stack"],
+            "url": "https://unstop.com/internships",
+            "logo": get_company_logo("Unstop"),
+            "is_indian": True
+        },
+        {
+            "title": "Startup Software Engineer & Full-Stack Interns",
+            "company_name": "Wellfound (AngelList)",
+            "candidate_required_location": "Bengaluru / Remote India",
+            "job_type": "Startup Talent Hub",
+            "tags": ["React", "Node.js", "Python", "Docker"],
+            "url": "https://wellfound.com/role/r/software-engineer",
+            "logo": get_company_logo("Wellfound"),
+            "is_indian": True
+        },
         {
             "title": "Junior Software Trainee (CEPT Tech)",
             "company_name": "India Post (CEPT / Dak Vibhag)",
@@ -738,7 +820,7 @@ def live_jobs():
             "is_indian": True
         },
         {
-            "title": "Software Engineer Intern (Digital)",
+            "title": "Software Engineer Intern (Digital & NextStep)",
             "company_name": "TCS (Tata Consultancy Services)",
             "candidate_required_location": "Pan India / Remote",
             "job_type": "Corporate Internship",
@@ -748,13 +830,33 @@ def live_jobs():
             "is_indian": True
         },
         {
-            "title": "InStep Software Trainee",
+            "title": "InStep & Springboard Software Trainee",
             "company_name": "Infosys Technologies",
             "candidate_required_location": "Bengaluru / Pune, India",
             "job_type": "Flagship Internship",
             "tags": ["Python", "Cloud", "SQL", "Flask"],
             "url": "https://www.infosys.com/careers.html",
             "logo": get_company_logo("Infosys"),
+            "is_indian": True
+        },
+        {
+            "title": "WILP & Project Engineer Internships",
+            "company_name": "Wipro Technologies",
+            "candidate_required_location": "Bengaluru / Chennai / Noida",
+            "job_type": "Enterprise Career Portal",
+            "tags": ["Java", "Python", "SQL", "Cloud"],
+            "url": "https://careers.wipro.com/",
+            "logo": get_company_logo("Wipro"),
+            "is_indian": True
+        },
+        {
+            "title": "Graduate & Software Engineering Trainee",
+            "company_name": "HCLTech India",
+            "candidate_required_location": "Noida / Lucknow / Bengaluru",
+            "job_type": "Enterprise Career Portal",
+            "tags": ["C", "Python", "SQL", "Networking"],
+            "url": "https://www.hcltech.com/careers",
+            "logo": get_company_logo("HCL"),
             "is_indian": True
         },
         {
@@ -768,13 +870,23 @@ def live_jobs():
             "is_indian": True
         },
         {
-            "title": "Backend Systems Intern",
+            "title": "Backend & Fintech Systems Intern",
             "company_name": "Razorpay India",
             "candidate_required_location": "Bengaluru / Remote India",
             "job_type": "Fintech Internship",
             "tags": ["Python", "SQL", "REST APIs", "Docker"],
             "url": "https://razorpay.com/jobs/",
             "logo": get_company_logo("Razorpay"),
+            "is_indian": True
+        },
+        {
+            "title": "Software Development Engineering (SDE) Intern",
+            "company_name": "Flipkart Careers",
+            "candidate_required_location": "Bengaluru, India",
+            "job_type": "E-Commerce Tech",
+            "tags": ["DSA", "Java", "Python", "SQL"],
+            "url": "https://www.flipkartcareers.com/",
+            "logo": get_company_logo("Flipkart"),
             "is_indian": True
         },
         {
@@ -786,29 +898,135 @@ def live_jobs():
             "url": "https://www.isro.gov.in/",
             "logo": get_company_logo("ISRO"),
             "is_indian": True
+        },
+        {
+            "title": "Paid Engineering & Computer Science Apprenticeship",
+            "company_name": "DRDO (Defence R&D Organisation)",
+            "candidate_required_location": "Delhi / Bengaluru / Pune",
+            "job_type": "Govt Defence R&D",
+            "tags": ["C", "C++", "Python", "Algorithms"],
+            "url": "https://www.drdo.gov.in/drdo/careers",
+            "logo": get_company_logo("DRDO"),
+            "is_indian": True
+        },
+        {
+            "title": "Software Engineering & STEP Internships (India)",
+            "company_name": "Google Careers India",
+            "candidate_required_location": "Bengaluru / Hyderabad / Pune",
+            "job_type": "Global Tech Hub",
+            "tags": ["DSA", "C++", "Python", "Cloud"],
+            "url": "https://www.google.com/about/careers/applications/jobs/results/?location=India",
+            "logo": get_company_logo("Google"),
+            "is_indian": True
+        },
+        {
+            "title": "Software Engineering Internship (India IDC)",
+            "company_name": "Microsoft Careers India",
+            "candidate_required_location": "Hyderabad / Bengaluru / Noida",
+            "job_type": "Global Tech Hub",
+            "tags": ["DSA", "C++", "React", "Cloud"],
+            "url": "https://careers.microsoft.com/v2/global/en/home.html",
+            "logo": get_company_logo("Microsoft"),
+            "is_indian": True
+        },
+        {
+            "title": "SDE Intern & AWS Cloud Support Roles",
+            "company_name": "Amazon Jobs India",
+            "candidate_required_location": "Bengaluru / Chennai / Hyderabad",
+            "job_type": "Global Tech Hub",
+            "tags": ["DSA", "Java", "Python", "Docker"],
+            "url": "https://www.amazon.jobs/en/locations/india",
+            "logo": get_company_logo("Amazon"),
+            "is_indian": True
         }
     ]
 
-    external_jobs = []
-    try:
-        response = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=12', timeout=4)
-        if response.status_code == 200:
-            data = response.json()
-            for rj in data.get('jobs', []):
-                c_name = rj.get('company_name', '')
-                api_logo = rj.get('company_logo') or rj.get('company_logo_url')
-                external_jobs.append({
-                    "title": rj.get('title'),
-                    "company_name": c_name,
-                    "candidate_required_location": rj.get('candidate_required_location') or 'Worldwide',
-                    "job_type": rj.get('job_type') or 'Remote Tech',
-                    "tags": rj.get('tags', [])[:5],
-                    "url": rj.get('url'),
-                    "logo": get_company_logo(c_name, api_logo),
-                    "is_indian": False
-                })
-    except Exception as e:
-        print(f"Error fetching live jobs: {e}")
+    # 2. Multi-API Live Global Remote Aggregator (Remotive + Arbeitnow + Jobicy with 5-min cache)
+    now = time.time()
+    if LIVE_PORTAL_CACHE["jobs"] and (now - LIVE_PORTAL_CACHE["timestamp"] < LIVE_PORTAL_TTL):
+        external_jobs = LIVE_PORTAL_CACHE["jobs"]
+    else:
+        external_jobs = []
+        seen_titles = set()
+
+        # Source A: Remotive Live Remote Software Jobs
+        try:
+            r1 = requests.get('https://remotive.com/api/remote-jobs?category=software-dev&limit=14', timeout=3.5)
+            if r1.status_code == 200:
+                for rj in r1.json().get('jobs', []):
+                    title = (rj.get('title') or '').strip()
+                    c_name = (rj.get('company_name') or '').strip()
+                    key = (title.lower(), c_name.lower())
+                    if title and c_name and key not in seen_titles:
+                        seen_titles.add(key)
+                        api_logo = rj.get('company_logo') or rj.get('company_logo_url')
+                        external_jobs.append({
+                            "title": title,
+                            "company_name": c_name,
+                            "candidate_required_location": rj.get('candidate_required_location') or 'Worldwide Remote',
+                            "job_type": rj.get('job_type') or 'Remote Tech',
+                            "tags": (rj.get('tags') or ["Python", "Web Dev"])[:5],
+                            "url": rj.get('url'),
+                            "logo": get_company_logo(c_name, api_logo),
+                            "is_indian": False
+                        })
+        except Exception as e:
+            print(f"Remotive API note: {e}")
+
+        # Source B: Arbeitnow Public Job Board API (No auth required)
+        try:
+            r2 = requests.get('https://www.arbeitnow.com/api/job-board-api', timeout=3.5)
+            if r2.status_code == 200:
+                for aj in r2.json().get('data', [])[:12]:
+                    title = (aj.get('title') or '').strip()
+                    c_name = (aj.get('company_name') or '').strip()
+                    key = (title.lower(), c_name.lower())
+                    if title and c_name and key not in seen_titles:
+                        seen_titles.add(key)
+                        tags = aj.get('tags') or ["Software", "Remote"]
+                        loc = "Remote / Global" if aj.get('remote') else (aj.get('location') or "Europe / Remote")
+                        external_jobs.append({
+                            "title": title,
+                            "company_name": c_name,
+                            "candidate_required_location": loc,
+                            "job_type": (aj.get('job_types') or ['Full-Time / Remote'])[0],
+                            "tags": tags[:5],
+                            "url": aj.get('url'),
+                            "logo": get_company_logo(c_name),
+                            "is_indian": False
+                        })
+        except Exception as e:
+            print(f"Arbeitnow API note: {e}")
+
+        # Source C: Jobicy Public Engineering Jobs API (No auth required)
+        try:
+            r3 = requests.get('https://jobicy.com/api/v2/remote-jobs?count=10&industry=engineering', timeout=3.5)
+            if r3.status_code == 200:
+                for jj in r3.json().get('jobs', []):
+                    title = (jj.get('jobTitle') or '').strip()
+                    c_name = (jj.get('companyName') or '').strip()
+                    key = (title.lower(), c_name.lower())
+                    if title and c_name and key not in seen_titles:
+                        seen_titles.add(key)
+                        j_type = jj.get('jobType')
+                        if isinstance(j_type, list):
+                            j_type = j_type[0] if j_type else "Remote Engineering"
+                        external_jobs.append({
+                            "title": title,
+                            "company_name": c_name,
+                            "candidate_required_location": jj.get('jobGeo') or 'Worldwide Remote',
+                            "job_type": j_type or 'Remote Engineering',
+                            "tags": ["Engineering", "Remote", "Full-Stack"],
+                            "url": jj.get('url'),
+                            "logo": get_company_logo(c_name, jj.get('companyLogo')),
+                            "is_indian": False
+                        })
+        except Exception as e:
+            print(f"Jobicy API note: {e}")
+
+        if external_jobs:
+            LIVE_PORTAL_CACHE["timestamp"] = now
+            LIVE_PORTAL_CACHE["jobs"] = external_jobs
 
     return render_template('live_jobs.html', jobs=indian_internships + external_jobs)
 
