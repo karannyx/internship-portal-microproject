@@ -48,9 +48,9 @@
         border: 1px solid var(--border-color);
         background: var(--body-bg);
         color: var(--text-heading);
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         font-weight: 600;
-        padding: 0.42rem 0.9rem;
+        padding: 0.4rem 0.85rem;
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.18s ease;
@@ -120,7 +120,7 @@
             </span>
         </div>
         <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="resetBridgeFilter()">
-            <i class="bi bi-x-circle me-1"></i> Show All (18)
+            <i class="bi bi-x-circle me-1"></i> Show All (<span id="resetCountLabel">34</span>)
         </button>
     </div>
 
@@ -132,21 +132,21 @@
                     <i class="bi bi-youtube fs-5"></i> CURATED YOUTUBE LEARNING HUB &bull; 100% FREE
                 </div>
                 <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
-                    Master Every Programming Language on YouTube
+                    Master Every Tech Stack &amp; Placement Subject on YouTube
                 </h1>
                 <p class="text-muted mb-0" style="font-size: 0.93rem;">
-                    Hand-picked full playlists and one-shot masterclasses across C, C++, Python, Java, JavaScript, React, SQL, and DSA in Hindi, Hinglish, and English.
+                    Hand-picked full playlists and one-shot masterclasses across C, C++, Python, Flask, Java, JavaScript, React, Node.js, SQL, DSA, Core CS (DBMS/OS/CN), Cloud &amp; Docker, Data Science, and Aptitude.
                 </p>
             </div>
             <div class="col-lg-4">
                 <div class="d-flex justify-content-lg-end gap-3">
                     <div class="hero-stat-box">
-                        <div class="h4 fw-bold mb-0 text-primary">18</div>
+                        <div class="h4 fw-bold mb-0 text-primary" id="heroTotalCourses">34</div>
                         <div class="small text-muted">Full Courses</div>
                     </div>
                     <div class="hero-stat-box">
-                        <div class="h4 fw-bold mb-0 text-danger">10</div>
-                        <div class="small text-muted">Languages & Stacks</div>
+                        <div class="h4 fw-bold mb-0 text-danger" id="heroTotalStacks">16</div>
+                        <div class="small text-muted">Tracks &amp; Stacks</div>
                     </div>
                 </div>
             </div>
@@ -159,7 +159,7 @@
             <div class="col-md-7 position-relative">
                 <i class="bi bi-search text-muted position-absolute" style="left: 1.55rem; top: 50%; transform: translateY(-50%);"></i>
                 <input type="text" id="courseSearchInput" class="form-control course-search-input"
-                       placeholder="Search creator (Striver, Chai aur Code, Apna College), topic, or language..."
+                       placeholder="Search creator (Striver, Chai aur Code, Gate Smashers, CampusX), topic, or stack..."
                        oninput="applyCourseFilters()">
             </div>
             <div class="col-md-5 d-flex flex-wrap justify-content-md-end gap-2">
@@ -171,20 +171,27 @@
 
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top" style="border-color: var(--border-color) !important;">
             <div class="d-flex flex-wrap align-items-center gap-1.5" id="stackFilterGroup">
-                <span class="small text-muted me-1"><i class="bi bi-funnel me-1"></i>Language / Stack:</span>
-                <button type="button" class="stack-pill active" data-stack="all" onclick="selectStack(this)">All (18)</button>
+                <span class="small text-muted me-1"><i class="bi bi-funnel me-1"></i>Track / Stack:</span>
+                <button type="button" class="stack-pill active" data-stack="all" onclick="selectStack(this)">All (<span id="allStackCount">34</span>)</button>
                 <button type="button" class="stack-pill" data-stack="C" onclick="selectStack(this)">C</button>
                 <button type="button" class="stack-pill" data-stack="C++" onclick="selectStack(this)">C++</button>
                 <button type="button" class="stack-pill" data-stack="Python" onclick="selectStack(this)">Python</button>
+                <button type="button" class="stack-pill" data-stack="Flask & Backend" onclick="selectStack(this)">Flask &amp; Backend</button>
                 <button type="button" class="stack-pill" data-stack="Java" onclick="selectStack(this)">Java</button>
                 <button type="button" class="stack-pill" data-stack="JavaScript" onclick="selectStack(this)">JavaScript</button>
                 <button type="button" class="stack-pill" data-stack="HTML/CSS" onclick="selectStack(this)">HTML/CSS</button>
+                <button type="button" class="stack-pill" data-stack="Bootstrap & UI" onclick="selectStack(this)">Bootstrap &amp; UI</button>
                 <button type="button" class="stack-pill" data-stack="React" onclick="selectStack(this)">React</button>
+                <button type="button" class="stack-pill" data-stack="Node.js" onclick="selectStack(this)">Node.js</button>
                 <button type="button" class="stack-pill" data-stack="DSA" onclick="selectStack(this)">DSA</button>
                 <button type="button" class="stack-pill" data-stack="SQL" onclick="selectStack(this)">SQL</button>
-                <button type="button" class="stack-pill" data-stack="Git & GitHub" onclick="selectStack(this)">Git & GitHub</button>
+                <button type="button" class="stack-pill" data-stack="Core CS (DBMS/OS)" onclick="selectStack(this)">Core CS (DBMS/OS)</button>
+                <button type="button" class="stack-pill" data-stack="Cloud & DevOps" onclick="selectStack(this)">Cloud &amp; DevOps</button>
+                <button type="button" class="stack-pill" data-stack="Data Science & AI" onclick="selectStack(this)">Data Science &amp; AI</button>
+                <button type="button" class="stack-pill" data-stack="Git & GitHub" onclick="selectStack(this)">Git &amp; GitHub</button>
+                <button type="button" class="stack-pill" data-stack="Aptitude & Prep" onclick="selectStack(this)">Aptitude &amp; Prep</button>
             </div>
-            <span id="visibleCoursesCount" class="small text-muted fw-semibold">Showing 18 courses</span>
+            <span id="visibleCoursesCount" class="small text-muted fw-semibold">Showing 34 courses</span>
         </div>
     </div>
 
@@ -194,6 +201,7 @@
 
 <script>
 const COURSES_DATA = [
+    // --- C ---
     {
         title: "Complete C Language & Pointers Masterclass (One Shot)",
         creator: "CodeWithHarry",
@@ -216,6 +224,8 @@ const COURSES_DATA = [
         desc: "College-exam and placement-focused C programming course covering loops, recursion, pointers, and dynamic memory.",
         url: "https://www.youtube.com/watch?v=irqbmMNs2Bo"
     },
+
+    // --- C++ ---
     {
         title: "C++ Full Course & STL for Placements",
         creator: "College Wallah / PW",
@@ -238,6 +248,8 @@ const COURSES_DATA = [
         desc: "Deep dive into C++20 fundamentals, references, templates, smart pointers, and object-oriented system design.",
         url: "https://www.youtube.com/watch?v=8jLOx1hD3_o"
     },
+
+    // --- PYTHON ---
     {
         title: "Chai aur Python — Complete Python Mastery",
         creator: "Chai aur Code (Hitesh Choudhary)",
@@ -260,6 +272,32 @@ const COURSES_DATA = [
         desc: "Clean, fast-paced introduction to Python scripting, data structures, modules, and automation workflows.",
         url: "https://www.youtube.com/watch?v=_uQrJ0TkZlc"
     },
+
+    // --- FLASK & BACKEND ---
+    {
+        title: "Learn Flask for Python — Full Web App & SQLite Course",
+        creator: "freeCodeCamp.org",
+        stack: "Flask & Backend",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "6.5 Hours Full Course",
+        level: "Beginner to Intermediate",
+        desc: "Build full-stack Python web apps with Flask routing, Jinja2 templates, SQLAlchemy/SQLite databases, and authentication.",
+        url: "https://www.youtube.com/watch?v=Qr4QMBUPxWo"
+    },
+    {
+        title: "Flask Web Development Tutorial in Hindi (One Shot)",
+        creator: "CodeWithHarry",
+        stack: "Flask & Backend",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "2.5 Hours One-Shot",
+        level: "Beginner",
+        desc: "Create REST routes, connect SQLite/MySQL databases, handle forms, and deploy Python Flask applications.",
+        url: "https://www.youtube.com/watch?v=oA8brF3w5XQ"
+    },
+
+    // --- JAVA ---
     {
         title: "Java + DSA + Interview Preparation Course",
         creator: "Kunal Kushwaha",
@@ -282,6 +320,8 @@ const COURSES_DATA = [
         desc: "Step-by-step core Java, exception handling, multithreading, and object-oriented programming for campus drives.",
         url: "https://www.youtube.com/playlist?list=PLfqMhTWNBTe3LtFWcvwpqTkUSlB32kJop"
     },
+
+    // --- JAVASCRIPT ---
     {
         title: "Chai aur JavaScript — Complete JS Series",
         creator: "Chai aur Code (Hitesh Choudhary)",
@@ -304,6 +344,8 @@ const COURSES_DATA = [
         desc: "Build interactive web apps from scratch with modern ES6+ JavaScript, modules, fetch API, and testing.",
         url: "https://www.youtube.com/watch?v=EerdGm-ehJQ"
     },
+
+    // --- HTML/CSS ---
     {
         title: "HTML & CSS Full Course — Beginner to Pro",
         creator: "SuperSimpleDev",
@@ -326,6 +368,32 @@ const COURSES_DATA = [
         desc: "Responsive web design, CSS variables, animations, Bootstrap integration, and portfolio deployment.",
         url: "https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w"
     },
+
+    // --- BOOTSTRAP & UI ---
+    {
+        title: "Bootstrap 5 Crash Course — Responsive UI Design",
+        creator: "CodeWithHarry",
+        stack: "Bootstrap & UI",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "2 Hours One-Shot",
+        level: "Beginner",
+        desc: "Build responsive grids, navbars, cards, modals, and utility-driven dashboards fast with Bootstrap 5.",
+        url: "https://www.youtube.com/watch?v=vpAJ0s5S2t0"
+    },
+    {
+        title: "Bootstrap 5 Full Course for Beginners",
+        creator: "freeCodeCamp.org",
+        stack: "Bootstrap & UI",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "3 Hours Full Course",
+        level: "Beginner",
+        desc: "Complete walkthrough of Bootstrap 5 breakpoints, flexbox utilities, forms, and modern component styling.",
+        url: "https://www.youtube.com/watch?v=-qfEOE4vtxE"
+    },
+
+    // --- REACT ---
     {
         title: "Chai aur React — Full React JS Playlist",
         creator: "Chai aur Code (Hitesh Choudhary)",
@@ -348,6 +416,32 @@ const COURSES_DATA = [
         desc: "Practical walkthrough of JSX, state management, useEffect, custom hooks, and API integration.",
         url: "https://www.youtube.com/watch?v=CgkZ7MvWUAA"
     },
+
+    // --- NODE.JS ---
+    {
+        title: "Node.js and Express.js — Full Backend & REST API Course",
+        creator: "freeCodeCamp.org (John Smilga)",
+        stack: "Node.js",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "8 Hours Full Course",
+        level: "Beginner to Intermediate",
+        desc: "Build scalable REST APIs, middleware, JWT authentication, and server-side apps with Node.js & Express.",
+        url: "https://www.youtube.com/watch?v=Oe421EPjeBE"
+    },
+    {
+        title: "Node.js & Express Backend Tutorial in Hindi",
+        creator: "CodeWithHarry",
+        stack: "Node.js",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "2.5 Hours One-Shot",
+        level: "Beginner",
+        desc: "Understand event-driven architecture, NPM modules, Express routing, and RESTful JSON endpoints.",
+        url: "https://www.youtube.com/watch?v=BLl32FvcdVM"
+    },
+
+    // --- DSA ---
     {
         title: "Striver's A2Z DSA Course — Complete Placement Sheet",
         creator: "take U forward (Striver)",
@@ -359,6 +453,19 @@ const COURSES_DATA = [
         desc: "Arrays, Binary Search, Recursion, Trees, Graphs, and Dynamic Programming for top product interviews.",
         url: "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz"
     },
+    {
+        title: "Complete C++ Placement DSA Course (CodeHelp)",
+        creator: "Love Babbar",
+        stack: "DSA",
+        langGroup: "hindi",
+        langLabel: "Hinglish",
+        duration: "149 Videos Full Series",
+        level: "Beginner to Advanced",
+        desc: "Zero-to-hero DSA bootcamp covering time complexity, linked lists, stacks, queues, trees, heaps, and DP.",
+        url: "https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA"
+    },
+
+    // --- SQL ---
     {
         title: "Complete SQL & Database Management Course",
         creator: "Apna College",
@@ -381,6 +488,91 @@ const COURSES_DATA = [
         desc: "Hands-on relational database design, aggregation queries, primary/foreign keys, and schema normalization.",
         url: "https://www.youtube.com/watch?v=HXV3zeQKqGY"
     },
+
+    // --- CORE CS (DBMS / OS / CN) ---
+    {
+        title: "Complete DBMS (Database Management Systems) Playlist",
+        creator: "Gate Smashers",
+        stack: "Core CS (DBMS/OS)",
+        langGroup: "hindi",
+        langLabel: "Hinglish",
+        duration: "Full University & Placement Playlist",
+        level: "Essential for Interviews",
+        desc: "ER diagrams, Normalization (1NF-BCNF), ACID properties, transactions, concurrency control, and indexing.",
+        url: "https://www.youtube.com/playlist?list=PLxCzCOWd7aiFAN6I8CuViBuCdJgiOkT2Y"
+    },
+    {
+        title: "Operating Systems (OS) Complete Placement Playlist",
+        creator: "Gate Smashers",
+        stack: "Core CS (DBMS/OS)",
+        langGroup: "hindi",
+        langLabel: "Hinglish",
+        duration: "Full OS Playlist",
+        level: "Essential for Interviews",
+        desc: "CPU scheduling, deadlocks, semaphores, paging, virtual memory, and process synchronization for tech rounds.",
+        url: "https://www.youtube.com/playlist?list=PLxCzCOWd7aiGz9donHRrE9I3Mwn6XdP8p"
+    },
+    {
+        title: "Computer Networks (CN) Full Course for Placements",
+        creator: "Gate Smashers",
+        stack: "Core CS (DBMS/OS)",
+        langGroup: "hindi",
+        langLabel: "Hinglish",
+        duration: "Full CN Playlist",
+        level: "Essential for Interviews",
+        desc: "OSI & TCP/IP layers, IP addressing, subnetting, HTTP/HTTPS, DNS, routing protocols, and socket basics.",
+        url: "https://www.youtube.com/playlist?list=PLxCzCOWd7aiGFBD2-2joCpWOLUrDLvVV_"
+    },
+
+    // --- CLOUD & DEVOPS ---
+    {
+        title: "Docker Tutorial for Beginners — Full DevOps Course",
+        creator: "TechWorld with Nana",
+        stack: "Cloud & DevOps",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "3 Hours Full Course",
+        level: "Beginner to Intermediate",
+        desc: "Learn containers, images, Dockerfiles, Docker Compose, volumes, and deploying containerized apps.",
+        url: "https://www.youtube.com/watch?v=3c-iBn73dDE"
+    },
+    {
+        title: "AWS Certified Cloud Practitioner — Full Cloud Course",
+        creator: "freeCodeCamp.org",
+        stack: "Cloud & DevOps",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "14 Hours Full Course",
+        level: "Beginner",
+        desc: "Cloud computing fundamentals, EC2, S3, IAM, VPC, serverless architecture, and cloud deployment concepts.",
+        url: "https://www.youtube.com/watch?v=SOTamWNgDKc"
+    },
+
+    // --- DATA SCIENCE & AI ---
+    {
+        title: "Data Analysis with Python (NumPy, Pandas, Matplotlib)",
+        creator: "freeCodeCamp.org",
+        stack: "Data Science & AI",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "10 Hours Full Course",
+        level: "Beginner to Intermediate",
+        desc: "Data cleaning, exploratory data analysis, Pandas DataFrames, NumPy arrays, and statistical visualization.",
+        url: "https://www.youtube.com/watch?v=r-uOLxNrNk8"
+    },
+    {
+        title: "100 Days of Machine Learning — Complete Hindi Playlist",
+        creator: "CampusX",
+        stack: "Data Science & AI",
+        langGroup: "hindi",
+        langLabel: "Hindi",
+        duration: "100+ Videos Playlist",
+        level: "Beginner to Advanced",
+        desc: "End-to-end machine learning algorithms, feature engineering, regression, classification, and model evaluation.",
+        url: "https://www.youtube.com/playlist?list=PLKnIA16_Rmvbr7zKYQuBfsVkjoLcJgxHH"
+    },
+
+    // --- GIT & GITHUB ---
     {
         title: "Complete Git and GitHub Tutorial for Beginners",
         creator: "Apna College",
@@ -391,11 +583,50 @@ const COURSES_DATA = [
         level: "Beginner",
         desc: "Repositories, commits, branching, merge conflicts, pull requests, and deploying live projects.",
         url: "https://www.youtube.com/watch?v=Ez8F0nW6S-w"
+    },
+    {
+        title: "Git and GitHub for Beginners — Crash Course",
+        creator: "freeCodeCamp.org",
+        stack: "Git & GitHub",
+        langGroup: "english",
+        langLabel: "English",
+        duration: "1 Hour Crash Course",
+        level: "Beginner",
+        desc: "Version control workflow, SSH keys, remote origin syncing, and collaborative open-source contribution.",
+        url: "https://www.youtube.com/watch?v=RGOj5yH7evk"
+    },
+
+    // --- APTITUDE & PLACEMENT PREP ---
+    {
+        title: "Quantitative Aptitude & Logical Reasoning for Placements",
+        creator: "CareerRide",
+        stack: "Aptitude & Prep",
+        langGroup: "english",
+        langLabel: "English / Hinglish",
+        duration: "Full Placement Aptitude Series",
+        level: "All Campus Drives",
+        desc: "Shortcut tricks for percentages, probability, permutations, time & work, and logical puzzles for TCS/Infosys.",
+        url: "https://www.youtube.com/playlist?list=PLpyc33gOcbVA4qXMoQ5vmhefTruk5t9lt"
     }
 ];
 
 let activeLang = "all";
 let activeStack = "all";
+
+function updateDynamicCounters() {
+    const total = COURSES_DATA.length;
+    const uniqueStacks = new Set(COURSES_DATA.map(c => c.stack)).size;
+
+    const heroTotal = document.getElementById("heroTotalCourses");
+    const heroStacks = document.getElementById("heroTotalStacks");
+    const allStackCount = document.getElementById("allStackCount");
+    const resetCountLabel = document.getElementById("resetCountLabel");
+
+    if (heroTotal) heroTotal.textContent = total;
+    if (heroStacks) heroStacks.textContent = uniqueStacks;
+    if (allStackCount) allStackCount.textContent = total;
+    if (resetCountLabel) resetCountLabel.textContent = total;
+}
 
 function renderCourses(list) {
     const grid = document.getElementById("coursesGrid");
@@ -407,7 +638,7 @@ function renderCourses(list) {
                 <div class="card course-card text-center py-5">
                     <i class="bi bi-search fs-1 text-muted mb-2"></i>
                     <h5 class="fw-bold" style="color: var(--text-heading);">No matching courses found</h5>
-                    <p class="small text-muted mb-3">Try clearing your search filter or browsing all 18 curated courses.</p>
+                    <p class="small text-muted mb-3">Try clearing your search filter or browsing all ${COURSES_DATA.length} curated courses.</p>
                     <div>
                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="resetBridgeFilter()">Show All Courses</button>
                     </div>
@@ -499,6 +730,7 @@ function resetBridgeFilter() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    updateDynamicCounters();
     const params = new URLSearchParams(window.location.search);
     const incomingSkill = params.get("skill") || params.get("tag");
 
@@ -511,7 +743,12 @@ document.addEventListener("DOMContentLoaded", function () {
             "html5": "HTML/CSS",
             "css": "HTML/CSS",
             "css3": "HTML/CSS",
+            "bootstrap": "Bootstrap & UI",
+            "ui": "Bootstrap & UI",
             "js": "JavaScript",
+            "node": "Node.js",
+            "nodejs": "Node.js",
+            "express": "Node.js",
             "git": "Git & GitHub",
             "github": "Git & GitHub",
             "cpp": "C++",
@@ -520,7 +757,27 @@ document.addEventListener("DOMContentLoaded", function () {
             "mysql": "SQL",
             "sqlite": "SQL",
             "postgresql": "SQL",
-            "flask": "Python"
+            "flask": "Flask & Backend",
+            "rest api": "Flask & Backend",
+            "rest apis": "Flask & Backend",
+            "backend": "Flask & Backend",
+            "docker": "Cloud & DevOps",
+            "cloud": "Cloud & DevOps",
+            "aws": "Cloud & DevOps",
+            "linux": "Cloud & DevOps",
+            "dbms": "Core CS (DBMS/OS)",
+            "os": "Core CS (DBMS/OS)",
+            "operating system": "Core CS (DBMS/OS)",
+            "cn": "Core CS (DBMS/OS)",
+            "computer networks": "Core CS (DBMS/OS)",
+            "data analysis": "Data Science & AI",
+            "pandas": "Data Science & AI",
+            "numpy": "Data Science & AI",
+            "machine learning": "Data Science & AI",
+            "ml": "Data Science & AI",
+            "ai": "Data Science & AI",
+            "gis": "Data Science & AI",
+            "aptitude": "Aptitude & Prep"
         };
 
         const mappedStack = aliasMap[lower] || clean;
