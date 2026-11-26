@@ -3,6 +3,7 @@ import requests
 import time
 import csv
 import os
+import json
 import hashlib
 import smtplib
 from datetime import datetime, timedelta
@@ -138,7 +139,8 @@ def init_db():
             title TEXT NOT NULL,
             company TEXT NOT NULL,
             required_skills TEXT NOT NULL,
-            deadline TEXT DEFAULT 'Nov 25, 2026'
+            deadline TEXT DEFAULT 'Nov 25, 2026',
+            custom_quiz TEXT DEFAULT '[]'
         )
     ''')
 
@@ -165,6 +167,8 @@ def init_db():
     i_cols = [col[1] for col in cursor.fetchall()]
     if 'deadline' not in i_cols:
         cursor.execute("ALTER TABLE internships ADD COLUMN deadline TEXT DEFAULT 'Nov 25, 2026'")
+    if 'custom_quiz' not in i_cols:
+        cursor.execute("ALTER TABLE internships ADD COLUMN custom_quiz TEXT DEFAULT '[]'")
 
     cursor.execute("PRAGMA table_info(applications)")
     a_cols = [col[1] for col in cursor.fetchall()]
@@ -215,12 +219,15 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM internships')
     if cursor.fetchone()[0] == 0:
         openings = [
-            ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML", "Nov 22, 2026"),
-            ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C", "Nov 26, 2026"),
-            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C", "Nov 20, 2026"),
-            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL", "Nov 30, 2026")
+            ("Junior Software Trainee", "India Post (CEPT)", "Python, SQL, HTML", "Nov 22, 2026", "[]"),
+            ("Digital Banking Systems Trainee", "India Post Tech Cell", "Python, HTML, C", "Nov 26, 2026", "[]"),
+            ("Software Engineer Intern", "TCS Digital", "Python, SQL, C", "Nov 20, 2026", "[]"),
+            ("Data Analyst Intern", "Infosys Springboard", "Python, SQL", "Nov 30, 2026", "[]")
         ]
-        cursor.executemany('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)', openings)
+        cursor.executemany(
+            'INSERT INTO internships (title, company, required_skills, deadline, custom_quiz) VALUES (?, ?, ?, ?, ?)',
+            openings
+        )
 
     conn.commit()
     conn.close()
@@ -310,8 +317,10 @@ def sync_live_jobs_automatically():
                 if title and company:
                     cursor.execute('SELECT id FROM internships WHERE title = ? AND company = ?', (title, company))
                     if not cursor.fetchone():
-                        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)',
-                                       (title, company, skills, 'Rolling Basis'))
+                        cursor.execute(
+                            'INSERT INTO internships (title, company, required_skills, deadline, custom_quiz) VALUES (?, ?, ?, ?, ?)',
+                            (title, company, skills, 'Rolling Basis', '[]')
+                        )
 
             conn.commit()
             conn.close()
@@ -332,7 +341,7 @@ def jobs():
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, title, company, required_skills, deadline FROM internships ORDER BY id DESC')
+    cursor.execute('SELECT id, title, company, required_skills, deadline, custom_quiz FROM internships ORDER BY id DESC')
     raw_internships = cursor.fetchall()
 
     student_skills = []
@@ -361,6 +370,14 @@ def jobs():
         job_dict['is_saved'] = job['id'] in saved_job_ids
         job_dict['logo'] = get_company_logo(job['company'])
 
+        try:
+            cq = json.loads(job['custom_quiz'] or '[]')
+            job_dict['has_custom_quiz'] = len(cq) > 0
+            job_dict['custom_quiz_count'] = len(cq)
+        except Exception:
+            job_dict['has_custom_quiz'] = False
+            job_dict['custom_quiz_count'] = 0
+
         if student_skills and job_req:
             matched_items = [orig for orig in job_req if orig.lower() in student_skills]
             missing_items = [orig for orig in job_req if orig.lower() not in student_skills]
@@ -387,24 +404,73 @@ def jobs():
     return render_template('jobs.html', internships=internships, top_score=top_score, total_jobs=len(internships), announcements=announcements)
 
 
-# --- SCREENING QUIZ BEFORE APPLYING ---
+# --- EXPANDED SCREENING QUIZ BANK BEFORE APPLYING ---
 
 QUIZ_QUESTION_BANK = {
     'python': [
         {"q": "What is the output of print(type([]) is list)?", "opts": ["True", "False", "TypeError", "None"], "ans": "True"},
-        {"q": "Which data structure is immutable in Python?", "opts": ["Tuple", "List", "Dictionary", "Set"], "ans": "Tuple"}
+        {"q": "Which data structure is immutable in Python?", "opts": ["Tuple", "List", "Dictionary", "Set"], "ans": "Tuple"},
+        {"q": "What is the time complexity of looking up a key in a Python dictionary on average?", "opts": ["O(1)", "O(n)", "O(log n)", "O(n log n)"], "ans": "O(1)"},
+        {"q": "Which keyword is used to create a generator function in Python?", "opts": ["yield", "return", "async", "lambda"], "ans": "yield"},
+        {"q": "What does PEP 8 define in Python?", "opts": ["Code style and formatting guidelines", "Package installation protocol", "Memory garbage collection rules", "Database connector API"], "ans": "Code style and formatting guidelines"},
+        {"q": "What will len({1, 2, 2, 3, 3, 3}) return in Python?", "opts": ["3", "6", "5", "TypeError"], "ans": "3"}
     ],
     'sql': [
-        {"q": "Which clause is used to filter aggregated groups?", "opts": ["HAVING", "WHERE", "GROUP BY", "ORDER BY"], "ans": "HAVING"},
-        {"q": "Which constraint enforces uniqueness across rows?", "opts": ["UNIQUE / PRIMARY KEY", "FOREIGN KEY", "DEFAULT", "CHECK"], "ans": "UNIQUE / PRIMARY KEY"}
+        {"q": "Which clause is used to filter aggregated groups in SQL?", "opts": ["HAVING", "WHERE", "GROUP BY", "ORDER BY"], "ans": "HAVING"},
+        {"q": "Which constraint enforces uniqueness and non-null values across rows?", "opts": ["PRIMARY KEY", "FOREIGN KEY", "DEFAULT", "CHECK"], "ans": "PRIMARY KEY"},
+        {"q": "Which SQL JOIN returns all records from the left table and matched records from the right table?", "opts": ["LEFT JOIN", "INNER JOIN", "RIGHT JOIN", "CROSS JOIN"], "ans": "LEFT JOIN"},
+        {"q": "Which SQL command is used to remove all rows from a table without logging individual row deletions?", "opts": ["TRUNCATE", "DELETE", "DROP", "REMOVE"], "ans": "TRUNCATE"},
+        {"q": "What does ACID stand for in relational databases?", "opts": ["Atomicity, Consistency, Isolation, Durability", "Accuracy, Concurrency, Integrity, Data", "Access, Control, Indexing, Delivery", "Asynchronous, Cached, Indexed, Distributed"], "ans": "Atomicity, Consistency, Isolation, Durability"}
     ],
     'c': [
-        {"q": "Which operator returns the memory address of a variable?", "opts": ["& (Address-of)", "* (Dereference)", "->", "sizeof"], "ans": "& (Address-of)"},
-        {"q": "In C, strings terminate with which character?", "opts": ["\\0 (Null)", "\\n", "EOF", "\\t"], "ans": "\\0 (Null)"}
+        {"q": "Which operator returns the memory address of a variable in C?", "opts": ["& (Address-of)", "* (Dereference)", "->", "sizeof"], "ans": "& (Address-of)"},
+        {"q": "In C, strings terminate with which character?", "opts": ["\\0 (Null)", "\\n", "EOF", "\\t"], "ans": "\\0 (Null)"},
+        {"q": "Which standard library function dynamically allocates memory and initializes all bytes to zero?", "opts": ["calloc()", "malloc()", "realloc()", "free()"], "ans": "calloc()"},
+        {"q": "What is the default storage class for local variables declared inside a C function?", "opts": ["auto", "static", "extern", "register"], "ans": "auto"},
+        {"q": "Which header file is required for printf() and scanf() in C?", "opts": ["<stdio.h>", "<stdlib.h>", "<conio.h>", "<string.h>"], "ans": "<stdio.h>"}
     ],
     'html': [
         {"q": "Which HTML5 tag is semantic for site navigation links?", "opts": ["<nav>", "<menu>", "<header>", "<section>"], "ans": "<nav>"},
-        {"q": "Which tag embeds a responsive canvas for Chart.js?", "opts": ["<canvas>", "<svg>", "<paint>", "<graphic>"], "ans": "<canvas>"}
+        {"q": "Which tag embeds a responsive bitmap drawing surface for Chart.js?", "opts": ["<canvas>", "<svg>", "<paint>", "<graphic>"], "ans": "<canvas>"},
+        {"q": "Which attribute specifies alternative text when an image fails to load?", "opts": ["alt", "title", "src", "aria-label"], "ans": "alt"},
+        {"q": "Which CSS property controls the space inside an element's border?", "opts": ["padding", "margin", "gap", "outline"], "ans": "padding"},
+        {"q": "Which HTTP status code indicates a resource was successfully created?", "opts": ["201 Created", "200 OK", "204 No Content", "302 Found"], "ans": "201 Created"}
+    ],
+    'javascript': [
+        {"q": "Which keyword declares a block-scoped variable that cannot be reassigned?", "opts": ["const", "var", "let", "static"], "ans": "const"},
+        {"q": "What does '===' check in JavaScript?", "opts": ["Both value and data type", "Only value with type coercion", "Reference memory address only", "Null safety"], "ans": "Both value and data type"},
+        {"q": "Which method converts a JSON string into a JavaScript object?", "opts": ["JSON.parse()", "JSON.stringify()", "JSON.object()", "JSON.decode()"], "ans": "JSON.parse()"},
+        {"q": "What does async/await work on top of in JavaScript?", "opts": ["Promises", "Callbacks only", "Web Workers", "Event Bubbling"], "ans": "Promises"}
+    ],
+    'react': [
+        {"q": "Which React hook is used to manage local component state?", "opts": ["useState", "useEffect", "useRef", "useMemo"], "ans": "useState"},
+        {"q": "What does JSX stand for in React?", "opts": ["JavaScript XML", "Java Syntax Extension", "JSON XML", "JavaScript XHR"], "ans": "JavaScript XML"},
+        {"q": "Which hook runs side effects like API calls after rendering in React?", "opts": ["useEffect", "useState", "useContext", "useReducer"], "ans": "useEffect"},
+        {"q": "Why should each item in a rendered React list have a unique 'key' prop?", "opts": ["To help React efficiently track and update changed DOM elements", "To encrypt component props", "To apply CSS grid ordering", "To prevent API rate limits"], "ans": "To help React efficiently track and update changed DOM elements"}
+    ],
+    'java': [
+        {"q": "Which keyword prevents a class from being inherited in Java?", "opts": ["final", "static", "abstract", "private"], "ans": "final"},
+        {"q": "Which Java collection does NOT allow duplicate elements?", "opts": ["HashSet", "ArrayList", "LinkedList", "Vector"], "ans": "HashSet"},
+        {"q": "Which component executes Java bytecode on any platform?", "opts": ["JVM (Java Virtual Machine)", "JDK Compiler", "JAR Bundler", "JDBC Driver"], "ans": "JVM (Java Virtual Machine)"},
+        {"q": "What is method overloading in Java?", "opts": ["Multiple methods in the same class with the same name but different parameters", "Overriding a parent method in a subclass", "Hiding private fields", "Running two threads simultaneously"], "ans": "Multiple methods in the same class with the same name but different parameters"}
+    ],
+    'dsa': [
+        {"q": "What is the worst-case time complexity of Binary Search on a sorted array?", "opts": ["O(log n)", "O(n)", "O(1)", "O(n log n)"], "ans": "O(log n)"},
+        {"q": "Which data structure follows the FIFO (First-In, First-Out) principle?", "opts": ["Queue", "Stack", "Binary Heap", "Hash Table"], "ans": "Queue"},
+        {"q": "Which traversal of a Binary Search Tree (BST) yields elements in sorted ascending order?", "opts": ["Inorder", "Preorder", "Postorder", "Level-order"], "ans": "Inorder"},
+        {"q": "Which algorithm is used to find the shortest path in a weighted graph with non-negative edges?", "opts": ["Dijkstra's Algorithm", "Kruskal's Algorithm", "DFS", "Topological Sort"], "ans": "Dijkstra's Algorithm"}
+    ],
+    'cloud': [
+        {"q": "Which Git command creates and switches to a new branch in one step?", "opts": ["git checkout -b <branch>", "git branch -d <branch>", "git merge <branch>", "git stash"], "ans": "git checkout -b <branch>"},
+        {"q": "What is a Docker container?", "opts": ["A lightweight standalone package containing app code and dependencies", "A physical bare-metal server", "A relational database engine", "A DNS load balancer"], "ans": "A lightweight standalone package containing app code and dependencies"},
+        {"q": "Which HTTP method is idempotent and typically used to update an entire resource in REST APIs?", "opts": ["PUT", "POST", "PATCH", "CONNECT"], "ans": "PUT"}
+    ],
+    'general': [
+        {"q": "Which data structure follows LIFO (Last-In, First-Out) order?", "opts": ["Stack", "Queue", "Linked List", "Graph"], "ans": "Stack"},
+        {"q": "What is the primary purpose of HTTPS over HTTP?", "opts": ["Encrypts communication using TLS/SSL", "Increases image resolution", "Compresses SQL queries", "Bypasses DNS lookup"], "ans": "Encrypts communication using TLS/SSL"},
+        {"q": "Which Git command uploads local committed changes to a remote repository?", "opts": ["git push", "git pull", "git clone", "git init"], "ans": "git push"},
+        {"q": "What is the time complexity of Merge Sort in the worst case?", "opts": ["O(n log n)", "O(n^2)", "O(n)", "O(log n)"], "ans": "O(n log n)"},
+        {"q": "In OOP, bundling data and methods operating on that data within a single unit is called:", "opts": ["Encapsulation", "Polymorphism", "Abstraction", "Inheritance"], "ans": "Encapsulation"}
     ]
 }
 
@@ -422,25 +488,78 @@ def apply(job_id):
         conn.close()
         return redirect(url_for('dashboard'))
 
-    cursor.execute('SELECT title, company, required_skills FROM internships WHERE id = ?', (job_id,))
+    cursor.execute('SELECT title, company, required_skills, custom_quiz FROM internships WHERE id = ?', (job_id,))
     job = cursor.fetchone()
     conn.close()
 
     if not job:
         return redirect(url_for('jobs'))
 
-    req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
-    selected_questions = []
+    # 1. Check if Admin added custom quiz questions for this specific internship/drive
+    custom_questions = []
+    try:
+        parsed = json.loads(job['custom_quiz'] or '[]')
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, dict) and item.get('q') and item.get('opts') and item.get('ans'):
+                    custom_questions.append(item)
+    except Exception:
+        custom_questions = []
 
-    for sk in req_skills:
-        for bank_key in QUIZ_QUESTION_BANK:
-            if bank_key in sk:
-                for q in QUIZ_QUESTION_BANK[bank_key]:
-                    if q not in selected_questions and len(selected_questions) < 3:
-                        selected_questions.append(q)
+    if custom_questions:
+        selected_questions = custom_questions
+    else:
+        # 2. Otherwise build a 5-question skill-matched screening quiz from QUIZ_QUESTION_BANK
+        req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
+        selected_questions = []
 
-    if not selected_questions:
-        selected_questions = QUIZ_QUESTION_BANK['python'][:2] + [QUIZ_QUESTION_BANK['sql'][0]]
+        skill_aliases = {
+            'js': 'javascript',
+            'node': 'javascript',
+            'flask': 'python',
+            'django': 'python',
+            'mysql': 'sql',
+            'postgres': 'sql',
+            'sqlite': 'sql',
+            'css': 'html',
+            'web': 'html',
+            'data structure': 'dsa',
+            'algorithm': 'dsa',
+            'docker': 'cloud',
+            'aws': 'cloud',
+            'git': 'cloud'
+        }
+
+        matched_keys = []
+        for sk in req_skills:
+            for bank_key in QUIZ_QUESTION_BANK:
+                if bank_key != 'general' and bank_key in sk and bank_key not in matched_keys:
+                    matched_keys.append(bank_key)
+            for alias, target_key in skill_aliases.items():
+                if alias in sk and target_key not in matched_keys:
+                    matched_keys.append(target_key)
+
+        # Round-robin across matched skill banks up to 5 questions
+        idx = 0
+        while len(selected_questions) < 5 and matched_keys:
+            added_in_round = False
+            for key in matched_keys:
+                bank_list = QUIZ_QUESTION_BANK.get(key, [])
+                if idx < len(bank_list):
+                    q_item = bank_list[idx]
+                    if q_item not in selected_questions and len(selected_questions) < 5:
+                        selected_questions.append(q_item)
+                        added_in_round = True
+            if not added_in_round:
+                break
+            idx += 1
+
+        # Pad up to 5 questions using core CS general bank if needed
+        for gq in QUIZ_QUESTION_BANK['general']:
+            if len(selected_questions) >= 5:
+                break
+            if gq not in selected_questions:
+                selected_questions.append(gq)
 
     return render_template('screening_quiz.html', job=job, job_id=job_id, questions=selected_questions)
 
@@ -1115,10 +1234,40 @@ def add_job():
             error = "Invalid Coordinator Passkey. Only authorized officers can post listings."
             return render_template('add_job.html', error=error)
 
+        # Parse custom screening quiz questions added by Admin (if any)
+        q_texts = request.form.getlist('q_text[]')
+        opt_as = request.form.getlist('opt_a[]')
+        opt_bs = request.form.getlist('opt_b[]')
+        opt_cs = request.form.getlist('opt_c[]')
+        opt_ds = request.form.getlist('opt_d[]')
+        correct_opts = request.form.getlist('correct_opt[]')
+
+        custom_questions = []
+        for i in range(len(q_texts)):
+            q_str = (q_texts[i] or '').strip()
+            oa = (opt_as[i] if i < len(opt_as) else '').strip()
+            ob = (opt_bs[i] if i < len(opt_bs) else '').strip()
+            oc = (opt_cs[i] if i < len(opt_cs) else '').strip()
+            od = (opt_ds[i] if i < len(opt_ds) else '').strip()
+            c_key = (correct_opts[i] if i < len(correct_opts) else 'A').strip().upper()
+
+            if q_str and oa and ob and oc and od:
+                opt_map = {'A': oa, 'B': ob, 'C': oc, 'D': od}
+                ans_text = opt_map.get(c_key, oa)
+                custom_questions.append({
+                    "q": q_str,
+                    "opts": [oa, ob, oc, od],
+                    "ans": ans_text
+                })
+
+        custom_quiz_json = json.dumps(custom_questions)
+
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO internships (title, company, required_skills, deadline) VALUES (?, ?, ?, ?)',
-                       (title, company, required_skills, deadline))
+        cursor.execute(
+            'INSERT INTO internships (title, company, required_skills, deadline, custom_quiz) VALUES (?, ?, ?, ?, ?)',
+            (title, company, required_skills, deadline, custom_quiz_json)
+        )
         conn.commit()
         conn.close()
         return redirect(url_for('jobs'))
