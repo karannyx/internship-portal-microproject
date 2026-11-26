@@ -23,62 +23,167 @@
         pointer-events: none;
     }
 
+    /* Clean Light-Grey Showcase Container */
+    .dev-cards-showcase {
+        background: #f3f4f8;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 1.75rem;
+    }
+
+    /* Predominantly White Developer Card */
     .dev-card {
         position: relative;
-        background: var(--card-bg) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 22px;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 20px;
         overflow: hidden;
+        box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(15, 23, 42, 0.04);
         transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .dev-card:hover {
-        transform: translateY(-6px);
-        border-color: rgba(139, 92, 246, 0.7) !important;
-        box-shadow: 0 20px 40px -14px rgba(124, 58, 237, 0.3);
+        transform: translateY(-5px);
+        border-color: rgba(124, 58, 237, 0.35) !important;
+        box-shadow: 0 22px 42px -14px rgba(37, 16, 82, 0.16), 0 6px 16px -6px rgba(15, 23, 42, 0.06);
     }
 
-    .dev-cover-strip {
-        height: 92px;
-        background: linear-gradient(135deg, #4c1d95, #7c3aed, #6366f1);
+    /* Dark Charcoal-Black to Deep Purple Gradient Header ONLY */
+    .dev-cover-header {
         position: relative;
+        height: 112px;
+        background: linear-gradient(125deg, #090914 0%, #17102D 54%, #251052 100%);
+        overflow: hidden;
     }
-    .dev-cover-strip-alt {
-        height: 92px;
-        background: linear-gradient(135deg, #312e81, #6d28d9, #0ea5e9);
-        position: relative;
+    .dev-cover-header::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 78% 20%, rgba(139, 92, 246, 0.16) 0%, transparent 58%);
+        pointer-events: none;
+    }
+    .dev-header-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        pointer-events: none;
     }
 
+    /* Overlapping Circular Profile Photo */
     .dev-avatar-wrap {
-        margin-top: -50px;
+        margin-top: -54px;
         position: relative;
-        z-index: 2;
+        z-index: 3;
         display: inline-block;
     }
     .dev-pfp {
-        width: 100px;
-        height: 100px;
+        width: 104px;
+        height: 104px;
         border-radius: 50%;
         object-fit: cover;
         object-position: top center;
-        border: 4px solid var(--card-bg);
-        background: var(--body-bg);
-        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+        border: 4px solid #ffffff;
+        background: #f8fafc;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.1);
     }
     .dev-monogram {
-        width: 100px;
-        height: 100px;
+        width: 104px;
+        height: 104px;
         border-radius: 50%;
-        border: 4px solid var(--card-bg);
-        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        border: 4px solid #ffffff;
+        background: linear-gradient(135deg, #17102D, #5b21b6);
         color: #ffffff;
         font-size: 2rem;
         font-weight: 800;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
     }
 
+    /* White Content Area Typography */
+    .dev-card-body {
+        background: #ffffff;
+        padding: 0 1.65rem 1.4rem;
+    }
+    .dev-name {
+        color: #0f172a !important;
+        font-size: 1.42rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.35rem;
+    }
+    .dev-meta {
+        color: #475569 !important;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+    .dev-meta i {
+        color: #2563eb;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Bottom Action Footer & Light-Grey Rounded Buttons */
+    .dev-card-footer {
+        background: #ffffff;
+        padding: 1rem 1.65rem 1.35rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+    .dev-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0.5rem 1.05rem;
+        border-radius: 11px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        text-decoration: none;
+        background: #f3f4f6;
+        border: 1px solid #e2e8f0;
+        color: #1e293b !important;
+        transition: all 0.18s ease;
+    }
+    .dev-action-btn i {
+        font-size: 0.95rem;
+    }
+    .dev-action-btn.btn-github i {
+        color: #111827;
+    }
+    .dev-action-btn.btn-linkedin i {
+        color: #0f172a;
+    }
+    .dev-action-btn.btn-email i {
+        color: #2563eb;
+    }
+    .dev-action-btn:hover {
+        background: #e9ecf3;
+        border-color: #cbd5e1;
+        color: #0f172a !important;
+        transform: translateY(-2px);
+    }
+    .dev-action-btn.btn-github:hover {
+        border-color: rgba(124, 58, 237, 0.45);
+    }
+    .dev-action-btn.btn-linkedin:hover {
+        border-color: #0284c7;
+    }
+    .dev-action-btn.btn-linkedin:hover i {
+        color: #0284c7;
+    }
+    .dev-action-btn.btn-email:hover {
+        border-color: #2563eb;
+    }
+
+    /* Mentor Acknowledgement Card */
     .social-pill-btn {
         display: inline-flex;
         align-items: center;
@@ -99,15 +204,6 @@
         color: var(--badge-text);
         transform: translateY(-2px);
     }
-    .social-pill-btn.github-btn:hover {
-        border-color: #a78bfa;
-    }
-    .social-pill-btn.linkedin-btn:hover {
-        border-color: #38bdf8;
-        color: #38bdf8;
-    }
-
-    /* Mentor Acknowledgement Card */
     .mentor-card {
         position: relative;
         background: var(--card-bg) !important;
@@ -144,9 +240,20 @@
         font-size: 1.65rem;
         flex-shrink: 0;
     }
+
+    @media (max-width: 575.98px) {
+        .dev-cards-showcase {
+            padding: 1rem;
+        }
+        .dev-card-body,
+        .dev-card-footer {
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+    }
 </style>
 
-<div class="container py-3" style="max-width: 1020px;">
+<div class="container py-3" style="max-width: 1080px;">
     <!-- Hero Header -->
     <div class="dev-hero-banner mb-4 text-center text-md-start">
         <div class="row align-items-center g-3">
@@ -155,7 +262,7 @@
                     <i class="bi bi-code-slash me-1"></i> The Creators Behind Skill2Career
                 </span>
                 <h1 class="h2 fw-bold mb-2" style="color: var(--text-heading);">
-                    Bridging the Gap Between Campus Talent & Tech Careers
+                    Bridging the Gap Between Campus Talent &amp; Tech Careers
                 </h1>
                 <p class="text-muted mb-0" style="font-size: 0.94rem;">
                     Crafted to simplify opportunity discovery, automate skill-based screening, and empower students with verified digital portfolios.
@@ -163,7 +270,7 @@
             </div>
             <div class="col-md-4 text-md-end">
                 <div class="d-inline-flex flex-wrap gap-1.5 justify-content-md-end">
-                    <span class="badge badge-skill">Python & Flask</span>
+                    <span class="badge badge-skill">Python &amp; Flask</span>
                     <span class="badge badge-skill">SQLite3</span>
                     <span class="badge badge-skill">Firebase Auth</span>
                     <span class="badge badge-skill">Bootstrap 5.3</span>
@@ -172,74 +279,195 @@
         </div>
     </div>
 
-    <!-- Developers Cards Grid -->
-    <div class="row g-4">
-        <!-- Developer 1: Karan Sahu -->
-        <div class="col-lg-6">
-            <div class="card dev-card h-100 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="dev-cover-strip"></div>
-                    <div class="px-4 pb-4">
-                        <div class="dev-avatar-wrap mb-3">
-                            <img src="/static/karan.jpg" alt="Karan Sahu" class="dev-pfp"
-                                 onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/karannyx.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
-                            <div class="dev-monogram" style="display: none;">KS</div>
+    <!-- Side-by-Side Developer Portfolio Cards Section -->
+    <div class="dev-cards-showcase">
+        <div class="row g-4">
+
+            <!-- Left Card: Karan Sahu -->
+            <div class="col-lg-6">
+                <div class="card dev-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Dark Gradient Tech Header -->
+                        <div class="dev-cover-header">
+                            <svg class="dev-header-svg" viewBox="0 0 520 112" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.15"/>
+                                        <stop offset="48%" stop-color="#a855f7" stop-opacity="0.55"/>
+                                        <stop offset="100%" stop-color="#6d28d9" stop-opacity="0.22"/>
+                                    </linearGradient>
+                                    <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6366f1" stop-opacity="0.08"/>
+                                        <stop offset="60%" stop-color="#c084fc" stop-opacity="0.32"/>
+                                        <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.1"/>
+                                    </linearGradient>
+                                    <filter id="softGlow1" x="-10%" y="-20%" width="120%" height="140%">
+                                        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                                        <feMerge>
+                                            <feMergeNode in="blur"/>
+                                            <feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <!-- Subtle Diagonal Circuit-Board Patterns (Top-Left Corner) -->
+                                <g stroke="#8b5cf6" stroke-width="1.15" stroke-opacity="0.22" fill="none">
+                                    <path d="M-8,38 L30,0 M-8,54 L46,0 M-8,70 L62,0 M8,72 L42,38 L70,38"/>
+                                    <circle cx="70" cy="38" r="2.2" fill="#a855f7" fill-opacity="0.32" stroke="none"/>
+                                    <circle cx="42" cy="38" r="1.6" fill="#8b5cf6" fill-opacity="0.28" stroke="none"/>
+                                    <path d="M22,86 L54,54 L88,54"/>
+                                    <circle cx="88" cy="54" r="2" fill="#a855f7" fill-opacity="0.25" stroke="none"/>
+                                </g>
+
+                                <!-- Small Dotted Texture Pattern -->
+                                <g fill="#a78bfa" fill-opacity="0.2">
+                                    <circle cx="242" cy="18" r="1.2"/><circle cx="254" cy="18" r="1.2"/><circle cx="266" cy="18" r="1.2"/><circle cx="278" cy="18" r="1.2"/>
+                                    <circle cx="242" cy="30" r="1.2"/><circle cx="254" cy="30" r="1.2"/><circle cx="266" cy="30" r="1.2"/><circle cx="278" cy="30" r="1.2"/>
+                                    <circle cx="242" cy="42" r="1.2"/><circle cx="254" cy="42" r="1.2"/><circle cx="266" cy="42" r="1.2"/><circle cx="278" cy="42" r="1.2"/>
+                                </g>
+
+                                <!-- Flowing Neon-Purple Wave Lines -->
+                                <path d="M0,98 C88,68 158,114 258,82 C345,54 422,96 520,56" fill="none" stroke="url(#waveGrad1)" stroke-width="2" filter="url(#softGlow1)"/>
+                                <path d="M0,108 C110,82 190,116 292,76 C375,44 445,86 520,38" fill="none" stroke="url(#waveGrad2)" stroke-width="1.4"/>
+                                <path d="M0,84 C115,112 215,62 328,94 C415,118 468,84 520,74" fill="none" stroke="#8b5cf6" stroke-opacity="0.16" stroke-width="1.1"/>
+
+                                <!-- Minimal Purple Programming Symbol </> -->
+                                <text x="330" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="23" font-weight="700" fill="#a855f7" fill-opacity="0.48" letter-spacing="1">&lt;/&gt;</text>
+
+                                <!-- Subtle Minimalist Laptop / Code Illustration (Right Side) -->
+                                <g transform="translate(402, 16) rotate(4)" opacity="0.34">
+                                    <!-- Laptop Screen Frame -->
+                                    <rect x="6" y="4" width="84" height="54" rx="5" fill="#17102D" stroke="#a855f7" stroke-width="1.35"/>
+                                    <rect x="11" y="9" width="74" height="44" rx="2.5" fill="#090914" stroke="#7c3aed" stroke-width="0.7" stroke-opacity="0.6"/>
+                                    <!-- Code Lines inside Screen -->
+                                    <line x1="17" y1="17" x2="40" y2="17" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round"/>
+                                    <line x1="23" y1="24" x2="62" y2="24" stroke="#8b5cf6" stroke-width="1.6" stroke-linecap="round"/>
+                                    <line x1="23" y1="31" x2="54" y2="31" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+                                    <line x1="29" y1="38" x2="72" y2="38" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round"/>
+                                    <line x1="17" y1="45" x2="46" y2="45" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round"/>
+                                    <!-- Laptop Keyboard Base -->
+                                    <polygon points="4,61 92,61 102,75 -6,75" fill="#17102D" stroke="#a855f7" stroke-width="1.25" stroke-linejoin="round"/>
+                                    <line x1="34" y1="68" x2="62" y2="68" stroke="#8b5cf6" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.7"/>
+                                </g>
+                            </svg>
                         </div>
 
-                        <h4 class="fw-bold mb-1" style="color: var(--text-heading);">Karan Sahu</h4>
-                        <p class="small text-muted fw-semibold mb-0">
-                            <i class="bi bi-mortarboard-fill text-primary me-1"></i> B.Tech Computer Science & Engineering &bull; MITS Gwalior
-                        </p>
+                        <!-- White Content Area -->
+                        <div class="dev-card-body">
+                            <div class="dev-avatar-wrap mb-3">
+                                <img src="/static/karan.jpg" alt="Karan Sahu" class="dev-pfp"
+                                     onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/karannyx.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
+                                <div class="dev-monogram" style="display: none;">KS</div>
+                            </div>
+
+                            <h4 class="dev-name">Karan Sahu</h4>
+                            <p class="dev-meta">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                <span>B.Tech Computer Science &amp; Engineering &bull; MITS Gwalior</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Buttons -->
+                    <div class="dev-card-footer">
+                        <a href="https://github.com/karannyx" target="_blank" rel="noopener noreferrer" class="dev-action-btn btn-github">
+                            <i class="bi bi-github"></i> GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/karannyx" target="_blank" rel="noopener noreferrer" class="dev-action-btn btn-linkedin">
+                            <i class="bi bi-linkedin"></i> LinkedIn
+                        </a>
+                        <a href="mailto:karansahu1594@gmail.com" class="dev-action-btn btn-email">
+                            <i class="bi bi-envelope-fill"></i> Email
+                        </a>
                     </div>
                 </div>
-
-                <!-- Social & Contact Links -->
-                <div class="px-4 py-3 border-top d-flex flex-wrap gap-2" style="border-color: var(--border-color) !important;">
-                    <a href="https://github.com/karannyx" target="_blank" rel="noopener noreferrer" class="social-pill-btn github-btn">
-                        <i class="bi bi-github"></i> GitHub
-                    </a>
-                    <a href="https://www.linkedin.com/in/karannyx" target="_blank" rel="noopener noreferrer" class="social-pill-btn linkedin-btn">
-                        <i class="bi bi-linkedin"></i> LinkedIn
-                    </a>
-                    <a href="mailto:karansahu1594@gmail.com" class="social-pill-btn">
-                        <i class="bi bi-envelope-fill text-primary"></i> Email
-                    </a>
-                </div>
             </div>
-        </div>
 
-        <!-- Developer 2: Yuvraj Yadav -->
-        <div class="col-lg-6">
-            <div class="card dev-card h-100 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="dev-cover-strip-alt"></div>
-                    <div class="px-4 pb-4">
-                        <div class="dev-avatar-wrap mb-3">
-                            <img src="/static/yuvraj.jpg" alt="Yuvraj Yadav" class="dev-pfp"
-                                 onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/yyadavind.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
-                            <div class="dev-monogram" style="display: none;">YY</div>
+            <!-- Right Card: Yuvraj Yadav -->
+            <div class="col-lg-6">
+                <div class="card dev-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Dark Gradient Tech Header -->
+                        <div class="dev-cover-header">
+                            <svg class="dev-header-svg" viewBox="0 0 520 112" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6d28d9" stop-opacity="0.16"/>
+                                        <stop offset="52%" stop-color="#c084fc" stop-opacity="0.55"/>
+                                        <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.24"/>
+                                    </linearGradient>
+                                    <linearGradient id="waveGrad4" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.1"/>
+                                        <stop offset="55%" stop-color="#a855f7" stop-opacity="0.3"/>
+                                        <stop offset="100%" stop-color="#4c1d95" stop-opacity="0.12"/>
+                                    </linearGradient>
+                                    <filter id="softGlow2" x="-10%" y="-20%" width="120%" height="140%">
+                                        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                                        <feMerge>
+                                            <feMergeNode in="blur"/>
+                                            <feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <!-- Subtle Diagonal Circuit-Board Patterns (Top-Left Corner) -->
+                                <g stroke="#8b5cf6" stroke-width="1.15" stroke-opacity="0.22" fill="none">
+                                    <path d="M-8,38 L30,0 M-8,54 L46,0 M-8,70 L62,0 M10,74 L44,40 L76,40"/>
+                                    <circle cx="76" cy="40" r="2.2" fill="#a855f7" fill-opacity="0.32" stroke="none"/>
+                                    <circle cx="44" cy="40" r="1.6" fill="#8b5cf6" fill-opacity="0.28" stroke="none"/>
+                                    <path d="M26,88 L58,56 L92,56"/>
+                                    <circle cx="92" cy="56" r="2" fill="#a855f7" fill-opacity="0.25" stroke="none"/>
+                                </g>
+
+                                <!-- Flowing Neon-Purple Wave Lines -->
+                                <path d="M0,78 C95,112 182,88 264,34 C332,-10 426,28 520,8" fill="none" stroke="url(#waveGrad3)" stroke-width="2" filter="url(#softGlow2)"/>
+                                <path d="M0,92 C108,116 205,74 295,28 C372,-12 448,38 520,24" fill="none" stroke="url(#waveGrad4)" stroke-width="1.4"/>
+                                <path d="M180,112 C285,78 395,108 520,66" fill="none" stroke="#8b5cf6" stroke-opacity="0.22" stroke-width="1.3"/>
+
+                                <!-- Minimal Purple Programming Symbol </> -->
+                                <text x="386" y="68" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="700" fill="#a855f7" fill-opacity="0.52" letter-spacing="1">&lt;/&gt;</text>
+
+                                <!-- Clean Dotted Grid Texture (Top-Right Corner) -->
+                                <g fill="#c4b5fd" fill-opacity="0.24">
+                                    <circle cx="446" cy="18" r="1.5"/><circle cx="459" cy="18" r="1.5"/><circle cx="472" cy="18" r="1.5"/><circle cx="485" cy="18" r="1.5"/><circle cx="498" cy="18" r="1.5"/>
+                                    <circle cx="446" cy="31" r="1.5"/><circle cx="459" cy="31" r="1.5"/><circle cx="472" cy="31" r="1.5"/><circle cx="485" cy="31" r="1.5"/><circle cx="498" cy="31" r="1.5"/>
+                                    <circle cx="446" cy="44" r="1.5"/><circle cx="459" cy="44" r="1.5"/><circle cx="472" cy="44" r="1.5"/><circle cx="485" cy="44" r="1.5"/><circle cx="498" cy="44" r="1.5"/>
+                                    <circle cx="446" cy="57" r="1.5"/><circle cx="459" cy="57" r="1.5"/><circle cx="472" cy="57" r="1.5"/><circle cx="485" cy="57" r="1.5"/><circle cx="498" cy="57" r="1.5"/>
+                                </g>
+                            </svg>
                         </div>
 
-                        <h4 class="fw-bold mb-1" style="color: var(--text-heading);">Yuvraj Yadav</h4>
-                        <p class="small text-muted fw-semibold mb-0">
-                            <i class="bi bi-mortarboard-fill text-primary me-1"></i> B.Tech Computer Science & Engineering &bull; MITS Gwalior
-                        </p>
+                        <!-- White Content Area -->
+                        <div class="dev-card-body">
+                            <div class="dev-avatar-wrap mb-3">
+                                <img src="/static/yuvraj.jpg" alt="Yuvraj Yadav" class="dev-pfp"
+                                     onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://github.com/yyadavind.png';}else{this.style.display='none';this.nextElementSibling.style.display='inline-flex';}">
+                                <div class="dev-monogram" style="display: none;">YY</div>
+                            </div>
+
+                            <h4 class="dev-name">Yuvraj Yadav</h4>
+                            <p class="dev-meta">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                <span>B.Tech Computer Science &amp; Engineering &bull; MITS Gwalior</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Buttons -->
+                    <div class="dev-card-footer">
+                        <a href="https://github.com/yyadavind" target="_blank" rel="noopener noreferrer" class="dev-action-btn btn-github">
+                            <i class="bi bi-github"></i> GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/yuvraj-yadav-436579403" target="_blank" rel="noopener noreferrer" class="dev-action-btn btn-linkedin">
+                            <i class="bi bi-linkedin"></i> LinkedIn
+                        </a>
+                        <a href="mailto:yuvraj14jhs@gmail.com" class="dev-action-btn btn-email">
+                            <i class="bi bi-envelope-fill"></i> Email
+                        </a>
                     </div>
                 </div>
-
-                <!-- Social & Contact Links -->
-                <div class="px-4 py-3 border-top d-flex flex-wrap gap-2" style="border-color: var(--border-color) !important;">
-                    <a href="https://github.com/yyadavind" target="_blank" rel="noopener noreferrer" class="social-pill-btn github-btn">
-                        <i class="bi bi-github"></i> GitHub
-                    </a>
-                    <a href="https://www.linkedin.com/in/yuvraj-yadav-436579403" target="_blank" rel="noopener noreferrer" class="social-pill-btn linkedin-btn">
-                        <i class="bi bi-linkedin"></i> LinkedIn
-                    </a>
-                    <a href="mailto:yuvraj14jhs@gmail.com" class="social-pill-btn">
-                        <i class="bi bi-envelope-fill text-primary"></i> Email
-                    </a>
-                </div>
             </div>
+
         </div>
     </div>
 
@@ -252,11 +480,11 @@
                 </div>
                 <div>
                     <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2.5 py-1 small fw-semibold mb-1">
-                        <i class="bi bi-stars me-1"></i> Project Mentor & Faculty Guide
+                        <i class="bi bi-stars me-1"></i> Project Mentor &amp; Faculty Guide
                     </span>
                     <h5 class="fw-bold mb-1" style="color: var(--text-heading);">Dr. Ranjeet Kumar Singh</h5>
                     <p class="small text-muted mb-0">
-                        Department of Computer Science & Engineering &bull; Madhav Institute of Technology & Science (MITS), Gwalior
+                        Department of Computer Science &amp; Engineering &bull; Madhav Institute of Technology &amp; Science (MITS), Gwalior
                     </p>
                 </div>
             </div>
