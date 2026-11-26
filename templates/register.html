@@ -5,7 +5,7 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card card-custom p-5">
+            <div class="card card-custom p-4 p-md-5">
                 <h3 class="fw-bold text-center mb-1">Create Student Account</h3>
                 <p class="text-muted text-center small mb-4">Register your skills with Firebase Auth</p>
 
@@ -28,11 +28,35 @@
                         <label class="form-label fw-semibold small">Secure Password</label>
                         <input type="password" id="password" class="form-control" placeholder="••••••••" required>
                     </div>
-                    <button type="submit" id="regBtn" class="btn btn-primary-custom w-100 mb-3">Create Account</button>
-                    <div class="text-center small">
-                        Already have an account? <a href="/login" class="text-decoration-none fw-bold">Sign In</a>
-                    </div>
+                    <button type="submit" id="regBtn" class="btn btn-primary-custom w-100 py-2 fw-semibold"
+                            style="background: linear-gradient(135deg, #4f46e5, #6366f1); color: #ffffff; border: none; border-radius: 10px;">
+                        Create Account
+                    </button>
                 </form>
+
+                <!-- Divider -->
+                <div class="d-flex align-items-center my-3">
+                    <hr class="flex-grow-1" style="border-color: var(--border-color);">
+                    <span class="px-2 small text-muted fw-semibold">OR</span>
+                    <hr class="flex-grow-1" style="border-color: var(--border-color);">
+                </div>
+
+                <!-- Continue with Google Button -->
+                <button type="button" id="googleSignupBtn"
+                        class="btn w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 mb-3"
+                        style="background: var(--body-bg); border: 1px solid var(--border-color); color: var(--text-heading); border-radius: 10px;">
+                    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <div class="text-center small">
+                    Already have an account? <a href="/login" class="text-decoration-none fw-bold">Sign In</a>
+                </div>
             </div>
         </div>
     </div>
@@ -40,7 +64,12 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup
+  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD9BTtt9e8xNLjgZZg3onbVmpauo9S5y5c",
@@ -54,7 +83,10 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
+  // 1. Email & Password Register
   document.getElementById('regForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value;
@@ -68,7 +100,7 @@
       errBox.classList.add('d-none');
 
       createUserWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
+          .then(() => {
               fetch('/sync_firebase', {
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},
@@ -80,6 +112,44 @@
               errBox.innerHTML = error.message.replace("Firebase: ", "");
               errBox.classList.remove('d-none');
           });
+  });
+
+  // 2. 1-Click Google Sign Up / Sign In
+  document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+      const gBtn = document.getElementById('googleSignupBtn');
+      const errBox = document.getElementById('errorMessage');
+      gBtn.disabled = true;
+      errBox.classList.add('d-none');
+
+      try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          const response = await fetch('/google_login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  name: user.displayName || user.email.split('@')[0],
+                  email: user.email,
+                  photo_url: user.photoURL || ''
+              })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+              window.location.href = data.redirect || '/dashboard';
+          } else {
+              errBox.innerHTML = data.error || "Google sign-up failed.";
+              errBox.classList.remove('d-none');
+              gBtn.disabled = false;
+          }
+      } catch (error) {
+          if (error.code !== "auth/popup-closed-by-user") {
+              errBox.innerHTML = error.message.replace("Firebase: ", "");
+              errBox.classList.remove('d-none');
+          }
+          gBtn.disabled = false;
+      }
   });
 </script>
 {% endblock %}
