@@ -1,40 +1,74 @@
 {% extends "base.html" %}
+{% block title %}T&P Master Control Panel | Skill2Career{% endblock %}
 
-{% block title %}T&P Master Admin Panel | Skill2Career{% endblock %}
-
-{% block head %}
+{% block content %}
 <style>
     .admin-hero {
-        background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.18), transparent 55%), var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 20px;
-        padding: 1.65rem;
-        box-shadow: var(--card-shadow);
-    }
-
-    .admin-kpi-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 1.15rem 1.25rem;
+        border-radius: 22px;
+        padding: 1.75rem 2rem;
         box-shadow: var(--card-shadow);
-        transition: transform 0.18s ease;
+        position: relative;
+        overflow: hidden;
     }
-
-    .admin-kpi-card:hover {
+    .admin-hero::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -5%;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .btn-post-drive {
+        background: linear-gradient(135deg, #6366f1, #7c3aed);
+        border: none;
+        color: #ffffff !important;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 0.55rem 1.15rem;
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.28);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .btn-post-drive:hover {
         transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(99, 102, 241, 0.36);
+        color: #ffffff !important;
     }
-
-    .kpi-icon-box {
-        width: 42px;
-        height: 42px;
+    .stat-card-admin {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 1.25rem 1.4rem;
+        box-shadow: var(--card-shadow);
+    }
+    .stat-icon-box {
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
     }
-
+    .admin-tab-btn {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-heading);
+        border-radius: 12px;
+        padding: 0.52rem 1rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: all 0.18s ease;
+    }
+    .admin-tab-btn.active {
+        background: linear-gradient(135deg, #6366f1, #7c3aed);
+        border-color: transparent;
+        color: #ffffff !important;
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+    }
     .admin-table-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
@@ -42,134 +76,86 @@
         overflow: hidden;
         box-shadow: var(--card-shadow);
     }
-
-    .admin-table-card .table {
-        margin-bottom: 0;
-        color: var(--text-heading);
-    }
-
-    .admin-table-card .table thead th {
-        background: rgba(139, 92, 246, 0.08);
+    .admin-table thead th {
+        background: var(--body-bg);
         color: var(--text-muted);
-        font-size: 0.76rem;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
+        font-size: 0.75rem;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.85rem 1rem;
         border-bottom: 1px solid var(--border-color);
-        padding: 0.9rem 1rem;
     }
-
-    .admin-table-card .table tbody td {
+    .admin-table tbody td {
         padding: 0.9rem 1rem;
-        border-bottom: 1px solid var(--border-color);
         vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-heading);
         font-size: 0.88rem;
-    }
-
-    .admin-pills .nav-link {
-        color: var(--text-muted);
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 11px;
-        font-weight: 600;
-        font-size: 0.88rem;
-        padding: 0.55rem 1rem;
-        transition: all 0.18s ease;
-    }
-
-    .admin-pills .nav-link.active {
-        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-        color: #ffffff;
-        border-color: transparent;
-        box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
-    }
-
-    .lock-card {
-        max-width: 440px;
-        margin: 4rem auto;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 22px;
-        padding: 2.2rem;
-        box-shadow: var(--card-shadow);
-    }
-
-    .lock-shield-circle {
-        width: 64px;
-        height: 64px;
-        border-radius: 18px;
-        background: rgba(139, 92, 246, 0.16);
-        border: 1px solid rgba(139, 92, 246, 0.35);
-        color: #a78bfa;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-    }
-
-    .schedule-slot-box {
-        background: rgba(139, 92, 246, 0.08);
-        border: 1px dashed rgba(139, 92, 246, 0.4);
-        border-radius: 10px;
-        padding: 0.55rem;
-        margin-top: 0.5rem;
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container py-3" style="max-width: 1360px;">
-
-    {% if not is_admin %}
-    <!-- T&P Coordinator Passkey Lock Screen -->
-    <div class="lock-card text-center">
-        <div class="lock-shield-circle mb-3">
-            <i class="bi bi-shield-lock-fill"></i>
-        </div>
-        <h3 class="fw-bold mb-1">T&amp;P Coordinator Access</h3>
-        <p class="text-muted small mb-4">
-            Restricted portal for MITS Gwalior Training &amp; Placement Officers. Enter master passkey to unlock live database &amp; shortlisting controls.
-        </p>
-
-        {% if error %}
-        <div class="alert alert-danger py-2 px-3 small rounded-3 text-start d-flex align-items-center gap-2 mb-3">
-            <i class="bi bi-exclamation-octagon-fill"></i>
-            <span>{{ error }}</span>
-        </div>
-        {% endif %}
-
-        <form method="POST" action="{{ url_for('admin_panel') }}">
-            <div class="mb-3 text-start">
-                <label class="form-label small fw-semibold text-muted">Coordinator Passkey</label>
-                <input type="password" name="admin_pin" class="form-control form-control-lg rounded-3" placeholder="Enter T&P Passkey..." required autofocus style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
+{% if not is_admin %}
+<!-- Coordinator Passkey Gate -->
+<div class="container py-5" style="max-width: 440px;">
+    <div class="card border-0 rounded-4 overflow-hidden" style="background: var(--card-bg); border: 1px solid var(--border-color) !important; box-shadow: var(--card-shadow);">
+        <div style="height: 6px; background: linear-gradient(90deg, #4f46e5, #7c3aed, #10b981);"></div>
+        <div class="p-4 p-md-5 text-center">
+            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-4"
+                 style="width: 56px; height: 56px; background: rgba(99, 102, 241, 0.14); color: #6366f1; font-size: 1.5rem;">
+                <i class="bi bi-shield-lock-fill"></i>
             </div>
-            <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold rounded-3">
-                <i class="bi bi-unlock-fill me-1"></i> Unlock Master Panel
-            </button>
-        </form>
-    </div>
+            <h1 class="h4 fw-bold mb-1" style="color: var(--text-heading);">T&amp;P Coordinator Access</h1>
+            <p class="small text-muted mb-4">Enter authorized placement cell passkey to manage drives, quizzes &amp; applicants.</p>
 
-    {% else %}
-    <!-- Unlocked T&P Master Control Panel -->
+            {% if error %}
+            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                <i class="bi bi-exclamation-circle-fill me-1"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin_panel') }}">
+                <div class="mb-3 text-start">
+                    <label class="form-label small fw-semibold" style="color: var(--text-heading);">Coordinator Passkey</label>
+                    <input type="password" name="admin_pin" class="form-control"
+                           placeholder="Enter passkey (admin2026)" required autofocus
+                           style="background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading); border-radius: 11px; padding: 0.65rem 0.9rem;">
+                </div>
+                <button type="submit" class="btn btn-post-drive w-100 py-2.5">
+                    <i class="bi bi-unlock-fill me-1"></i> Unlock Control Panel
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Unlocked T&P Master Control Panel -->
+<div class="container py-3" style="max-width: 1220px;">
+    <!-- Top Header Banner -->
     <div class="admin-hero mb-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
             <div>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small fw-semibold">
                         <i class="bi bi-database-check me-1"></i> Live Cloud SQLite Connected
                     </span>
-                    <span id="adminAutoLockBadge" class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 small">
-                        <i class="bi bi-hourglass-split me-1"></i> Auto-Lock: <span id="lockCountdown">05:00</span>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 small fw-semibold">
+                        <i class="bi bi-hourglass-split me-1"></i> Auto-Lock: <span id="lockTimer">04:59</span>
                     </span>
                 </div>
-                <h2 class="fw-bold mb-1">T&amp;P Master Control Panel</h2>
-                <p class="text-muted small mb-0">
-                    Real-time student registry, 1-click shortlisting, interview slot scheduler, official PDF letters &amp; CSV exports
+                <h1 class="h3 fw-bold mb-1" style="color: var(--text-heading);">T&amp;P Master Control Panel</h1>
+                <p class="small text-muted mb-0">
+                    Publish campus drives with custom quizzes, manage student registry, schedule interviews &amp; export CSVs
                 </p>
             </div>
 
+            <!-- Action Buttons (Includes + Post New Drive) -->
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <a href="{{ url_for('admin_export_csv', export_type='students') }}" class="btn btn-sm btn-outline-info rounded-3 px-3 py-2 fw-semibold">
+                <a href="{{ url_for('add_job') }}" class="btn btn-sm btn-post-drive d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-plus-circle"></i> Post New Drive
+                </a>
+                <a href="{{ url_for('admin_export_csv', export_type='students') }}" class="btn btn-sm btn-outline-primary rounded-3 px-3 py-2 fw-semibold">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Students CSV
                 </a>
                 <a href="{{ url_for('admin_export_csv', export_type='applications') }}" class="btn btn-sm btn-outline-success rounded-3 px-3 py-2 fw-semibold">
@@ -182,403 +168,372 @@
         </div>
     </div>
 
-    <!-- 4 KPI Cards -->
+    <!-- 4 Telemetry Stat Cards -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
-            <div class="admin-kpi-card d-flex align-items-center gap-3">
-                <div class="kpi-icon-box" style="background: rgba(139, 92, 246, 0.16); color: #a78bfa;">
+            <div class="stat-card-admin d-flex align-items-center gap-3">
+                <div class="stat-icon-box" style="background: rgba(99, 102, 241, 0.14); color: #6366f1;">
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">Registered Students</div>
-                    <div class="fs-4 fw-bold">{{ students|length }}</div>
+                    <div class="small text-muted fw-semibold">Registered Students</div>
+                    <div class="h4 fw-bold mb-0" style="color: var(--text-heading);">{{ students|length }}</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="admin-kpi-card d-flex align-items-center gap-3">
-                <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.16); color: #34d399;">
+            <div class="stat-card-admin d-flex align-items-center gap-3">
+                <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.14); color: #10b981;">
                     <i class="bi bi-send-check-fill"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">Total Applications</div>
-                    <div class="fs-4 fw-bold">{{ applications|length }}</div>
+                    <div class="small text-muted fw-semibold">Total Applications</div>
+                    <div class="h4 fw-bold mb-0" style="color: var(--text-heading);">{{ applications|length }}</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="admin-kpi-card d-flex align-items-center gap-3">
-                <div class="kpi-icon-box" style="background: rgba(56, 189, 248, 0.16); color: #38bdf8;">
+            <div class="stat-card-admin d-flex align-items-center gap-3">
+                <div class="stat-icon-box" style="background: rgba(14, 165, 233, 0.14); color: #0ea5e9;">
                     <i class="bi bi-building-check"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">Active Drives</div>
-                    <div class="fs-4 fw-bold">{{ drives|length }}</div>
+                    <div class="small text-muted fw-semibold">Active Drives</div>
+                    <div class="h4 fw-bold mb-0" style="color: var(--text-heading);">{{ drives|length }}</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="admin-kpi-card d-flex align-items-center gap-3">
-                <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.16); color: #fbbf24;">
+            <div class="stat-card-admin d-flex align-items-center gap-3">
+                <div class="stat-icon-box" style="background: rgba(245, 158, 11, 0.14); color: #f59e0b;">
                     <i class="bi bi-file-earmark-person-fill"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">ATS Resumes Built</div>
-                    <div class="fs-4 fw-bold">{{ resumes|length }}</div>
+                    <div class="small text-muted fw-semibold">ATS Resumes Built</div>
+                    <div class="h4 fw-bold mb-0" style="color: var(--text-heading);">{{ resumes|length }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Global Search & Navigation Tabs -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-        <ul class="nav nav-pills admin-pills gap-2" id="adminTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="apps-tab" data-bs-toggle="pill" data-bs-target="#apps-pane" type="button" role="tab">
-                    <i class="bi bi-check2-square me-1"></i> Applications ({{ applications|length }})
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="students-tab" data-bs-toggle="pill" data-bs-target="#students-pane" type="button" role="tab">
-                    <i class="bi bi-person-lines-fill me-1"></i> Students ({{ students|length }})
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="drives-tab" data-bs-toggle="pill" data-bs-target="#drives-pane" type="button" role="tab">
-                    <i class="bi bi-briefcase me-1"></i> Campus Drives ({{ drives|length }})
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="resumes-tab" data-bs-toggle="pill" data-bs-target="#resumes-pane" type="button" role="tab">
-                    <i class="bi bi-file-text me-1"></i> ATS Resumes ({{ resumes|length }})
-                </button>
-            </li>
-        </ul>
+    <!-- Navigation Tabs + Live Search -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-3">
+        <div class="d-flex flex-wrap gap-2" id="adminTabs">
+            <button type="button" class="admin-tab-btn active" data-target="tab-applications">
+                <i class="bi bi-check2-square me-1"></i> Applications ({{ applications|length }})
+            </button>
+            <button type="button" class="admin-tab-btn" data-target="tab-students">
+                <i class="bi bi-people me-1"></i> Students ({{ students|length }})
+            </button>
+            <button type="button" class="admin-tab-btn" data-target="tab-drives">
+                <i class="bi bi-briefcase me-1"></i> Campus Drives ({{ drives|length }})
+            </button>
+            <button type="button" class="admin-tab-btn" data-target="tab-resumes">
+                <i class="bi bi-file-text me-1"></i> ATS Resumes ({{ resumes|length }})
+            </button>
+        </div>
 
-        <div style="min-width: 280px; flex: 1; max-width: 380px;">
-            <div class="input-group">
-                <span class="input-group-text" style="background: var(--card-bg); border-color: var(--border-color); color: var(--text-muted);">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="adminSearchInput" onkeyup="filterAdminTables()" class="form-control" placeholder="Filter by student, skill, company, or status..." style="background: var(--card-bg); border-color: var(--border-color); color: var(--text-heading);">
-            </div>
+        <div class="input-group" style="max-width: 340px;">
+            <span class="input-group-text border-end-0" style="background: var(--card-bg); border-color: var(--border-color); color: var(--text-muted);">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="adminSearchInput" class="form-control border-start-0"
+                   placeholder="Filter by student, skill, company, or status..."
+                   style="background: var(--card-bg); border-color: var(--border-color); color: var(--text-heading); font-size: 0.88rem;">
         </div>
     </div>
 
-    <!-- Tab Panes -->
-    <div class="tab-content">
-
-        <!-- 1. APPLICATIONS TAB (With Interview Date/Time Scheduler & Official Letter) -->
-        <div class="tab-pane fade show active" id="apps-pane" role="tabpanel">
-            <div class="admin-table-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle admin-filter-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Candidate</th>
-                                <th>Company &amp; Role</th>
-                                <th>Quiz</th>
-                                <th>Status &amp; Scheduled Slot</th>
-                                <th>Shortlist / Interview Scheduler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for a in applications %}
-                            <tr>
-                                <td class="text-muted fw-semibold">#{{ a.id }}</td>
+    <!-- TAB 1: APPLICATIONS -->
+    <div class="admin-tab-pane" id="tab-applications">
+        <div class="admin-table-card">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Candidate</th>
+                            <th>Company &amp; Role</th>
+                            <th>Quiz</th>
+                            <th>Status &amp; Scheduled Slot</th>
+                            <th>Shortlist / Interview Scheduler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if applications %}
+                            {% for app in applications %}
+                            <tr class="searchable-row">
+                                <td class="fw-bold text-muted">#{{ app.id }}</td>
                                 <td>
-                                    <div class="fw-bold">{{ a.student_name or 'Registered Student' }}</div>
-                                    <div class="text-muted small">{{ a.student_email }}</div>
+                                    <div class="fw-bold">{{ app.student_name or 'Student' }}</div>
+                                    <div class="small text-muted">{{ app.student_email }}</div>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold">{{ a.job_title or 'Campus Opening' }}</div>
-                                    <div class="text-muted small">{{ a.company or 'Partner Org' }}</div>
+                                    <div class="fw-semibold">{{ app.job_title }}</div>
+                                    <div class="small text-primary">{{ app.company }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1 rounded-pill">
-                                        {{ a.quiz_score or 'N/A' }}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2.5 py-1">
+                                        {{ app.quiz_score }}
                                     </span>
                                 </td>
                                 <td>
-                                    {% if a.status in ['Shortlisted', 'Selected'] %}
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
-                                    {% elif a.status == 'Interview Scheduled' %}
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
-                                        {% if a.formatted_date or a.formatted_time %}
-                                        <div class="small text-info fw-semibold mt-1">
-                                            <i class="bi bi-calendar-event me-1"></i>{{ a.formatted_date }} {% if a.formatted_time %}&bull; {{ a.formatted_time }}{% endif %}
-                                        </div>
-                                        {% endif %}
-                                        {% if a.interview_venue %}
-                                        <div class="text-muted" style="font-size: 0.75rem;">
-                                            <i class="bi bi-geo-alt me-1"></i>{{ a.interview_venue }}
-                                        </div>
-                                        {% endif %}
-                                    {% elif a.status == 'Rejected' %}
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill">{{ a.status }}</span>
-                                    {% else %}
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1 rounded-pill">{{ a.status or 'Under Review' }}</span>
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold
+                                        {% if app.status in ['Shortlisted', 'Selected'] %}bg-success-subtle text-success border border-success-subtle
+                                        {% elif app.status == 'Interview Scheduled' %}bg-primary-subtle text-primary border border-primary-subtle
+                                        {% elif app.status == 'Rejected' %}bg-danger-subtle text-danger border border-danger-subtle
+                                        {% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                        {{ app.status }}
+                                    </span>
+                                    {% if app.formatted_date or app.interview_venue %}
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-calendar-event me-1"></i>{{ app.formatted_date }} {{ app.formatted_time }}
+                                        {% if app.interview_venue %} &bull; {{ app.interview_venue }}{% endif %}
+                                    </div>
+                                    {% endif %}
+                                    {% if app.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
+                                    <div class="mt-1">
+                                        <a href="{{ url_for('shortlist_letter', app_id=app.id) }}" target="_blank" class="small fw-semibold text-decoration-none">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Official Letter
+                                        </a>
+                                    </div>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form method="POST" action="{{ url_for('admin_update_status', app_id=a.id) }}">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <select name="status" onchange="toggleSlotBox(this, 'slot-box-{{ a.id }}')" class="form-select form-select-sm rounded-3" style="max-width: 170px; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
-                                                <option value="Under Review" {% if a.status == 'Under Review' %}selected{% endif %}>Under Review</option>
-                                                <option value="Shortlisted" {% if a.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
-                                                <option value="Interview Scheduled" {% if a.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
-                                                <option value="Selected" {% if a.status == 'Selected' %}selected{% endif %}>Selected</option>
-                                                <option value="Rejected" {% if a.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                                            </select>
-
-                                            <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
-                                                Save
-                                            </button>
-
-                                            {% if a.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}
-                                            <a href="{{ url_for('shortlist_letter', app_id=a.id) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-3 px-2.5 fw-semibold" title="View Official PDF Letter">
-                                                <i class="bi bi-file-earmark-check"></i> Letter
-                                            </a>
-                                            {% endif %}
-                                        </div>
-
-                                        <!-- Inline Interview Date, Time & Venue Drafter -->
-                                        <div id="slot-box-{{ a.id }}" class="schedule-slot-box {% if a.status != 'Interview Scheduled' %}d-none{% endif %}">
-                                            <div class="d-flex flex-wrap gap-1.5 align-items-center">
-                                                <input type="date" name="interview_date" value="{{ a.interview_date or '' }}" class="form-control form-control-sm rounded-2" title="Interview Date" style="max-width: 132px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
-                                                <input type="time" name="interview_time" value="{{ a.interview_time or '' }}" class="form-control form-control-sm rounded-2" title="Interview Time" style="max-width: 108px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
-                                                <input type="text" name="interview_venue" value="{{ a.interview_venue or '' }}" placeholder="Room / Meet Link" class="form-control form-control-sm rounded-2" style="max-width: 155px; font-size: 0.78rem; background: var(--body-bg); border-color: var(--border-color); color: var(--text-heading);">
-                                            </div>
-                                        </div>
+                                    <form method="POST" action="{{ url_for('admin_update_status', app_id=app.id) }}" class="d-flex flex-wrap align-items-center gap-1.5">
+                                        <select name="status" class="form-select form-select-sm" style="width: 155px; background: var(--body-bg); color: var(--text-heading); border-color: var(--border-color);">
+                                            <option value="Under Review" {% if app.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                            <option value="Shortlisted" {% if app.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                            <option value="Interview Scheduled" {% if app.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
+                                            <option value="Selected" {% if app.status == 'Selected' %}selected{% endif %}>Selected</option>
+                                            <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                        </select>
+                                        <input type="date" name="interview_date" value="{{ app.interview_date or '' }}" class="form-control form-control-sm" style="width: 130px; background: var(--body-bg); color: var(--text-heading); border-color: var(--border-color);">
+                                        <input type="time" name="interview_time" value="{{ app.interview_time or '' }}" class="form-control form-control-sm" style="width: 105px; background: var(--body-bg); color: var(--text-heading); border-color: var(--border-color);">
+                                        <input type="text" name="interview_venue" value="{{ app.interview_venue or '' }}" placeholder="Venue / Meet Link" class="form-control form-control-sm" style="width: 145px; background: var(--body-bg); color: var(--text-heading); border-color: var(--border-color);">
+                                        <button type="submit" class="btn btn-sm btn-primary fw-semibold px-2.5">Save</button>
                                     </form>
                                 </td>
                             </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No student applications recorded yet.</td>
-                            </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No student applications recorded yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-        <!-- 2. STUDENTS TAB -->
-        <div class="tab-pane fade" id="students-pane" role="tabpanel">
-            <div class="admin-table-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle admin-filter-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Student Name</th>
-                                <th>Email</th>
-                                <th>Branch / CGPA</th>
-                                <th>Verified Skills</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+    <!-- TAB 2: STUDENTS -->
+    <div class="admin-tab-pane d-none" id="tab-students">
+        <div class="admin-table-card">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>Verified Skills</th>
+                            <th>Branch &amp; CGPA</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students %}
                             {% for s in students %}
-                            <tr>
-                                <td class="text-muted fw-semibold">#{{ s.id }}</td>
-                                <td class="fw-bold">{{ s.name }}</td>
-                                <td class="text-muted small">{{ s.email }}</td>
+                            <tr class="searchable-row">
+                                <td class="fw-bold text-muted">#{{ s.id }}</td>
                                 <td>
-                                    <span class="small fw-semibold">{{ s.branch or 'CSE' }}</span>
-                                    {% if s.cgpa %}
-                                        <span class="badge bg-secondary-subtle text-secondary ms-1">CGPA: {{ s.cgpa }}</span>
-                                    {% endif %}
+                                    <div class="fw-bold">{{ s.name }}</div>
+                                    <div class="small text-muted">{{ s.email }}</div>
                                 </td>
+                                <td>{{ s.skills or 'Not updated' }}</td>
                                 <td>
-                                    {% for sk in (s.skills or '').split(',') if sk.strip() %}
-                                        <span class="badge badge-skill me-1 mb-1">{{ sk.strip() }}</span>
-                                    {% endfor %}
+                                    <span class="small">{{ s.branch or 'CSE' }}</span>
+                                    {% if s.cgpa %}<span class="badge bg-secondary-subtle text-secondary ms-1">CGPA: {{ s.cgpa }}</span>{% endif %}
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <a href="{{ url_for('public_portfolio', student_id=s.id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-3" title="View Public QR Portfolio">
-                                            <i class="bi bi-qr-code"></i>
+                                        <a href="{{ url_for('public_portfolio', student_id=s.id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-2">
+                                            <i class="bi bi-qr-code"></i> Portfolio
                                         </a>
-                                        <form method="POST" action="{{ url_for('admin_delete_student', student_id=s.id) }}" onsubmit="return confirm('Delete {{ s.name }} and all associated records?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Remove Student">
+                                        <form method="POST" action="{{ url_for('admin_delete_student', student_id=s.id) }}" onsubmit="return confirm('Delete this student record?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No registered students found.</td>
-                            </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No students registered yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-        <!-- 3. CAMPUS DRIVES TAB -->
-        <div class="tab-pane fade" id="drives-pane" role="tabpanel">
-            <div class="admin-table-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle admin-filter-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Role &amp; Organization</th>
-                                <th>Required Stack</th>
-                                <th>Deadline</th>
-                                <th>Applicants</th>
-                                <th>Manage</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+    <!-- TAB 3: CAMPUS DRIVES (WITH + POST NEW DRIVE BUTTON) -->
+    <div class="admin-tab-pane d-none" id="tab-drives">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="small text-muted fw-semibold">Manage active campus recruitment drives and custom screening quizzes</div>
+            <a href="{{ url_for('add_job') }}" class="btn btn-sm btn-post-drive d-inline-flex align-items-center gap-1">
+                <i class="bi bi-plus-circle"></i> Post New Drive
+            </a>
+        </div>
+        <div class="admin-table-card">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Role &amp; Company</th>
+                            <th>Required Skills</th>
+                            <th>Quiz Mode</th>
+                            <th>Deadline</th>
+                            <th>Applicants</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if drives %}
                             {% for d in drives %}
-                            <tr>
-                                <td class="text-muted fw-semibold">#{{ d.id }}</td>
+                            <tr class="searchable-row">
+                                <td class="fw-bold text-muted">#{{ d.id }}</td>
                                 <td>
                                     <div class="fw-bold">{{ d.title }}</div>
-                                    <div class="text-muted small">{{ d.company }}</div>
+                                    <div class="small text-primary">{{ d.company }}</div>
                                 </td>
+                                <td>{{ d.required_skills }}</td>
                                 <td>
-                                    {% for sk in (d.required_skills or '').split(',') if sk.strip() %}
-                                        <span class="badge badge-skill me-1 mb-1">{{ sk.strip() }}</span>
-                                    {% endfor %}
+                                    {% if d.custom_quiz_count > 0 %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1">
+                                        Custom Quiz ({{ d.custom_quiz_count }} Qs)
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">
+                                        Auto Skill Quiz (5 Qs)
+                                    </span>
+                                    {% endif %}
                                 </td>
-                                <td class="small text-muted">{{ d.deadline }}</td>
+                                <td><span class="small fw-semibold">{{ d.deadline }}</span></td>
                                 <td>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1">
                                         {{ d.app_count }} Applied
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('view_applicants', job_id=d.id) }}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
-                                        Review Drive
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('view_applicants', job_id=d.id) }}" class="btn btn-sm btn-outline-primary rounded-2">
+                                            View Applicants
+                                        </a>
+                                        <a href="{{ url_for('export_applicants', job_id=d.id) }}" class="btn btn-sm btn-outline-success rounded-2">
+                                            CSV
+                                        </a>
+                                    </div>
                                 </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No campus drives posted yet.</td>
                             </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No campus drives posted yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-        <!-- 4. ATS RESUMES TAB -->
-        <div class="tab-pane fade" id="resumes-pane" role="tabpanel">
-            <div class="admin-table-card">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle admin-filter-table">
-                        <thead>
-                            <tr>
-                                <th>Candidate</th>
-                                <th>College &amp; Branch</th>
-                                <th>CGPA / Batch</th>
-                                <th>Contact</th>
-                                <th>Portfolio</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+    <!-- TAB 4: ATS RESUMES -->
+    <div class="admin-tab-pane d-none" id="tab-resumes">
+        <div class="admin-table-card">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>College &amp; Branch</th>
+                            <th>CGPA / Grad</th>
+                            <th>Portfolio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if resumes %}
                             {% for r in resumes %}
-                            <tr>
+                            <tr class="searchable-row">
+                                <td class="fw-bold text-muted">#{{ r.id }}</td>
                                 <td>
                                     <div class="fw-bold">{{ r.student_name or 'Student' }}</div>
-                                    <div class="text-muted small">{{ r.student_email }}</div>
+                                    <div class="small text-muted">{{ r.student_email }}</div>
                                 </td>
                                 <td>
-                                    <div class="small fw-semibold">{{ r.college or 'MITS Gwalior' }}</div>
-                                    <div class="text-muted small">{{ r.degree or 'B.Tech' }} &bull; {{ r.branch or 'CSE' }}</div>
+                                    <div class="fw-semibold">{{ r.college or 'MITS Gwalior' }}</div>
+                                    <div class="small text-muted">{{ r.degree or 'B.Tech' }} &bull; {{ r.branch or 'CSE' }}</div>
                                 </td>
-                                <td>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">CGPA: {{ r.cgpa or 'N/A' }}</span>
-                                    <span class="text-muted small ms-1">({{ r.grad_year or '2029' }})</span>
-                                </td>
-                                <td class="small text-muted">{{ r.phone or 'N/A' }}</td>
+                                <td>{{ r.cgpa or 'N/A' }} ({{ r.grad_year or '2030' }})</td>
                                 <td>
                                     {% if r.student_id %}
-                                    <a href="{{ url_for('public_portfolio', student_id=r.student_id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-3 fw-semibold">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i> Open ATS Card
+                                    <a href="{{ url_for('public_portfolio', student_id=r.student_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-2">
+                                        Open QR Profile
                                     </a>
-                                    {% else %}
-                                    <span class="text-muted small">N/A</span>
                                     {% endif %}
                                 </td>
                             </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No ATS resumes generated yet.</td>
-                            </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No ATS resumes built yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
-
     </div>
-    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    function toggleSlotBox(selectEl, boxId) {
-        const box = document.getElementById(boxId);
-        if (!box) return;
-        if (selectEl.value === "Interview Scheduled") {
-            box.classList.remove("d-none");
-        } else {
-            box.classList.add("d-none");
-        }
-    }
-
-    function filterAdminTables() {
-        const query = (document.getElementById("adminSearchInput")?.value || "").toLowerCase().trim();
-        const rows = document.querySelectorAll(".admin-filter-table tbody tr");
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(query) ? "" : "none";
+    // Tab Switching
+    document.querySelectorAll('#adminTabs .admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#adminTabs .admin-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-target');
+            document.querySelectorAll('.admin-tab-pane').forEach(pane => {
+                pane.classList.toggle('d-none', pane.id !== target);
+            });
         });
-    }
-
-    // 5-Minute Inactivity Auto-Lock Countdown
-    let adminIdleSeconds = 300;
-    const countdownEl = document.getElementById("lockCountdown");
-    const lockBadgeEl = document.getElementById("adminAutoLockBadge");
-
-    function resetAdminIdleTimer() {
-        adminIdleSeconds = 300;
-        if (lockBadgeEl) {
-            lockBadgeEl.className = "badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 small";
-        }
-    }
-
-    ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach(evt => {
-        document.addEventListener(evt, resetAdminIdleTimer, { passive: true });
     });
 
-    if (countdownEl) {
-        setInterval(() => {
-            adminIdleSeconds--;
-            if (adminIdleSeconds <= 0) {
-                window.location.href = "{{ url_for('admin_logout') }}";
-                return;
-            }
-            if (adminIdleSeconds <= 30 && lockBadgeEl) {
-                lockBadgeEl.className = "badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 small";
-            }
-            const mins = String(Math.floor(adminIdleSeconds / 60)).padStart(2, "0");
-            const secs = String(adminIdleSeconds % 60).padStart(2, "0");
-            countdownEl.textContent = `${mins}:${secs}`;
-        }, 1000);
-    }
+    // Live Search Filter
+    document.getElementById('adminSearchInput').addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        document.querySelectorAll('.searchable-row').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
+
+    // 5-Minute Auto-Lock Countdown
+    let secondsLeft = 299;
+    setInterval(() => {
+        if (secondsLeft <= 0) {
+            window.location.reload();
+            return;
+        }
+        secondsLeft--;
+        const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+        const s = String(secondsLeft % 60).padStart(2, '0');
+        const el = document.getElementById('lockTimer');
+        if (el) el.textContent = `${m}:${s}`;
+    }, 1000);
 </script>
+{% endif %}
 {% endblock %}

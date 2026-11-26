@@ -52,15 +52,15 @@
             <!-- Header -->
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
                 <div>
-                    <span class="badge border px-3 py-1 rounded-pill small mb-2" style="background: var(--body-bg); color: var(--badge-text);">
-                        <i class="bi bi-shield-lock-fill me-1"></i> T&amp;P Coordinator Portal
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill small mb-2 fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Authenticated T&amp;P Coordinator Session
                     </span>
                     <h1 class="h3 fw-bold mb-1" style="color: var(--text-heading);">Publish Campus Drive / Internship</h1>
-                    <p class="text-muted small mb-0">Add role details and optional custom screening quiz questions for applicants.</p>
+                    <p class="text-muted small mb-0">Add role details and custom MCQ screening quiz questions for student applicants.</p>
                 </div>
-                <a href="{{ url_for('jobs') }}" class="btn btn-sm border px-3 py-2 rounded-3 fw-semibold"
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-sm border px-3 py-2 rounded-3 fw-semibold flex-shrink-0"
                    style="background: var(--body-bg); color: var(--text-heading); border-color: var(--border-color) !important;">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Drives
+                    <i class="bi bi-arrow-left me-1"></i> Back to T&amp;P Admin
                 </a>
             </div>
 
@@ -103,7 +103,7 @@
                                 <i class="bi bi-patch-question-fill text-primary me-1"></i> Custom Screening Quiz (Optional)
                             </h5>
                             <p class="text-muted small mb-0">
-                                Questions added here will be shown to students when they log in and click <strong>Apply</strong>. Leave empty to auto-generate 5 skill-based questions.
+                                Questions added here will appear when students log in and click <strong>Apply</strong>. Leave empty to auto-generate 5 skill-based questions.
                             </p>
                         </div>
                         <button type="button" id="addQuestionBtn" class="btn btn-sm fw-semibold px-3 py-2 rounded-3 flex-shrink-0"
@@ -113,7 +113,6 @@
                     </div>
 
                     <div id="quizQuestionsContainer">
-                        <!-- Initial Question Block #1 -->
                         <div class="quiz-q-card" data-q-block>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold" data-q-label>
@@ -126,7 +125,7 @@
 
                             <div class="mb-2">
                                 <input type="text" name="q_text[]" class="form-control drive-input"
-                                       placeholder="Enter MCQ question (leave blank if not using custom quiz)">
+                                       placeholder="Enter MCQ question (leave blank if using auto skill quiz)">
                             </div>
 
                             <div class="row g-2 mb-2">
@@ -155,15 +154,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Coordinator Verification & Submit -->
-                <div class="p-3 rounded-3 mb-4" style="background: var(--body-bg); border: 1px solid var(--border-color);">
-                    <label class="form-label small fw-bold mb-1" style="color: var(--text-heading);">
-                        <i class="bi bi-key-fill text-warning me-1"></i> T&amp;P Coordinator Passkey *
-                    </label>
-                    <input type="password" name="admin_pin" class="form-control drive-input"
-                           placeholder="Enter Coordinator Passkey (admin2026)" required>
                 </div>
 
                 <button type="submit" class="btn w-100 py-2.5 fw-bold rounded-3"

@@ -40,7 +40,7 @@ def auto_lock_admin_session():
         if now - last_active > ADMIN_TIMEOUT_SECONDS:
             session.pop('is_admin', None)
             session.pop('admin_last_active', None)
-            if request.endpoint and request.endpoint.startswith('admin_'):
+            if request.endpoint and (request.endpoint.startswith('admin_') or request.endpoint == 'add_job'):
                 return redirect(url_for('admin_panel'))
         else:
             session['admin_last_active'] = now
@@ -495,7 +495,6 @@ def apply(job_id):
     if not job:
         return redirect(url_for('jobs'))
 
-    # 1. Check if Admin added custom quiz questions for this specific internship/drive
     custom_questions = []
     try:
         parsed = json.loads(job['custom_quiz'] or '[]')
@@ -509,7 +508,6 @@ def apply(job_id):
     if custom_questions:
         selected_questions = custom_questions
     else:
-        # 2. Otherwise build a 5-question skill-matched screening quiz from QUIZ_QUESTION_BANK
         req_skills = [s.strip().lower() for s in job['required_skills'].split(',') if s.strip()]
         selected_questions = []
 
@@ -539,7 +537,6 @@ def apply(job_id):
                 if alias in sk and target_key not in matched_keys:
                     matched_keys.append(target_key)
 
-        # Round-robin across matched skill banks up to 5 questions
         idx = 0
         while len(selected_questions) < 5 and matched_keys:
             added_in_round = False
@@ -554,7 +551,6 @@ def apply(job_id):
                 break
             idx += 1
 
-        # Pad up to 5 questions using core CS general bank if needed
         for gq in QUIZ_QUESTION_BANK['general']:
             if len(selected_questions) >= 5:
                 break
@@ -1220,18 +1216,23 @@ def google_login():
     return jsonify({"success": True, "redirect": url_for('dashboard')})
 
 
+# --- T&P ADMIN ONLY: POST NEW CAMPUS DRIVE & CUSTOM QUIZ ---
+
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():
+    # Require active T&P Admin login first
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
     error = None
     if request.method == 'POST':
-        pin = request.form.get('admin_pin', '').strip()
         title = request.form.get('title', '').strip()
         company = request.form.get('company', '').strip()
         required_skills = request.form.get('required_skills', '').strip()
         deadline = request.form.get('deadline', 'Nov 30, 2026').strip()
 
-        if pin != ADMIN_PASSKEY:
-            error = "Invalid Coordinator Passkey. Only authorized officers can post listings."
+        if not title or not company or not required_skills:
+            error = "Please fill in Role Title, Company, and Required Skills."
             return render_template('add_job.html', error=error)
 
         # Parse custom screening quiz questions added by Admin (if any)
@@ -1270,7 +1271,7 @@ def add_job():
         )
         conn.commit()
         conn.close()
-        return redirect(url_for('jobs'))
+        return redirect(url_for('admin_panel'))
 
     return render_template('add_job.html', error=error)
 
@@ -1345,14 +1346,22 @@ def admin_panel():
 
         cursor.execute('''
             SELECT internships.id, internships.title, internships.company,
-                   internships.required_skills, internships.deadline,
+                   internships.required_skills, internships.deadline, internships.custom_quiz,
                    COUNT(applications.id) as app_count
             FROM internships
             LEFT JOIN applications ON internships.id = applications.job_id
             GROUP BY internships.id
             ORDER BY internships.id DESC
         ''')
-        drives_list = cursor.fetchall()
+        drives_list = []
+        for row in cursor.fetchall():
+            d_item = dict(row)
+            try:
+                cq = json.loads(d_item.get('custom_quiz') or '[]')
+                d_item['custom_quiz_count'] = len(cq)
+            except Exception:
+                d_item['custom_quiz_count'] = 0
+            drives_list.append(d_item)
 
         cursor.execute('''
             SELECT student_resumes.*, students.id as student_id, students.name as student_name, students.skills
